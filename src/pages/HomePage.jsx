@@ -48,8 +48,8 @@ const HomePage = () => {
 
       <Row className="justify-content-center mt-5">
         <Col md={8}>
-          <Card className="bg-light">
-            <Card.Body>
+          <Card className="border shadow-sm">
+            <Card.Body className="about-api-section">
               <h4>{t('homeAboutTitle')}</h4>
               <p>
                 {t('homeAboutDesc')}

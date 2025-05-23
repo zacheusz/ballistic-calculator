@@ -40,3 +40,24 @@
 .read-the-docs {
   color: #888;
 }
+
+/* About API section styling with theme support */
+.about-api-section {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-bs-theme="light"] .about-api-section {
+  background-color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .about-api-section {
+  background-color: #343a40;
+}
+
+[data-bs-theme="dark"] .about-api-section a {
+  color: #8bb9fe;
+}
+
+[data-bs-theme="dark"] .about-api-section a:hover {
+  color: #a8c7fe;
+}
