@@ -11,7 +11,7 @@ jobs:
     with:
       environment: stage
       stack_name: snipe-ballistics-web-ui-stage
-      deploy_cloudfront: "true"
+      deploy_cloudfront: "false"
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
