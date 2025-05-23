@@ -40,7 +40,7 @@ const ConfigPage = () => {
     updateFirearmProfile,
     updateAmmo,
     updateCalculationOptions,
-    updateDisplayOptions
+    updateDisplayPreferences
   } = useAppContext();
   
   const [inputApiKey, setInputApiKey] = useState(apiKey);
