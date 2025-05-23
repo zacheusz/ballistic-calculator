@@ -6,7 +6,6 @@ const ModePanel = ({ mode, onModeChange, rangeCardStart, onRangeCardStartChange,
     <Card className="mb-4 w-100">
       <Card.Header as="h5">Mode</Card.Header>
       <Card.Body>
-        <Form>
           <Form.Group as={Row} className="mb-3" controlId="modeSwitch">
             <Form.Label column sm="4">Display Mode</Form.Label>
             <Col sm="8">
@@ -77,7 +76,7 @@ const ModePanel = ({ mode, onModeChange, rangeCardStart, onRangeCardStartChange,
               </Form.Group>
             </>
           )}
-        </Form>
+        
       </Card.Body>
     </Card>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Container, Row, Col, Form, Button, Card, Spinner, Alert, Table } from 'react-bootstrap';
-import { Formik } from 'formik';
+import { Container, Row, Col, Button, Card, Spinner, Alert, Table, Form } from 'react-bootstrap';
+import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
 import { useAppContext } from '../context/AppContext';
 import api from '../services/api';
@@ -253,7 +253,7 @@ const CalculatorPage = () => {
         enableReinitialize
       >
         {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-          <Form onSubmit={handleSubmit}>
+          <FormikForm>
             <Row>
               <Col md={6}>
                 <Card className="mb-4">
@@ -686,7 +686,7 @@ const CalculatorPage = () => {
                 </Button>
               </Col>
             </Row>
-          </Form>
+          </FormikForm>
         )}
       </Formik>
 
