@@ -167,7 +167,14 @@ const CalculatorPage = () => {
         preferences,
       };
       
-      console.log('Sending request to API:', JSON.stringify(request, null, 2));
+      // Create a deep copy of the request object to ensure accurate logging
+      const requestCopy = JSON.parse(JSON.stringify(request));
+      
+      // Use a timestamp to distinguish between different API calls
+      const timestamp = new Date().toISOString();
+      
+      // Log the request with timestamp and distinctive formatting
+      console.log('%c ⚡ Ballistics API Request (' + timestamp + ')', 'font-weight: bold; font-size: 14px; color: #0066cc; background: #f0f8ff; padding: 3px 5px; border-radius: 3px;', requestCopy);
       
       const response = await api.computeBallisticSolution(request);
       setResults(response);
