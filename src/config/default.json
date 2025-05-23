@@ -1,0 +1,77 @@
+{
+  "firearmProfile": {
+    "id": 0,
+    "name": "Bor_308", 
+    "sightHeight": { "value": 3.19, "unit": "INCHES" },
+    "sightOffset": { "value": 0.0, "unit": "INCHES" },
+    "barrelTwist": { "value": 12.0, "unit": "INCHES" },
+    "barrelTwistDirection": "RIGHT",
+    "elevAdjUnit": "MOA",
+    "windAdjUnit": "MOA",
+    "leadAdjUnit": "MOA",
+    "sightReticle": "",
+    "reticleFfp": false,
+    "sightLowMagnification": 0.0,
+    "sightHighMagnification": 0.0,
+    "sightTrueMagnification": 0.0,
+    "elevTurretGrad": 0.25,
+    "windTurretGrad": 0.25,
+    "correctionFactorElev": 1.0,
+    "correctionFactorWind": 1.0,
+    "ammoProfiles": []
+  },
+  "ammo": {
+    "name": "Lapua_Scenar_185",
+    "dragModel": "CDM",
+    "diameter": { "value": 0.308, "unit": "INCHES" },
+    "mass": { "value": 185.0, "unit": "GRAINS" },
+    "length": { "value": 1.30, "unit": "INCHES" },
+    "muzzleVelocity": { "value": 2510, "unit": "FEET_PER_SECOND" },
+    "muzzleVelVarDeg": 0.0,
+    "zeroRange": { "value": 100, "unit": "YARDS" },
+    "ballisticCoefficients": []
+  },
+  "atmosphere": {
+    "temperature": { "value": 70.0, "unit": "FAHRENHEIT" },
+    "pressure": { "value": 30.0, "unit": "INCHES_MERCURY" },
+    "pressureType": "STATION",
+    "humidity": 50.0,
+    "altitude": { "value": 0.0, "unit": "FEET" }
+  },
+  "shot": {
+    "range": { "value": 1500, "unit": "YARDS" },
+    "elevationAngle": { "value": 0.0, "unit": "DEGREES" },
+    "powderTemp": { "value": 70.0, "unit": "FAHRENHEIT" },
+    "targetSpeed": { "value": 0.0, "unit": "MILES_PER_HOUR" },
+    "targetAngle": { "value": 0.0, "unit": "DEGREES" },
+    "azimuth": { "value": 0, "unit": "DEGREES" },
+    "latitude": { "value": 0, "unit": "DEGREES" },
+    "windSegments": [
+      {
+        "maxRange": { "value": 1500, "unit": "YARDS" },
+        "speed": { "value": 6.0, "unit": "MILES_PER_HOUR" },
+        "direction": { "value": 3, "unit": "CLOCK" },
+        "verticalComponent": { "value": 0.0, "unit": "MILES_PER_HOUR" }
+      }
+    ]
+  },
+  "calculationOptions": {
+    "calculateSpinDrift": true,
+    "calculateCoriolisEffect": true,
+    "calculateAeroJump": true,
+    "rangeCardStart": { "value": 100, "unit": "YARDS" },
+    "rangeCardStep": { "value": 100, "unit": "YARDS" }
+  },
+  "unitPreferences": {
+    "Range": "YARDS",
+    "ScopeAdjustment": "MOA",
+    "Temperature": "FAHRENHEIT",
+    "BulletVelocity": "FEET_PER_SECOND",
+    "WindSpeed": "MILES_PER_HOUR",
+    "WindDirection": "CLOCK",
+    "AtmosphericPressure": "INCHES_MERCURY",
+    "BulletWeight": "GRAINS",
+    "BulletEnergy": "FOOT_POUNDS",
+    "TimeOfFlight": "SECONDS"
+  }
+}
