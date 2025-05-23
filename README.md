@@ -10,6 +10,12 @@
 ![Calculator Screenshot](./calculator_screenshot.png)
 *Screenshot: Ballistic Calculator UI*
 
+## Deployed Version
+
+A live version of this application is deployed at: [http://snipe-ballistics-web-ui-prod.s3-website.eu-central-1.amazonaws.com](http://snipe-ballistics-web-ui-prod.s3-website.eu-central-1.amazonaws.com)
+
+See the [deployment documentation](./deployment/README.md) for information on how this application is deployed to AWS.
+
 ---
 
 # React + Vite

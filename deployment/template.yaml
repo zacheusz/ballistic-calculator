@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Snipe Ballistics Web UI - Serverless deployment of the ballistic calculator UI to S3 with CloudFront
+
+Parameters:
+  StageName:
+    Type: String
+    Default: prod
+    Description: Stage name for the deployment
+    
+  DeployCloudFront:
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+    Description: Whether to deploy CloudFront distribution (requires account verification)
+
+Conditions:
+  CreateCloudFrontResources: !Equals [!Ref DeployCloudFront, 'true']
+    
+Resources:
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub snipe-ballistics-web-ui-${StageName}
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: !If [CreateCloudFrontResources, 'BucketOwnerEnforced', 'ObjectWriter']
+      PublicAccessBlockConfiguration: !If 
+        - CreateCloudFrontResources
+        - BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        - BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+    DeletionPolicy: Retain
+
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Condition: CreateCloudFrontResources
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub Origin Access Identity for ${StageName} Snipe Ballistics Web UI
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Statement: !If
+          - CreateCloudFrontResources
+          - - Action: 's3:GetObject'
+              Effect: Allow
+              Resource: !Sub ${WebsiteBucket.Arn}/*
+              Principal:
+                CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+          - - Action: 's3:GetObject'
+              Effect: Allow
+              Resource: !Sub ${WebsiteBucket.Arn}/*
+              Principal: '*'
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Condition: CreateCloudFrontResources
+    Properties:
+      DistributionConfig:
+        Comment: !Sub Snipe Ballistics Web UI - ${StageName}
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: true
+          DefaultTTL: 86400
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          TargetOriginId: s3Origin
+          ViewerProtocolPolicy: redirect-to-https
+        Origins:
+          - DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            Id: s3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+        PriceClass: PriceClass_100
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+
+Outputs:
+  WebsiteBucketName:
+    Description: Name of the S3 bucket storing the static website
+    Value: !Ref WebsiteBucket
+    
+  CloudFrontDistributionId:
+    Description: ID of the CloudFront distribution
+    Condition: CreateCloudFrontResources
+    Value: !Ref CloudFrontDistribution
+    
+  CloudFrontDomainName:
+    Description: Domain name of the CloudFront distribution
+    Condition: CreateCloudFrontResources
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    
+  WebsiteURL:
+    Description: URL of the website
+    Value: !If 
+      - CreateCloudFrontResources
+      - !Sub https://${CloudFrontDistribution.DomainName}
+      - !Sub http://${WebsiteBucket}.s3-website.${AWS::Region}.amazonaws.com
