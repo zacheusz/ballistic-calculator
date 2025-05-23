@@ -15,16 +15,6 @@ const StyledTimePicker = styled(TimePicker)(({ theme }) => ({
     padding: '0.375rem 0.75rem',
     overflow: 'hidden', // Prevent content overflow
   },
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#ced4da',
-  },
-  '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#86b7fe',
-  },
-  '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#0d6efd',
-    boxShadow: '0 0 0 0.25rem rgba(13, 110, 253, 0.25)',
-  },
   '& .MuiInputLabel-root': {
     display: 'none', // Hide the label to prevent overflow
   },

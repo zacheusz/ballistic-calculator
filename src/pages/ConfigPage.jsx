@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ThemeSelector from '../components/ThemeSelector';
 import LanguageSelector from '../components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +52,18 @@ const ConfigPage = () => {
   const [displayOptionsState, setDisplayOptionsState] = useState({...displayPreferences});
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get active tab from URL or default to 'api'
+  const activeTab = searchParams.get('tab') || 'api';
+  
+  // Function to update the active tab in the URL
+  const setActiveTab = (tab) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', tab);
+    setSearchParams(newParams);
+  };
   
   useEffect(() => {
     setSelectedEnvironment(environment);
@@ -129,6 +141,9 @@ const ConfigPage = () => {
     }));
   };
 
+  // Get theme context functions
+  const { setTheme: setAppTheme } = useTheme();
+  
   const handleDisplayOptionsChange = (field, value) => {
     const newDisplayOptions = {
       ...displayOptionsState,
@@ -136,12 +151,11 @@ const ConfigPage = () => {
     };
     setDisplayOptionsState(newDisplayOptions);
     
-    // If changing theme, apply it immediately
+    // If changing theme, use the ThemeContext to apply it
     if (field === 'theme') {
-      // Apply theme to both HTML and body elements
-      document.documentElement.setAttribute('data-bs-theme', value);
-      document.body.setAttribute('data-bs-theme', value);
-      console.log('Theme immediately changed to:', value);
+      // Apply theme change directly - tab state is preserved in URL
+      setAppTheme(value);
+      console.log('Theme changed through ThemeContext to:', value);
     }
   };
 
@@ -152,7 +166,13 @@ const ConfigPage = () => {
           {t('snipeBallisticsConfig')}
         </Card.Header>
         <Card.Body>
-          <Tab.Container id="config-tabs" defaultActiveKey="api">
+          {/* Use a key to force the Tab.Container to maintain its state */}
+          <Tab.Container 
+            id="config-tabs" 
+            activeKey={activeTab} 
+            onSelect={(key) => setActiveTab(key)}
+            mountOnEnter={true}
+            unmountOnExit={false}>
             <Nav variant="tabs" className="mb-3">
               <Nav.Item>
                 <Nav.Link eventKey="api">{t('apiSettings')}</Nav.Link>

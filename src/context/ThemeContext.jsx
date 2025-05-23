@@ -3,7 +3,10 @@ import { createContext, useState, useEffect, useContext } from 'react';
 // Create a dedicated context for theme management
 const ThemeContext = createContext();
 
-// Theme provider component
+/**
+ * Theme provider component that manages application-wide theme state
+ * Following best practices for theme management in React applications
+ */
 export const ThemeProvider = ({ children }) => {
   // Initialize theme from localStorage or default to 'light'
   const [theme, setTheme] = useState(() => {
@@ -15,9 +18,12 @@ export const ThemeProvider = ({ children }) => {
     // Save to localStorage
     localStorage.setItem('snipe_ballistics_theme', theme);
     
-    // Apply to HTML and body elements
+    // Apply to HTML and body elements for Bootstrap theming
     document.documentElement.setAttribute('data-bs-theme', theme);
     document.body.setAttribute('data-bs-theme', theme);
+    
+    // Set color-scheme for browser UI elements (scrollbars, etc.)
+    document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
   // Theme toggle function
