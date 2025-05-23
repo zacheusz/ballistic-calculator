@@ -2,10 +2,11 @@
 set -e
 
 function show_usage {
-  echo "Usage: $0 [STACK_NAME] [REGION] [--force|-f]"
+  echo "Usage: $0 [STACK_NAME] [REGION] [--force|-f] [--env|-e ENV]"
   echo "  STACK_NAME: Name of the CloudFormation stack (default: snipe-ballistics-web-ui)"
   echo "  REGION: AWS region (default: eu-central-1)"
   echo "  --force|-f: Skip confirmation prompts and automatically delete resources"
+  echo "  --env|-e: Environment (dev, stage, prod) - will be appended to stack name if provided"
   exit 1
 }
 
@@ -13,11 +14,17 @@ function show_usage {
 FORCE=false
 STACK_NAME="snipe-ballistics-web-ui"
 REGION="eu-central-1"
+ENVIRONMENT=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --force|-f)
       FORCE=true
+      shift
+      ;;
+    --env|-e)
+      shift
+      ENVIRONMENT=$1
       shift
       ;;
     --help|-h)
@@ -36,6 +43,12 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# Append environment to stack name if provided
+if [[ -n "$ENVIRONMENT" ]]; then
+  STACK_NAME="${STACK_NAME}-${ENVIRONMENT}"
+  echo "Using environment-specific stack name: ${STACK_NAME}"
+fi
 
 echo "Deleting CloudFormation stack: ${STACK_NAME} in region: ${REGION}"
 
@@ -66,7 +79,13 @@ done
 
 # Check for any orphaned resources
 echo "Checking for orphaned S3 buckets..."
-BUCKET_NAME="snipe-ballistics-web-ui-prod"
+
+# Extract the stack name without environment suffix for bucket name pattern
+BASE_STACK_NAME=$(echo "$STACK_NAME" | sed -E 's/-(dev|stage|prod)$//')
+BUCKET_NAME="$STACK_NAME"
+
+echo "Looking for bucket: $BUCKET_NAME"
+
 if aws s3 ls "s3://${BUCKET_NAME}" --region ${REGION} 2>/dev/null; then
   echo "Found orphaned S3 bucket: ${BUCKET_NAME}"
   
@@ -91,7 +110,7 @@ if aws s3 ls "s3://${BUCKET_NAME}" --region ${REGION} 2>/dev/null; then
     echo "Skipping bucket deletion."
   fi
 else
-  echo "No orphaned S3 buckets found."
+  echo "No orphaned S3 bucket found with name: ${BUCKET_NAME}"
 fi
 
 echo "Stack cleanup completed. You can now deploy a new stack."
