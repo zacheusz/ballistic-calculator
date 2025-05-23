@@ -1,0 +1,17 @@
+name: Deploy to Dev Environment
+
+on:
+  push:
+    branches: [ "development" ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      environment: dev
+      stack_name: snipe-ballistics-web-ui-dev
+      deploy_cloudfront: "false"
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
