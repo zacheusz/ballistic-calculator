@@ -604,7 +604,10 @@ const ConfigPage = () => {
         <LanguageSelector />
       </Card.Header>
       <Card.Body>
-        <ThemeSelector />
+        <ThemeSelector 
+          value={displayOptionsState.theme}
+          onChange={e => handleDisplayOptionsChange('theme', e.target.value)}
+        />
       </Card.Body>
     </Card>
   </Form>

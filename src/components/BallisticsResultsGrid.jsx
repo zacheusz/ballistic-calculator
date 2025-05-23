@@ -9,46 +9,61 @@ import { useTheme } from '../context/ThemeContext';
 const BallisticsResultsGrid = ({ results, unitPreferences }) => {
   const { theme } = useTheme();
 
-  // Define columns based on the available data
-  const columns = useMemo(() => {
-    if (!results || !results.length) return [];
+  // Helper to extract unit from object fields, fallback to unitPreferences
+  function extractUnitOrPref(field, prefKey) {
+    if (field && typeof field === 'object' && 'unit' in field && field.unit) return getUnitLabel(field.unit);
+    if (unitPreferences && prefKey && unitPreferences[prefKey]) return getUnitLabel(unitPreferences[prefKey]);
+    return '';
+  }
 
+  // Define columns based on the available data and actual units from the first row, fallback to preferences
+  const columns = useMemo(() => {
+    const first = (results && results.length > 0) ? results[0] : {};
+    function headerWithUnit(label, field, prefKey) {
+      const unit = extractUnitOrPref(field, prefKey);
+      return unit ? `${label} (${unit})` : label;
+    }
     return [
-      { field: 'range', headerName: `Range (${getUnitLabel(unitPreferences.Range)})`, width: 120, type: 'number' },
-      { field: 'verticalAdjustment', headerName: `Elevation (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 120, type: 'number' },
-      { field: 'horizontalAdjustment', headerName: `Windage Adj (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 120, type: 'number' },
-      { field: 'drop', headerName: `Drop (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 120, type: 'number' },
-      { field: 'wind', headerName: `Wind Drift (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 120, type: 'number' },
-      { field: 'velocity', headerName: `Velocity (${getUnitLabel(unitPreferences.BulletVelocity)})`, width: 120, type: 'number' },
-      { field: 'energy', headerName: `Energy (${getUnitLabel(unitPreferences.BulletEnergy)})`, width: 120, type: 'number' },
-      { field: 'time', headerName: `Time (${getUnitLabel(unitPreferences.TimeOfFlight)})`, width: 100, type: 'number' },
+      { field: 'range', headerName: headerWithUnit('Range', first.range, 'Range'), width: 120, type: 'number' },
+      { field: 'horizontalAdjustment', headerName: headerWithUnit('Windage Adj', first.horizontalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' },
+      { field: 'verticalAdjustment', headerName: headerWithUnit('Elevation', first.verticalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' },
+      { field: 'time', headerName: headerWithUnit('Time', undefined, 'TimeOfFlight'), width: 100, type: 'number' },
+      { field: 'energy', headerName: headerWithUnit('Energy', first.energy, 'BulletEnergy'), width: 120, type: 'number' },
+      { field: 'velocity', headerName: headerWithUnit('Velocity', first.velocity, 'BulletVelocity'), width: 120, type: 'number' },
       { field: 'mach', headerName: 'Mach', width: 100, type: 'number' },
-      { field: 'spinDrift', headerName: `Spin Drift (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 120, type: 'number' },
-      { field: 'coroDrift', headerName: `Coriolis (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 120, type: 'number' },
-      { field: 'lead', headerName: `Lead (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 100, type: 'number' },
-      { field: 'aeroJump', headerName: `Aero Jump (${getUnitLabel(unitPreferences.ScopeAdjustment)})`, width: 120, type: 'number' },
+      { field: 'drop', headerName: headerWithUnit('Drop', first.drop, 'ScopeAdjustment'), width: 120, type: 'number' },
+      { field: 'coroDrift', headerName: headerWithUnit('Coriolis', first.coroDrift, 'ScopeAdjustment'), width: 120, type: 'number' },
+      { field: 'lead', headerName: headerWithUnit('Lead', first.lead, 'ScopeAdjustment'), width: 100, type: 'number' },
+      { field: 'spinDrift', headerName: headerWithUnit('Spin Drift', first.spinDrift, 'ScopeAdjustment'), width: 120, type: 'number' },
+      { field: 'wind', headerName: headerWithUnit('Wind Drift', first.wind, 'ScopeAdjustment'), width: 120, type: 'number' },
+      { field: 'aeroJump', headerName: headerWithUnit('Aero Jump', first.aeroJump, 'ScopeAdjustment'), width: 120, type: 'number' },
     ];
   }, [results, unitPreferences]);
 
-  // Transform results into rows with IDs
+  // Helper to extract .value from object fields or return primitive if number
+  const extractValue = (field) => {
+    if (field && typeof field === 'object' && 'value' in field) return field.value;
+    return field;
+  };
+
+  // Transform results into rows with IDs, extracting .value from object fields
   const rows = useMemo(() => {
     if (!results || !results.length) return [];
-    
     return results.map((result, index) => ({
       id: index,
-      range: formatNumber(result.range),
-      verticalAdjustment: formatNumber(result.verticalAdjustment),
-      horizontalAdjustment: formatNumber(result.horizontalAdjustment),
-      drop: formatNumber(result.drop),
-      wind: formatNumber(result.wind),
-      velocity: formatNumber(result.velocity),
-      energy: formatNumber(result.energy),
+      range: formatNumber(extractValue(result.range)),
+      horizontalAdjustment: formatNumber(extractValue(result.horizontalAdjustment)),
+      verticalAdjustment: formatNumber(extractValue(result.verticalAdjustment)),
       time: formatNumber(result.time),
+      energy: formatNumber(extractValue(result.energy)),
+      velocity: formatNumber(extractValue(result.velocity)),
       mach: formatNumber(result.mach),
-      spinDrift: formatNumber(result.spinDrift),
-      coroDrift: formatNumber(result.coroDrift),
-      lead: formatNumber(result.lead),
-      aeroJump: formatNumber(result.aeroJump),
+      drop: formatNumber(extractValue(result.drop)),
+      coroDrift: formatNumber(extractValue(result.coroDrift)),
+      lead: formatNumber(extractValue(result.lead)),
+      spinDrift: formatNumber(extractValue(result.spinDrift)),
+      wind: formatNumber(extractValue(result.wind)),
+      aeroJump: formatNumber(extractValue(result.aeroJump)),
     }));
   }, [results]);
 
@@ -61,22 +76,48 @@ const BallisticsResultsGrid = ({ results, unitPreferences }) => {
   // Helper function to get readable unit labels
   function getUnitLabel(unit) {
     const unitMap = {
+      // RangeMeasurement
       'YARDS': 'yd',
       'METERS': 'm',
       'FEET': 'ft',
+      // ScopeAdjustmentMeasurement
+      'MILS': 'mrad',
       'MOA': 'MOA',
-      'MILS': 'MRAD',
+      'IPHY': 'IPHY',
+      'DEGREES': '°',
+      // GunParametersMeasurement
       'INCHES': 'in',
       'CENTIMETERS': 'cm',
+      'MILLIMETERS': 'mm',
+      // BulletVelocityMeasurement
       'FEET_PER_SECOND': 'ft/s',
       'METERS_PER_SECOND': 'm/s',
+      // WindSpeedMeasurement, TargetSpeedMeasurement
       'MILES_PER_HOUR': 'mph',
       'KILOMETERS_PER_HOUR': 'km/h',
+      // BulletEnergyMeasurement
       'FOOT_POUNDS': 'ft-lb',
       'JOULES': 'J',
+      // BulletWeightMeasurement
+      'GRAINS': 'gr',
+      'GRAMS': 'g',
+      // AtmosphericPressureMeasurement
+      'INCHES_MERCURY': 'inHg',
+      'HECTOPASCALS': 'hPa',
+      // WindDirectionMeasurement
+      'CLOCK': 'clock',
+      // AngleMeasurement
+      // Already mapped: 'DEGREES': '°',
+      // TemperatureMeasurement
+      'FAHRENHEIT': '°F',
+      'CELSIUS': '°C',
+      'RANKINE': '°R',
+      // TimeOfFlightMeasurement
       'SECONDS': 's',
+      'MILLISECONDS': 'ms',
     };
-    
+    // Fallback to showing the raw unit if not mapped and not empty
+    if (!unit) return '';
     return unitMap[unit] || unit;
   }
 
