@@ -52,12 +52,14 @@ WEBSITE_URL=$(aws cloudformation describe-stacks \
 echo "Uploading files to S3 bucket: ${S3_BUCKET}..."
 aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --delete --region ${REGION}
 
-# Invalidate CloudFront cache
-echo "Invalidating CloudFront cache..."
-aws cloudfront create-invalidation \
-  --distribution-id ${CLOUDFRONT_DIST_ID} \
-  --paths "/*" \
-  --region ${REGION}
+# Invalidate CloudFront cache only if CloudFront is enabled
+if [ "${DEPLOY_CLOUDFRONT}" = "true" ]; then
+  echo "Invalidating CloudFront cache..."
+  aws cloudfront create-invalidation \
+    --distribution-id ${CLOUDFRONT_DIST_ID} \
+    --paths "/*" \
+    --region ${REGION}
+fi
 
 echo "Deployment completed successfully!"
 echo "Website URL: ${WEBSITE_URL}"

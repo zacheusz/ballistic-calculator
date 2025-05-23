@@ -3,8 +3,14 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - development  # Change this to match your main branch name if different
+      - main  # Change this to match your main branch name if different
   workflow_dispatch:  # Allows manual triggering
+
+# Define default environment variables
+env:
+  AWS_REGION: eu-central-1
+  STAGE_NAME: prod
+  DEPLOY_CLOUDFRONT: "false"
 
 jobs:
   deploy:
@@ -40,15 +46,23 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION || 'eu-central-1' }}
+          aws-region: ${{ vars.AWS_REGION || env.AWS_REGION }}
+          
+      - name: Set deployment parameters
+        id: params
+        run: |
+          echo "region=${{ vars.AWS_REGION || env.AWS_REGION }}" >> $GITHUB_OUTPUT
+          echo "stage=${{ vars.STAGE_NAME || env.STAGE_NAME }}" >> $GITHUB_OUTPUT
+          echo "use_cloudfront=${{ vars.DEPLOY_CLOUDFRONT || env.DEPLOY_CLOUDFRONT }}" >> $GITHUB_OUTPUT
           
       - name: Deploy with SAM
         run: |
           sam deploy \
             --template-file deployment/template.yaml \
             --stack-name snipe-ballistics-web-ui \
-            --parameter-overrides StageName=${{ vars.STAGE_NAME || 'prod' }} DeployCloudFront=${{ vars.DEPLOY_CLOUDFRONT || 'false' }} \
+            --parameter-overrides StageName=${{ steps.params.outputs.stage }} DeployCloudFront=${{ steps.params.outputs.use_cloudfront }} \
             --capabilities CAPABILITY_IAM \
+            --region ${{ steps.params.outputs.region }} \
             --no-fail-on-empty-changeset
             
       - name: Get deployment outputs
@@ -57,30 +71,43 @@ jobs:
           S3_BUCKET=$(aws cloudformation describe-stacks \
             --stack-name snipe-ballistics-web-ui \
             --query "Stacks[0].Outputs[?OutputKey=='WebsiteBucketName'].OutputValue" \
-            --output text)
-          CLOUDFRONT_DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name snipe-ballistics-web-ui \
-            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
-            --output text)
+            --output text \
+            --region ${{ steps.params.outputs.region }})
+          echo "s3_bucket=${S3_BUCKET}" >> $GITHUB_OUTPUT
+          
           WEBSITE_URL=$(aws cloudformation describe-stacks \
             --stack-name snipe-ballistics-web-ui \
             --query "Stacks[0].Outputs[?OutputKey=='WebsiteURL'].OutputValue" \
-            --output text)
-          echo "s3_bucket=${S3_BUCKET}" >> $GITHUB_OUTPUT
-          echo "cloudfront_id=${CLOUDFRONT_DIST_ID}" >> $GITHUB_OUTPUT
+            --output text \
+            --region ${{ steps.params.outputs.region }})
           echo "website_url=${WEBSITE_URL}" >> $GITHUB_OUTPUT
+          
+          # Only get CloudFront ID if we're using CloudFront
+          if [ "${{ steps.params.outputs.use_cloudfront }}" = "true" ]; then
+            CLOUDFRONT_DIST_ID=$(aws cloudformation describe-stacks \
+              --stack-name snipe-ballistics-web-ui \
+              --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+              --output text \
+              --region ${{ steps.params.outputs.region }})
+            echo "cloudfront_id=${CLOUDFRONT_DIST_ID}" >> $GITHUB_OUTPUT
+          fi
           
       - name: Upload to S3
         run: |
-          aws s3 sync dist s3://${{ steps.get-outputs.outputs.s3_bucket }} --delete
+          aws s3 sync dist s3://${{ steps.get-outputs.outputs.s3_bucket }} --delete --region ${{ steps.params.outputs.region }}
           
       - name: Invalidate CloudFront cache
+        if: ${{ steps.params.outputs.use_cloudfront == 'true' }}
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ steps.get-outputs.outputs.cloudfront_id }} \
-            --paths "/*"
+            --paths "/*" \
+            --region ${{ steps.params.outputs.region }}
             
       - name: Deployment summary
         run: |
           echo "Deployment completed successfully!"
           echo "Website URL: ${{ steps.get-outputs.outputs.website_url }}"
+          if [ "${{ steps.params.outputs.use_cloudfront }}" = "true" ]; then
+            echo "CloudFront Distribution ID: ${{ steps.get-outputs.outputs.cloudfront_id }}"
+          fi
