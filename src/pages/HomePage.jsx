@@ -56,7 +56,7 @@ const HomePage = () => {
               </p>
               <p className="mb-0">
                 <small>
-                  {t('homeApiDoc')}: <a href="https://api.calculator.snipe.technology/prod/docs/docs/openapi.yaml" target="_blank" rel="noopener noreferrer">{t('homeOpenApi')}</a> ({t('homeApiDocLink')})
+                  {t('homeApiDoc')}: <a href="https://api.calculator.snipe.technology/prod/docs/docs/openapi.yaml" target="_blank" rel="noopener noreferrer">{t('homeOpenApi')}</a>
                 </small>
               </p>
             </Card.Body>
