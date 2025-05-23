@@ -3,7 +3,9 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - main  # Change this to match your main branch name if different
+      - development  
+      - stage
+      - stable
   workflow_dispatch:  # Allows manual triggering
 
 # Define default environment variables
