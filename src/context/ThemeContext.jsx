@@ -10,7 +10,7 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   // Initialize theme from localStorage or default to 'light'
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('snipe_ballistics_theme') || 'light';
+    return localStorage.getItem('snipe_ballistics_theme') || 'dark';
   });
 
   // Apply theme whenever it changes

@@ -13,7 +13,7 @@ const defaultAmmo = configService.getDefaultAmmo();
 const defaultCalculationOptions = configService.getDefaultCalculationOptions();
 
 const defaultDisplayPreferences = {
-  theme: localStorage.getItem('snipe_ballistics_theme') || 'light',
+  theme: localStorage.getItem('snipe_ballistics_theme') || 'dark',
 };
 
 export const AppProvider = ({ children }) => {
