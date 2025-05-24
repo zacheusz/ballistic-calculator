@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import { useAppContext } from '../context/AppContext';
 import api from '../services/api';
 import configService from '../services/configService';
+import storageService, { STORAGE_KEYS } from '../services/storageService';
 import ClockTimePicker from '../components/ClockTimePicker';
 import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
 import ModePanel from '../components/ModePanel';
@@ -125,6 +126,34 @@ const CalculatorPage = () => {
       return updatedShot;
     });
   }, [unitPreferences]);
+  
+  // Log initial calculation options from localStorage
+  useEffect(() => {
+    // Check localStorage directly to see what's stored there
+    const savedOptions = localStorage.getItem('snipe_ballistics_calculation_options');
+    if (savedOptions) {
+      const parsedOptions = JSON.parse(savedOptions);
+      console.log('Initial calculation options in localStorage:', parsedOptions);
+      console.log('Initial Coriolis effect in localStorage:', parsedOptions.calculateCoriolisEffect);
+    } else {
+      console.log('No calculation options found in localStorage');
+    }
+  }, []); // Empty dependency array means this runs once on mount
+  
+  // Log calculation options for debugging
+  useEffect(() => {
+    console.log('Calculation options updated:', calculationOptions);
+    
+    // Check localStorage directly to see what's stored there
+    const savedOptions = localStorage.getItem('snipe_ballistics_calculation_options');
+    if (savedOptions) {
+      const parsedOptions = JSON.parse(savedOptions);
+      console.log('Calculation options in localStorage:', parsedOptions);
+      console.log('Coriolis effect in localStorage:', parsedOptions.calculateCoriolisEffect);
+    } else {
+      console.log('No calculation options found in localStorage');
+    }
+  }, [calculationOptions]);
 
   const handleSubmit = async (values) => {
     setLoading(true);
@@ -159,12 +188,40 @@ const CalculatorPage = () => {
         preferences.rangeCardStart = undefined;
         preferences.rangeCardStep = undefined;
       }
+      // Prepare shot data and preferences, ensuring Coriolis effect settings are consistent
+      const shotData = { ...values.shot };
+      
+      // Create a copy of the preferences to avoid modifying the original calculationOptions
+      const updatedPreferences = {
+        ...preferences,
+        // Ensure calculateCoriolisEffect flag is explicitly set to match the context setting
+        calculateCoriolisEffect: calculationOptions.calculateCoriolisEffect
+      };
+      
+      if (!calculationOptions.calculateCoriolisEffect) {
+        // If Coriolis effect is disabled, set azimuth and latitude to zero
+        // This ensures the API doesn't calculate Coriolis effect even if fields exist
+        shotData.azimuth = { value: 0, unit: 'DEGREES' };
+        shotData.latitude = { value: 0, unit: 'DEGREES' };
+        console.log('%c 🌍 Coriolis Effect Disabled', 'font-weight: bold; color: #ff6b6b;', { 
+          coriolisEnabled: updatedPreferences.calculateCoriolisEffect,
+          azimuth: shotData.azimuth,
+          latitude: shotData.latitude
+        });
+      } else {
+        console.log('%c 🌍 Coriolis Effect Enabled', 'font-weight: bold; color: #51cf66;', { 
+          coriolisEnabled: updatedPreferences.calculateCoriolisEffect,
+          azimuth: shotData.azimuth,
+          latitude: shotData.latitude
+        });
+      }
+      
       const request = {
         firearmProfile,
         ammo: processedAmmo,
         atmosphere: values.atmosphere,
-        shot: values.shot,
-        preferences,
+        shot: shotData,
+        preferences: updatedPreferences,
       };
       
       // Create a deep copy of the request object to ensure accurate logging
@@ -470,6 +527,73 @@ const CalculatorPage = () => {
                         />
                       </div>
                     </Form.Group>
+
+                    {/* Only show Coriolis effect fields when the feature is enabled */}
+                    {(() => {
+                      // Get the latest value directly from storage service to ensure consistency
+                      const storedOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS, calculationOptions);
+                      const isCoriolisEnabled = storedOptions?.calculateCoriolisEffect === true;
+                      console.log('Rendering Coriolis fields, enabled:', isCoriolisEnabled);
+                      return isCoriolisEnabled;
+                    })() && (
+                      <>
+                        <Form.Group className="mb-3">
+                          <Form.Label>{t('shotAzimuth')}</Form.Label>
+                          <div className="d-flex align-items-center">
+                            <Form.Control
+                              type="number"
+                              name="shot.azimuth.value"
+                              value={values.shot.azimuth.value}
+                              onChange={(e) => {
+                                handleChange(e);
+                                handleShotChange('azimuth.value', parseFloat(e.target.value));
+                              }}
+                              onBlur={handleBlur}
+                              className="me-2"
+                            />
+                            <UnitSelector
+                              fieldName="shot.azimuth.unit"
+                              value={values.shot.azimuth.unit}
+                              onChange={(e) => {
+                                handleChange(e);
+                                handleShotChange('azimuth.unit', e.target.value);
+                              }}
+                              options={[
+                                { value: 'DEGREES', label: t('unitDegrees') }
+                              ]}
+                            />
+                          </div>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                          <Form.Label>{t('shooterLatitude')}</Form.Label>
+                          <div className="d-flex align-items-center">
+                            <Form.Control
+                              type="number"
+                              name="shot.latitude.value"
+                              value={values.shot.latitude.value}
+                              onChange={(e) => {
+                                handleChange(e);
+                                handleShotChange('latitude.value', parseFloat(e.target.value));
+                              }}
+                              onBlur={handleBlur}
+                              className="me-2"
+                            />
+                            <UnitSelector
+                              fieldName="shot.latitude.unit"
+                              value={values.shot.latitude.unit}
+                              onChange={(e) => {
+                                handleChange(e);
+                                handleShotChange('latitude.unit', e.target.value);
+                              }}
+                              options={[
+                                { value: 'DEGREES', label: t('unitDegrees') }
+                              ]}
+                            />
+                          </div>
+                        </Form.Group>
+                      </>
+                    )}
 
                     <h6 className="mt-4 mb-3">{t('calcWindSegments')}</h6>
                     {values.shot.windSegments.map((segment, index) => (

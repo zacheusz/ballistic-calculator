@@ -6,6 +6,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ThemeSelector from '../components/ThemeSelector';
 import LanguageSelector from '../components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
+import storageService, { STORAGE_KEYS } from '../services/storageService';
 import '../i18n';
 
 // Helper function to render unit selection dropdown
@@ -81,13 +82,38 @@ const ConfigPage = () => {
       return;
     }
 
+    // Log the current calculation options before saving
+    console.log('Saving calculation options:', calcOptions);
+    console.log('Coriolis effect enabled:', calcOptions.calculateCoriolisEffect);
+    
+    // Force a clean copy of calculation options to ensure proper saving
+    // Use explicit boolean conversion to ensure proper type
+    const cleanCalcOptions = {
+      calculateSpinDrift: Boolean(calcOptions.calculateSpinDrift),
+      calculateCoriolisEffect: Boolean(calcOptions.calculateCoriolisEffect),
+      calculateAeroJump: Boolean(calcOptions.calculateAeroJump),
+      rangeCardStart: calcOptions.rangeCardStart,
+      rangeCardStep: calcOptions.rangeCardStep
+    };
+    
+    console.log('Clean calculation options to save:', cleanCalcOptions);
+
+    // Update all settings in the app context
     updateApiKey(inputApiKey.trim());
     updateEnvironment(selectedEnvironment);
     updateUnitPreferences(preferences);
     updateFirearmProfile(firearm);
     updateAmmo(ammunition);
-    updateCalculationOptions(calcOptions);
+    updateCalculationOptions(cleanCalcOptions);
     updateDisplayPreferences(displayOptionsState);
+    
+    // Verify localStorage after saving using the storage service
+    const savedOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS);
+    if (savedOptions) {
+      console.log('Verified calculation options in localStorage:', savedOptions);
+      console.log('Verified Coriolis effect in localStorage:', savedOptions.calculateCoriolisEffect);
+    }
+    
     navigate('/calculator');
   };
   
@@ -135,10 +161,15 @@ const ConfigPage = () => {
   };
   
   const handleCalcOptionsChange = (field, value) => {
-    setCalcOptions(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    console.log(`Changing calculation option: ${field} to ${value}`);
+    setCalcOptions(prev => {
+      const newOptions = {
+        ...prev,
+        [field]: value
+      };
+      console.log('Updated calculation options:', newOptions);
+      return newOptions;
+    });
   };
 
   // Get theme context functions

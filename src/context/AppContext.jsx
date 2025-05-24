@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import configService from '../services/configService';
+import storageService, { STORAGE_KEYS } from '../services/storageService';
 
 const AppContext = createContext();
 
@@ -27,35 +28,35 @@ export const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Load settings from localStorage on initial load
-    const savedApiKey = localStorage.getItem('snipe_ballistics_api_key');
-    const savedEnvironment = localStorage.getItem('snipe_ballistics_api_environment') || 'dev';
-    const savedUnitPreferences = localStorage.getItem('snipe_ballistics_unit_preferences');
-    const savedFirearmProfile = localStorage.getItem('snipe_ballistics_firearm_profile');
-    const savedAmmo = localStorage.getItem('snipe_ballistics_ammo');
-    const savedCalculationOptions = localStorage.getItem('snipe_ballistics_calculation_options');
-    const savedTheme = localStorage.getItem('snipe_ballistics_theme');
+    // Load settings from localStorage on initial load using the storage service
+    const savedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
+    const savedEnvironment = storageService.loadFromStorage(STORAGE_KEYS.API_ENVIRONMENT, 'dev');
+    const savedUnitPreferences = storageService.loadFromStorage(STORAGE_KEYS.UNIT_PREFERENCES, null);
+    const savedFirearmProfile = storageService.loadFromStorage(STORAGE_KEYS.FIREARM_PROFILE, null);
+    const savedAmmo = storageService.loadFromStorage(STORAGE_KEYS.AMMO, null);
+    const savedCalculationOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS, null);
+    const savedTheme = storageService.loadFromStorage(STORAGE_KEYS.THEME, 'light');
 
     setEnvironment(savedEnvironment);
     
     if (savedUnitPreferences) {
-      const parsedPreferences = JSON.parse(savedUnitPreferences);
-      setUnitPreferences(parsedPreferences);
+      setUnitPreferences(savedUnitPreferences);
     }
     
     if (savedFirearmProfile) {
-      const parsedFirearmProfile = JSON.parse(savedFirearmProfile);
-      setFirearmProfile(parsedFirearmProfile);
+      setFirearmProfile(savedFirearmProfile);
     }
     
     if (savedAmmo) {
-      const parsedAmmo = JSON.parse(savedAmmo);
-      setAmmo(parsedAmmo);
+      setAmmo(savedAmmo);
     }
     
     if (savedCalculationOptions) {
-      const parsedCalculationOptions = JSON.parse(savedCalculationOptions);
-      setCalculationOptions(parsedCalculationOptions);
+      console.log('Loading calculation options from localStorage:', savedCalculationOptions);
+      console.log('Coriolis effect loaded as:', savedCalculationOptions.calculateCoriolisEffect);
+      setCalculationOptions(savedCalculationOptions);
+    } else {
+      console.log('No saved calculation options found, using defaults:', defaultCalculationOptions);
     }
     
     if (savedApiKey) {
@@ -65,7 +66,7 @@ export const AppProvider = ({ children }) => {
     }
     
     // Apply theme from localStorage or default to light
-    const themeToApply = savedTheme || 'light';
+    const themeToApply = savedTheme;
     setDisplayPreferences(prev => ({ ...prev, theme: themeToApply }));
     document.documentElement.setAttribute('data-bs-theme', themeToApply);
     document.body.setAttribute('data-bs-theme', themeToApply);
@@ -74,39 +75,64 @@ export const AppProvider = ({ children }) => {
 
   const updateApiKey = (newApiKey) => {
     setApiKey(newApiKey);
+    storageService.saveToStorage(STORAGE_KEYS.API_KEY, newApiKey);
+    setIsConfigured(true);
     api.setApiKey(newApiKey);
-    setIsConfigured(!!newApiKey);
   };
   
   const updateEnvironment = (newEnvironment) => {
     setEnvironment(newEnvironment);
+    storageService.saveToStorage(STORAGE_KEYS.API_ENVIRONMENT, newEnvironment);
     api.setEnvironment(newEnvironment);
   };
   
   const updateUnitPreferences = (newUnitPreferences) => {
     setUnitPreferences(newUnitPreferences);
-    localStorage.setItem('snipe_ballistics_unit_preferences', JSON.stringify(newUnitPreferences));
+    storageService.saveToStorage(STORAGE_KEYS.UNIT_PREFERENCES, newUnitPreferences);
     api.setUnitPreferences(newUnitPreferences);
   };
   
   const updateFirearmProfile = (newFirearmProfile) => {
     setFirearmProfile(newFirearmProfile);
-    localStorage.setItem('snipe_ballistics_firearm_profile', JSON.stringify(newFirearmProfile));
+    storageService.saveToStorage(STORAGE_KEYS.FIREARM_PROFILE, newFirearmProfile);
   };
   
   const updateAmmo = (newAmmo) => {
     setAmmo(newAmmo);
-    localStorage.setItem('snipe_ballistics_ammo', JSON.stringify(newAmmo));
+    storageService.saveToStorage(STORAGE_KEYS.AMMO, newAmmo);
   };
   
   const updateCalculationOptions = (newCalculationOptions) => {
-    setCalculationOptions(newCalculationOptions);
-    localStorage.setItem('snipe_ballistics_calculation_options', JSON.stringify(newCalculationOptions));
+    console.log('Updating calculation options:', newCalculationOptions);
+    
+    // Create a clean copy of the options to ensure we're not carrying any unexpected properties
+    // Use explicit boolean conversion to ensure proper type
+    const cleanOptions = {
+      calculateSpinDrift: Boolean(newCalculationOptions.calculateSpinDrift),
+      calculateCoriolisEffect: Boolean(newCalculationOptions.calculateCoriolisEffect),
+      calculateAeroJump: Boolean(newCalculationOptions.calculateAeroJump),
+      rangeCardStart: newCalculationOptions.rangeCardStart,
+      rangeCardStep: newCalculationOptions.rangeCardStep
+    };
+    
+    console.log('Clean calculation options to save:', cleanOptions);
+    
+    // First update the state
+    setCalculationOptions(cleanOptions);
+    
+    // Use the storage service to reliably save to localStorage
+    const success = storageService.saveToStorage(STORAGE_KEYS.CALCULATION_OPTIONS, cleanOptions);
+    
+    if (success) {
+      console.log('Coriolis effect saved as:', cleanOptions.calculateCoriolisEffect);
+    } else {
+      console.error('Failed to save calculation options');
+    }
   };
 
   const updateDisplayPreferences = (newPreferences) => {
     setDisplayPreferences(newPreferences);
-    localStorage.setItem('snipe_ballistics_theme', newPreferences.theme);
+    storageService.saveToStorage(STORAGE_KEYS.THEME, newPreferences.theme);
     // Apply theme to both HTML and body elements for better compatibility
     document.documentElement.setAttribute('data-bs-theme', newPreferences.theme);
     document.body.setAttribute('data-bs-theme', newPreferences.theme);
