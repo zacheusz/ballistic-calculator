@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import debounce from 'lodash/debounce';
 import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -45,6 +46,11 @@ const ConfigPage = () => {
   } = useAppContext();
   
   const [inputApiKey, setInputApiKey] = useState(apiKey);
+
+// Debounced API key update to avoid excessive calls
+const debouncedUpdateApiKey = debounce((key) => {
+  if (key.trim()) updateApiKey(key.trim());
+}, 400);
   const [selectedEnvironment, setSelectedEnvironment] = useState(environment);
   const [preferences, setPreferences] = useState({...unitPreferences});
   const [firearm, setFirearm] = useState({...firearmProfile});
@@ -86,53 +92,12 @@ const ConfigPage = () => {
     setDisplayOptionsState({...displayPreferences});
   }, [environment, unitPreferences, firearmProfile, ammo, calculationOptions, displayPreferences]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!inputApiKey.trim()) {
-      setError('API Key is required');
-      return;
-    }
-
-    // Log the current calculation options before saving
-    console.log('Saving calculation options:', calcOptions);
-    console.log('Coriolis effect enabled:', calcOptions.calculateCoriolisEffect);
-    
-    // Force a clean copy of calculation options to ensure proper saving
-    // Use explicit boolean conversion to ensure proper type
-    const cleanCalcOptions = {
-      calculateSpinDrift: Boolean(calcOptions.calculateSpinDrift),
-      calculateCoriolisEffect: Boolean(calcOptions.calculateCoriolisEffect),
-      calculateAeroJump: Boolean(calcOptions.calculateAeroJump),
-      rangeCardStart: calcOptions.rangeCardStart,
-      rangeCardStep: calcOptions.rangeCardStep
-    };
-    
-    console.log('Clean calculation options to save:', cleanCalcOptions);
-
-    // Update all settings in the app context
-    updateApiKey(inputApiKey.trim());
-    updateEnvironment(selectedEnvironment);
-    updateUnitPreferences(preferences);
-    updateFirearmProfile(firearm);
-    updateAmmo(ammunition);
-    updateCalculationOptions(cleanCalcOptions);
-    updateDisplayPreferences(displayOptionsState);
-    
-    // Verify localStorage after saving using the storage service
-    const savedOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS);
-    if (savedOptions) {
-      console.log('Verified calculation options in localStorage:', savedOptions);
-      console.log('Verified Coriolis effect in localStorage:', savedOptions.calculateCoriolisEffect);
-    }
-    
-    navigate('/calculator');
-  };
-  
   const handleUnitChange = (unitType, value) => {
-    setPreferences(prev => ({
-      ...prev,
-      [unitType]: value
-    }));
+    setPreferences(prev => {
+      const newPrefs = { ...prev, [unitType]: value };
+      updateUnitPreferences(newPrefs);
+      return newPrefs;
+    });
   };
   
   const handleFirearmChange = (field, value) => {
@@ -145,7 +110,7 @@ const ConfigPage = () => {
       } else if (fieldParts.length === 2) {
         newFirearm[fieldParts[0]][fieldParts[1]] = value;
       }
-      
+      updateFirearmProfile(newFirearm);
       return newFirearm;
     });
   };
@@ -166,19 +131,18 @@ const ConfigPage = () => {
         }
         newAmmo.ballisticCoefficients[parseInt(fieldParts[1])][fieldParts[2]] = value;
       }
-      
+      updateAmmo(newAmmo);
       return newAmmo;
     });
   };
   
   const handleCalcOptionsChange = (field, value) => {
-    console.log(`Changing calculation option: ${field} to ${value}`);
     setCalcOptions(prev => {
       const newOptions = {
         ...prev,
         [field]: value
       };
-      console.log('Updated calculation options:', newOptions);
+      updateCalculationOptions(newOptions);
       return newOptions;
     });
   };
@@ -192,8 +156,7 @@ const ConfigPage = () => {
       [field]: value
     };
     setDisplayOptionsState(newDisplayOptions);
-    
-    // If changing theme, use the ThemeContext to apply it
+    updateDisplayPreferences(newDisplayOptions);
     if (field === 'theme') {
       // Apply theme change directly - tab state is preserved in URL
       setAppTheme(value);
@@ -238,7 +201,7 @@ const ConfigPage = () => {
             
             <Tab.Content>
               <Tab.Pane eventKey="api">
-                <Form onSubmit={handleSubmit}>
+                <Form>
                   {error && <Alert variant="danger">{t(error)}</Alert>}
             
             <Row>
@@ -249,7 +212,10 @@ const ConfigPage = () => {
                     type="text"
                     placeholder={t('enterApiKey')}
                     value={inputApiKey}
-                    onChange={(e) => setInputApiKey(e.target.value)}
+                    onChange={(e) => {
+                      setInputApiKey(e.target.value);
+                      debouncedUpdateApiKey(e.target.value);
+                    }}
                     required
                   />
                   <Form.Text className="text-muted">
@@ -685,11 +651,6 @@ const ConfigPage = () => {
 </Tab.Pane>
             </Tab.Content>
             
-            <div className="d-grid gap-2 mb-4">
-              <Button variant="primary" onClick={handleSubmit} size="lg">
-                {t('saveConfig')}
-              </Button>
-            </div>
           </Tab.Container>
         </Card.Body>
         <Card.Footer className="text-muted">
