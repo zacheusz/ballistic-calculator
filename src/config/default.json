@@ -21,7 +21,8 @@
     "ammoProfiles": []
   },
   "ammo": {
-    "name": "Lapua_Scenar_185",
+    "bulletManufacturer": "Lapua",
+    "bulletModel": "Scenar",
     "dragModel": "CDM",
     "diameter": { "value": 0.308, "unit": "INCHES" },
     "mass": { "value": 185.0, "unit": "GRAINS" },

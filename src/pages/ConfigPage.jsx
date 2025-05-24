@@ -430,11 +430,20 @@ const ConfigPage = () => {
                     <Card.Header as="h5">{t('ammunition')}</Card.Header>
                     <Card.Body>
                       <Form.Group className="mb-3">
-                        <Form.Label>{t('ammunitionName')}</Form.Label>
+                        <Form.Label>{t('bulletManufacturer')}</Form.Label>
                         <Form.Control
                           type="text"
-                          value={ammunition.name}
-                          onChange={(e) => handleAmmoChange('name', e.target.value)}
+                          value={ammunition.bulletManufacturer}
+                          onChange={(e) => handleAmmoChange('bulletManufacturer', e.target.value)}
+                        />
+                      </Form.Group>
+
+                      <Form.Group className="mb-3">
+                        <Form.Label>{t('bulletModel')}</Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={ammunition.bulletModel}
+                          onChange={(e) => handleAmmoChange('bulletModel', e.target.value)}
                         />
                       </Form.Group>
 
