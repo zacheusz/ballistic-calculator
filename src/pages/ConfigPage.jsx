@@ -52,6 +52,17 @@ const ConfigPage = () => {
   const [calcOptions, setCalcOptions] = useState({...calculationOptions});
   const [displayOptionsState, setDisplayOptionsState] = useState({...displayPreferences});
   const [error, setError] = useState('');
+  
+  const handleEnvironmentChange = (e) => {
+    const newEnv = e.target.value;
+    setSelectedEnvironment(newEnv);
+    updateEnvironment(newEnv);
+    
+    // Save immediately when changed
+    if (inputApiKey.trim()) {
+      updateApiKey(inputApiKey.trim());
+    }
+  };
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -252,7 +263,7 @@ const ConfigPage = () => {
                   <Form.Label>{t('environment')}</Form.Label>
                   <Form.Select
                     value={selectedEnvironment}
-                    onChange={(e) => setSelectedEnvironment(e.target.value)}
+                    onChange={handleEnvironmentChange}
                   >
                     <option value="dev">{t('development')}</option>
                     <option value="test">{t('test')}</option>

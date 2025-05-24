@@ -18,7 +18,8 @@ const defaultDisplayPreferences = {
 
 export const AppProvider = ({ children }) => {
   const [apiKey, setApiKey] = useState('');
-  const [environment, setEnvironment] = useState('dev');
+  // Initialize with empty string, will be set from localStorage or API service in useEffect
+  const [environment, setEnvironment] = useState('');
   const [unitPreferences, setUnitPreferences] = useState(api.getDefaultUnitPreferences());
   const [firearmProfile, setFirearmProfile] = useState(defaultFirearmProfile);
   const [ammo, setAmmo] = useState(defaultAmmo);
@@ -30,13 +31,15 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     // Load settings from localStorage on initial load using the storage service
     const savedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
-    const savedEnvironment = storageService.loadFromStorage(STORAGE_KEYS.API_ENVIRONMENT, 'dev');
+    // Load settings from localStorage first, then fall back to API service defaults
     const savedUnitPreferences = storageService.loadFromStorage(STORAGE_KEYS.UNIT_PREFERENCES, null);
     const savedFirearmProfile = storageService.loadFromStorage(STORAGE_KEYS.FIREARM_PROFILE, null);
     const savedAmmo = storageService.loadFromStorage(STORAGE_KEYS.AMMO, null);
     const savedCalculationOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS, null);
     const savedTheme = storageService.loadFromStorage(STORAGE_KEYS.THEME, 'light');
-
+    
+    // Get environment from localStorage or use the one from API service (which falls back to env var)
+    const savedEnvironment = storageService.loadFromStorage(STORAGE_KEYS.API_ENVIRONMENT, api.environment);
     setEnvironment(savedEnvironment);
     
     if (savedUnitPreferences) {

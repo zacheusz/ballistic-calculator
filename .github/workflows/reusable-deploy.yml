@@ -50,6 +50,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
+      - name: Create environment configuration
+        run: |
+          cat > .env <<EOL
+          # Auto-generated for ${{ inputs.environment }} environment
+          VITE_API_ENDPOINT=https://api.calculator.snipe.technology
+          VITE_API_STAGE=${{ inputs.environment }}
+          EOL
+          
+          echo "Generated .env file:"
+          cat .env
+          
       - name: Build application
         run: npm run build
         

@@ -3,9 +3,35 @@ import configService from './configService';
 
 class BallisticsApi {
   constructor() {
+    // Debug log environment variables
+    console.log('Environment variables:', {
+      VITE_API_STAGE: import.meta.env.VITE_API_STAGE,
+      VITE_API_ENDPOINT: import.meta.env.VITE_API_ENDPOINT,
+      MODE: import.meta.env.MODE,
+      DEV: import.meta.env.DEV,
+      PROD: import.meta.env.PROD
+    });
+
+    // Set the API base URL from environment variable or use default
+    this.apiBaseUrl = import.meta.env.VITE_API_ENDPOINT || 'https://api.calculator.snipe.technology';
+    
+    // Load API key from localStorage
     this.apiKey = localStorage.getItem('snipe_ballistics_api_key') || '';
-    this.environment = localStorage.getItem('snipe_ballistics_api_environment') || 'dev';
-    this.unitPreferences = JSON.parse(localStorage.getItem('snipe_ballistics_unit_preferences')) || this.getDefaultUnitPreferences();
+    
+    // Use environment from localStorage if it exists, otherwise use VITE_API_STAGE or 'prod' as default
+    this.environment = localStorage.getItem('snipe_ballistics_api_environment') || 
+                      import.meta.env.VITE_API_STAGE || 
+                      'prod';
+    
+    // Log the final configuration
+    console.log('API Configuration:', {
+      environment: this.environment,
+      apiBaseUrl: this.apiBaseUrl,
+      fullUrl: `${this.apiBaseUrl}/${this.environment}`,
+      source: localStorage.getItem('snipe_ballistics_api_environment') ? 'localStorage' : 'environment variable'
+    });
+    
+    this.unitPreferences = JSON.parse(localStorage.getItem('snipe_ballistics_unit_preferences') || 'null') || this.getDefaultUnitPreferences();
     this.updateClient();
   }
   
@@ -14,7 +40,8 @@ class BallisticsApi {
   }
   
   updateClient() {
-    const BASE_URL = `https://api.calculator.snipe.technology/${this.environment}`;
+    const BASE_URL = `${this.apiBaseUrl}/${this.environment}`;
+    console.log(`Initializing API client with base URL: ${BASE_URL}`);
     this.client = axios.create({
       baseURL: BASE_URL,
       headers: {
