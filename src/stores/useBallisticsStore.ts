@@ -2,48 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { BallisticsState, FirearmProfile, Ammo, Atmosphere, Shot, Preferences, WindSegment } from '../types/ballistics';
 import { getDefaultConfig, toApiRequest, mergeWithDefaults } from '../utils/ballisticsUtils';
-import { migrateToZustand, cleanupOldStorage } from '../utils/migrateToZustand';
 
 const STORAGE_KEY = 'ballistics-store-v2';
-
-// Check if we need to migrate from old storage
-const shouldMigrate = () => {
-  // If we already have the new store, no need to migrate
-  if (localStorage.getItem(STORAGE_KEY)) return false;
-  
-  // Check if we have any of the old storage keys
-  const oldKeys = [
-    'ballistics-request-store',
-    'unit-preferences',
-    'firearm-profile',
-    'ammo'
-  ];
-  
-  return oldKeys.some(key => {
-    try {
-      return !!localStorage.getItem(key);
-    } catch (e) {
-      return false;
-    }
-  });
-};
-
-// Migration function to run once when the store is first created
-const runMigrationIfNeeded = () => {
-  if (shouldMigrate()) {
-    try {
-      const migratedData = migrateToZustand();
-      // Clean up old storage after successful migration
-      cleanupOldStorage();
-      return migratedData;
-    } catch (error) {
-      console.error('Migration failed:', error);
-      // Return default config if migration fails
-      return getDefaultConfig();
-    }
-  }
-  return null;
-};
 
 const useBallisticsStore = create<BallisticsState>()(
   persist(
@@ -135,25 +95,14 @@ const useBallisticsStore = create<BallisticsState>()(
       merge: (persistedState: any, currentState) => {
         if (!persistedState) return currentState;
         
-        // If we have a version mismatch, run migration
+        // If we have a version mismatch, use default config
         if (persistedState._version !== 2) {
-          try {
-            const migratedData = migrateToZustand();
-            cleanupOldStorage();
-            return {
-              ...currentState,
-              ...migratedData,
-              _version: 2
-            };
-          } catch (error) {
-            console.error('Migration during merge failed:', error);
-            // Fall back to default config if migration fails
-            return {
-              ...currentState,
-              ...getDefaultConfig(),
-              _version: 2
-            };
-          }
+          console.log('Version mismatch detected, using default configuration');
+          return {
+            ...currentState,
+            ...getDefaultConfig(),
+            _version: 2
+          };
         }
         
         const defaultConfig = getDefaultConfig();
