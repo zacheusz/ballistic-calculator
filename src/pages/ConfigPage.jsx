@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import debounce from 'lodash/debounce';
 import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
-import { useAppConfigStore } from '../context/useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ThemeSelector from '../components/ThemeSelector';

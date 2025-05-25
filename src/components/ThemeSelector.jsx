@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { useAppConfigStore } from '../context/useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 
 /**
  * A reusable component for selecting the application theme

@@ -7,7 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import { AppProvider } from './context/AppContext';
-import { useAppConfigStore } from './context/useAppConfigStore';
+import { useAppConfigStore } from './stores/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
 import { BallisticsStoreProvider } from './context/BallisticsStoreProvider'; // Add this import
 import Navigation from './components/Navigation';

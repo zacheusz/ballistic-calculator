@@ -1,7 +1,7 @@
 import { Navbar, Nav, Container, Badge } from 'react-bootstrap';
 import { Link, NavLink } from 'react-router-dom';
 import { useBallistics } from '../hooks/useBallistics';
-import { useAppConfigStore } from '../context/useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {

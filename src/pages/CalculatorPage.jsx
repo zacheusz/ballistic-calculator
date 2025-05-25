@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Card, Spinner, Alert, Table, Form } from 'react-bootstrap';
 import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
-import { useAppConfigStore } from '../context/useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import api from '../services/api';
 import configService from '../services/configService';

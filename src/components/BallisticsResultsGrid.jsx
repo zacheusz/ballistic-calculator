@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { useAppConfigStore } from '../context/useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 
 /**
  * Component for displaying ballistics calculation results using MUI X Data Grid

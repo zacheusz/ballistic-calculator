@@ -1,5 +1,5 @@
 import { act } from 'react';
-import { useAppConfigStore } from './context/useAppConfigStore';
+import { useAppConfigStore } from './stores/useAppConfigStore';
 
 describe('Zustand Integration Tests', () => {
   // Reset store before each test
@@ -28,7 +28,9 @@ describe('Zustand Integration Tests', () => {
     expect(useAppConfigStore.getState().theme).toBe('dark');
     
     // Check localStorage persistence
-    const stored = JSON.parse(localStorage.getItem('app-config'));
+    const storedData = localStorage.getItem('app-config');
+    expect(storedData).not.toBeNull();
+    const stored = JSON.parse(storedData as string);
     expect(stored.state.theme).toBe('dark');
   });
 
@@ -42,7 +44,9 @@ describe('Zustand Integration Tests', () => {
     expect(useAppConfigStore.getState().language).toBe('pl');
     
     // Check localStorage persistence
-    const stored = JSON.parse(localStorage.getItem('app-config'));
+    const storedData = localStorage.getItem('app-config');
+    expect(storedData).not.toBeNull();
+    const stored = JSON.parse(storedData as string);
     expect(stored.state.language).toBe('pl');
   });
 
@@ -56,7 +60,9 @@ describe('Zustand Integration Tests', () => {
     expect(useAppConfigStore.getState().apiStage).toBe('dev');
     
     // Check localStorage persistence
-    const stored = JSON.parse(localStorage.getItem('app-config'));
+    const storedData = localStorage.getItem('app-config');
+    expect(storedData).not.toBeNull();
+    const stored = JSON.parse(storedData as string);
     expect(stored.state.apiStage).toBe('dev');
   });
 
@@ -72,7 +78,9 @@ describe('Zustand Integration Tests', () => {
     expect(useAppConfigStore.getState().apiKey).toBe(testKey);
     
     // Check localStorage persistence
-    const stored = JSON.parse(localStorage.getItem('app-config'));
+    const storedData = localStorage.getItem('app-config');
+    expect(storedData).not.toBeNull();
+    const stored = JSON.parse(storedData as string);
     expect(stored.state.apiKey).toBe(testKey);
   });
 
@@ -94,7 +102,9 @@ describe('Zustand Integration Tests', () => {
     expect(state.apiKey).toBe('multi-update-key');
     
     // Check localStorage persistence
-    const stored = JSON.parse(localStorage.getItem('app-config'));
+    const storedData = localStorage.getItem('app-config');
+    expect(storedData).not.toBeNull();
+    const stored = JSON.parse(storedData as string);
     expect(stored.state.theme).toBe('dark');
     expect(stored.state.language).toBe('pl');
     expect(stored.state.apiStage).toBe('dev');

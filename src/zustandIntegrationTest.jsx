@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppConfigStore } from './context/useAppConfigStore';
+import { useAppConfigStore } from './stores/useAppConfigStore';
 
 // Simple component to test Zustand store
 export function ZustandTest() {

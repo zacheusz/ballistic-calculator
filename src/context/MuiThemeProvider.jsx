@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useAppConfigStore } from './useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 
 /**
  * MUI Theme Provider that syncs with our application theme

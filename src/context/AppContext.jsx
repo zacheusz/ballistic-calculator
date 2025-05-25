@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import configService from '../services/configService';
 import storageService, { STORAGE_KEYS } from '../services/storageService';
-import { useAppConfigStore } from './useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 
 const AppContext = createContext();
 
