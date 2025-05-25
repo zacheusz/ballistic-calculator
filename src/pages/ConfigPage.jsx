@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import debounce from 'lodash/debounce';
 import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
+import { useAppConfigStore } from '../context/useAppConfigStore';
 import { useAppContext } from '../context/AppContext';
-import { useTheme } from '../context/ThemeContext';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ThemeSelector from '../components/ThemeSelector';
 import LanguageSelector from '../components/LanguageSelector';
@@ -28,28 +28,41 @@ const UnitSelector = ({ fieldName, value, onChange, options }) => (
 
 const ConfigPage = () => {
   const { t } = useTranslation();
-  const { 
-    apiKey, 
-    environment, 
-    unitPreferences, 
+  // Zustand store for config values
+  const {
+    apiKey,
+    apiStage,
+    setApiKey,
+    setApiStage,
+    theme,
+    setTheme,
+    language,
+    setLanguage
+  } = useAppConfigStore();
+
+  // Alias for UI compatibility
+  const environment = apiStage;
+  const setEnvironment = setApiStage;
+  
+  // Get other values from AppContext until fully migrated to Zustand
+  const {
+    unitPreferences,
     firearmProfile,
     ammo,
     calculationOptions,
     displayPreferences,
-    updateApiKey, 
-    updateEnvironment, 
     updateUnitPreferences,
     updateFirearmProfile,
     updateAmmo,
     updateCalculationOptions,
     updateDisplayPreferences
   } = useAppContext();
-  
+
   const [inputApiKey, setInputApiKey] = useState(apiKey);
 
 // Debounced API key update to avoid excessive calls
 const debouncedUpdateApiKey = debounce((key) => {
-  if (key.trim()) updateApiKey(key.trim());
+  if (key.trim()) setApiKey(key.trim());
 }, 400);
   const [selectedEnvironment, setSelectedEnvironment] = useState(environment);
   const [preferences, setPreferences] = useState({...unitPreferences});
@@ -62,13 +75,13 @@ const debouncedUpdateApiKey = debounce((key) => {
   const handleEnvironmentChange = (e) => {
     const newEnv = e.target.value;
     setSelectedEnvironment(newEnv);
-    updateEnvironment(newEnv);
-    
+    setEnvironment(newEnv);
     // Save immediately when changed
     if (inputApiKey.trim()) {
-      updateApiKey(inputApiKey.trim());
+      setApiKey(inputApiKey.trim());
     }
   };
+
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -147,8 +160,9 @@ const debouncedUpdateApiKey = debounce((key) => {
     });
   };
 
-  // Get theme context functions
-  const { setTheme: setAppTheme } = useTheme();
+  // Get theme setter from Zustand store
+  // Note: We already have setTheme from useAppConfigStore at the top of the component
+  const setAppTheme = setTheme; // Alias for compatibility
   
   const handleDisplayOptionsChange = (field, value) => {
     const newDisplayOptions = {
@@ -160,7 +174,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     if (field === 'theme') {
       // Apply theme change directly - tab state is preserved in URL
       setAppTheme(value);
-      console.log('Theme changed through ThemeContext to:', value);
+      console.log('Theme changed through Zustand store to:', value);
     }
   };
 

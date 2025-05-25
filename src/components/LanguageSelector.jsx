@@ -1,18 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form } from 'react-bootstrap';
+import { useAppConfigStore } from '../context/useAppConfigStore';
 
 /**
  * LanguageSelector: allows user to switch between English and Polish
  */
 const LanguageSelector = () => {
   const { i18n, t } = useTranslation();
-  const currentLang = i18n.language || 'en';
+  const { language, setLanguage } = useAppConfigStore();
+  const currentLang = language || i18n.language || 'en';
 
   const handleChange = (e) => {
     const lang = e.target.value;
+    setLanguage(lang);
     i18n.changeLanguage(lang);
-    localStorage.setItem('language', lang);
   };
 
   return (

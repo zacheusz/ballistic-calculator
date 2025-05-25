@@ -6,16 +6,17 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import { AppProvider } from './context/AppContext';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { useAppConfigStore } from './context/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
 import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
 import ConfigPage from './pages/ConfigPage';
+import ZustandTest from './zustandIntegrationTest';
 
 // Toast container that uses the current theme
 function ThemedToastContainer() {
-  const { theme } = useTheme();
+  const { theme } = useAppConfigStore();
   return (
     <ToastContainer 
       position="bottom-right"
@@ -24,9 +25,9 @@ function ThemedToastContainer() {
   );
 }
 
-// Wrapper component that uses theme context after it's available
+// Wrapper component that uses theme from Zustand store
 function ThemedApp() {
-  const { theme } = useTheme();
+  const { theme } = useAppConfigStore();
   
   // Force remount of the entire MUI theme tree when theme changes
   return (
@@ -40,6 +41,7 @@ function ThemedApp() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/calculator" element={<CalculatorPage />} />
                 <Route path="/config" element={<ConfigPage />} />
+                <Route path="/zustand-test" element={<ZustandTest />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
@@ -52,11 +54,7 @@ function ThemedApp() {
 }
 
 function App() {
-  return (
-    <ThemeProvider>
-      <ThemedApp />
-    </ThemeProvider>
-  );
+  return <ThemedApp />;
 }
 
 export default App;

@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { useTheme } from '../context/ThemeContext';
+import { useAppConfigStore } from '../context/useAppConfigStore';
 
 /**
  * Component for displaying ballistics calculation results using MUI X Data Grid
  * Provides sorting, filtering, and export capabilities
  */
 const BallisticsResultsGrid = ({ results, unitPreferences }) => {
-  const { theme } = useTheme();
+  const { theme } = useAppConfigStore();
 
   // Helper to extract unit from object fields, fallback to unitPreferences
   function extractUnitOrPref(field, prefKey) {

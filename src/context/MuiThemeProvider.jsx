@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useTheme } from './ThemeContext';
+import { useAppConfigStore } from './useAppConfigStore';
 
 /**
  * MUI Theme Provider that syncs with our application theme
  * Using standard MUI theming approach
  */
 const MuiThemeProvider = ({ children }) => {
-  const { theme } = useTheme();
+  const { theme } = useAppConfigStore();
   
   // Create a theme with MUI's standard approach
   const muiTheme = useMemo(() => {

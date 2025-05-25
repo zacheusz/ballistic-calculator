@@ -1,11 +1,16 @@
 import { Navbar, Nav, Container, Badge } from 'react-bootstrap';
 import { Link, NavLink } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { useAppConfigStore } from '../context/useAppConfigStore';
 import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {
-  const { isConfigured, environment } = useAppContext();
+  const { isConfigured } = useAppContext();
+  const { apiStage } = useAppConfigStore();
   const { t } = useTranslation();
+  
+  // For UI compatibility
+  const environment = apiStage;
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-3">
