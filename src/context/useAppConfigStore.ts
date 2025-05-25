@@ -18,7 +18,7 @@ interface AppConfigState {
 export const useAppConfigStore = create<AppConfigState>()(
   persist(
     (set) => ({
-      theme: 'light',
+      theme: 'dark',
       language: 'en',
       apiStage: 'prod',
       apiKey: '',

@@ -164,6 +164,13 @@ const debouncedUpdateApiKey = debounce((key) => {
   // Note: We already have setTheme from useAppConfigStore at the top of the component
   const setAppTheme = setTheme; // Alias for compatibility
   
+  // Handle theme change directly through Zustand
+  const handleThemeChange = (value) => {
+    setAppTheme(value);
+    console.log('Theme changed through Zustand store to:', value);
+  };
+  
+  // Handle other display options if needed
   const handleDisplayOptionsChange = (field, value) => {
     const newDisplayOptions = {
       ...displayOptionsState,
@@ -171,11 +178,6 @@ const debouncedUpdateApiKey = debounce((key) => {
     };
     setDisplayOptionsState(newDisplayOptions);
     updateDisplayPreferences(newDisplayOptions);
-    if (field === 'theme') {
-      // Apply theme change directly - tab state is preserved in URL
-      setAppTheme(value);
-      console.log('Theme changed through Zustand store to:', value);
-    }
   };
 
   return (
@@ -655,10 +657,7 @@ const debouncedUpdateApiKey = debounce((key) => {
         <LanguageSelector />
       </Card.Header>
       <Card.Body>
-        <ThemeSelector 
-          value={displayOptionsState.theme}
-          onChange={e => handleDisplayOptionsChange('theme', e.target.value)}
-        />
+        <ThemeSelector />
       </Card.Body>
     </Card>
   </Form>

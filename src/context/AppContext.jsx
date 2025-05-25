@@ -13,9 +13,8 @@ const defaultAmmo = configService.getDefaultAmmo();
 
 const defaultCalculationOptions = configService.getDefaultCalculationOptions();
 
-const defaultDisplayPreferences = {
-  theme: localStorage.getItem('snipe_ballistics_theme') || 'dark',
-};
+// Display preferences no longer include theme as it's managed by Zustand
+const defaultDisplayPreferences = {};
 
 export const AppProvider = ({ children }) => {
   // Get API key and stage from Zustand store
@@ -41,8 +40,6 @@ export const AppProvider = ({ children }) => {
     const savedFirearmProfile = storageService.loadFromStorage(STORAGE_KEYS.FIREARM_PROFILE, null);
     const savedAmmo = storageService.loadFromStorage(STORAGE_KEYS.AMMO, null);
     const savedCalculationOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS, null);
-    const savedTheme = storageService.loadFromStorage(STORAGE_KEYS.THEME, 'light');
-    
     // Get environment from localStorage or use the one from API service (which falls back to env var)
     const savedEnvironment = storageService.loadFromStorage(STORAGE_KEYS.API_ENVIRONMENT, api.environment);
     setEnvironment(savedEnvironment);
@@ -67,12 +64,7 @@ export const AppProvider = ({ children }) => {
       console.log('No saved calculation options found, using defaults:', defaultCalculationOptions);
     }
     
-    // Apply theme from localStorage or default to light
-    const themeToApply = savedTheme;
-    setDisplayPreferences(prev => ({ ...prev, theme: themeToApply }));
-    document.documentElement.setAttribute('data-bs-theme', themeToApply);
-    document.body.setAttribute('data-bs-theme', themeToApply);
-    console.log('Initial theme applied:', themeToApply);
+    // Theme is now managed by Zustand store
   }, []);
 
   // Sync with Zustand store when its API key or stage changes
@@ -150,11 +142,7 @@ export const AppProvider = ({ children }) => {
 
   const updateDisplayPreferences = (newPreferences) => {
     setDisplayPreferences(newPreferences);
-    storageService.saveToStorage(STORAGE_KEYS.THEME, newPreferences.theme);
-    // Apply theme to both HTML and body elements for better compatibility
-    document.documentElement.setAttribute('data-bs-theme', newPreferences.theme);
-    document.body.setAttribute('data-bs-theme', newPreferences.theme);
-    console.log('Theme updated to:', newPreferences.theme);
+    // Theme is now managed by Zustand store
   };
 
   return (
