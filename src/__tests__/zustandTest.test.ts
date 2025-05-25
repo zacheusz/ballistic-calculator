@@ -1,4 +1,11 @@
 import { act } from 'react';
+
+// Mock the environment module
+jest.mock('../utils/environment', () => ({
+  getApiStage: jest.fn().mockReturnValue('test'),
+  getApiEndpoint: jest.fn().mockReturnValue('https://api.calculator.snipe.technology')
+}));
+
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 
 describe('Zustand Integration Tests', () => {
