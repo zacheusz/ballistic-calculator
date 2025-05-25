@@ -1,49 +1,56 @@
 import { Unit } from '../types/ballistics';
 
-// Conversion factors for different units
+/**
+ * Unit conversion factors.
+ * These factors convert from the specified unit to the internal base unit.
+ * WARNING: These factors are not exact and are only used for display purposes.
+ */
 export const CONVERSION_FACTORS = {
-  // Length
-  INCHES: 1,
-  FEET: 12,
-  YARDS: 36,
-  CENTIMETERS: 0.393701,
-  METERS: 39.3701,
-  MILLIMETERS: 0.0393701,
+  // Length units - Base unit: YARDS
+  YARDS: 1.0,
+  METERS: 1.093613298337708,
+  FEET: 0.3333333333333333,
+  INCHES: 0.027777777777778,
+  CENTIMETERS: 0.010936132983377,
+  MILLIMETERS: 0.001093613298338,
   
-  // Weight
-  GRAINS: 1,
+  // Weight/Mass units - Base unit: GRAINS
+  GRAINS: 1.0,
   GRAMS: 15.4324,
-  OUNCES: 437.5,
-  POUNDS: 7000,
+  POUNDS: 7000.0,
   KILOGRAMS: 15432.4,
   
-  // Velocity
-  FPS: 1,
-  MPH: 1.46667,
-  KPH: 0.911344,
-  MPS: 3.28084,
+  // Velocity units - Base unit: FEET_PER_SECOND
+  FEET_PER_SECOND: 1.0,
+  METERS_PER_SECOND: 3.28084,
+  MILES_PER_HOUR: 1.466666666667,
+  KILOMETERS_PER_HOUR: 0.911344415281,
   
-  // Pressure
-  IN_HG: 1,
-  MM_HG: 0.0393701,
-  MBAR: 0.02953,
-  HPA: 0.02953,
-  PSI: 2.03602,
-  KPA: 0.2953,
+  // Pressure units - Base unit: INCHES_MERCURY
+  INCHES_MERCURY: 1.0,
+  HECTOPASCALS: 0.0295333727,
   
-  // Temperature
-  FAHRENHEIT: 1,
-  CELSIUS: 1.8,
-  KELVIN: 1.8,
+  // Energy units - Base unit: FOOT_POUNDS
+  FOOT_POUNDS: 1.0,
+  JOULES: 0.737562,
   
-  // Angular
-  DEGREES: 1,
-  MILS: 0.05625,
-  RADIANS: 57.2958,
+  // Angular units - Base unit: IPHY (Inches Per Hundred Yards)
+  IPHY: 1.0,
+  MOA: 1.047197551196598,
+  MILS: 3.600000000000000,
+  DEGREES: 62.831853071796,
+  CLOCK: 1884.955592153876,
+  
+  // Time units - Base unit: SECONDS
+  SECONDS: 1.0,
+  MILLISECONDS: 0.001,
+  MINUTES: 0.016666666667,
+  HOURS: 0.000277777778
 } as const;
 
 /**
- * Convert a value from one unit to another
+ * Convert a value from one unit to another using the internal unit system
+ * 
  * @param value The value to convert
  * @param fromUnit The unit to convert from
  * @param toUnit The unit to convert to
@@ -63,6 +70,12 @@ export const convertUnit = (
   if (fromUnit === 'CELSIUS' && toUnit === 'FAHRENHEIT') {
     return (value * 9/5) + 32;
   }
+  if (fromUnit === 'RANKINE' && toUnit === 'FAHRENHEIT') {
+    return value - 459.67;
+  }
+  if (fromUnit === 'FAHRENHEIT' && toUnit === 'RANKINE') {
+    return value + 459.67;
+  }
   if (fromUnit === 'KELVIN' && toUnit === 'CELSIUS') {
     return value - 273.15;
   }
@@ -76,11 +89,18 @@ export const convertUnit = (
     return (value - 273.15) * 9/5 + 32;
   }
   
-  // For other units, use conversion factors
-  const fromFactor = CONVERSION_FACTORS[fromUnit as keyof typeof CONVERSION_FACTORS] || 1;
-  const toFactor = CONVERSION_FACTORS[toUnit as keyof typeof CONVERSION_FACTORS] || 1;
+  // For other units, convert to internal units and then to target units
+  const fromFactor = CONVERSION_FACTORS[fromUnit as keyof typeof CONVERSION_FACTORS];
+  const toFactor = CONVERSION_FACTORS[toUnit as keyof typeof CONVERSION_FACTORS];
   
-  return (value * fromFactor) / toFactor;
+  if (!fromFactor || !toFactor) {
+    console.warn(`Conversion factor not found for ${fromUnit} or ${toUnit}`);
+    return value; // Return original value if conversion factors are missing
+  }
+  
+  // Convert to internal units, then to target units
+  const internalValue = value * fromFactor;
+  return internalValue / toFactor;
 };
 
 /**
@@ -108,7 +128,7 @@ export const convertMeasurement = <T extends { value: number; unit: string }>(
  * @param decimals Number of decimal places (default: 2)
  * @returns Formatted string
  */
-export const formatNumber = (value: number, decimals = 2): string => {
+export const formatNumber = (value: number, decimals = 4): string => {
   return Number(value.toFixed(decimals)).toString();
 };
 

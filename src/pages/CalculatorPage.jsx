@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Card, Spinner, Alert, Table, Form } from 'react-bootstrap';
 import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
@@ -11,6 +12,7 @@ import storageService, { STORAGE_KEYS } from '../services/storageService';
 import ClockTimePicker from '../components/ClockTimePicker';
 import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
 import ModePanel from '../components/ModePanel';
+import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
 
 // Function to get initial values based on unit preferences
 const getInitialAtmosphere = (unitPrefs) => {
@@ -52,24 +54,66 @@ const validationSchema = Yup.object({
   }),
 });
 
-// Helper function to render unit selection dropdown
-const UnitSelector = ({ fieldName, value, onChange, options }) => (
-  <Form.Select 
-    size="sm"
-    name={fieldName}
+// Custom UnitSelector component that wraps UnitSelectorWithConversion
+const UnitSelector = ({
+  fieldName,
+  value,
+  onChange,
+  options,
+  currentValue,
+  onValueChange,
+  targetRef,
+  setFieldValue // Add setFieldValue from Formik
+}) => (
+  <UnitSelectorWithConversion
+    fieldName={fieldName}
     value={value}
-    onChange={onChange}
-    className="ms-2"
-    style={{ width: 'auto', display: 'inline-block' }}
-  >
-    {options.map(option => (
-      <option key={option.value} value={option.value}>{option.label}</option>
-    ))}
-  </Form.Select>
+    onChange={(e) => {
+      // Call the original onChange handler
+      onChange(e);
+    }}
+    options={options}
+    currentValue={currentValue}
+    onValueChange={(newValue) => {
+      // Update the value in the state
+      onValueChange(newValue);
+      
+      // Also update the Formik form value
+      if (setFieldValue) {
+        // Extract the field name from the full path (e.g., 'shot.range.value' from 'shot.range.unit')
+        const valuePath = fieldName.replace(/\.unit$/, '.value');
+        setFieldValue(valuePath, newValue);
+      }
+    }}
+    targetRef={targetRef}
+  />
 );
 
 const CalculatorPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  
+  // Create refs for input fields to position tooltips
+  const temperatureInputRef = useRef(null);
+  const pressureInputRef = useRef(null);
+  const altitudeInputRef = useRef(null);
+  const rangeInputRef = useRef(null);
+  const elevationAngleInputRef = useRef(null);
+  const windSpeedInputRef = useRef(null);
+  const windAngleInputRef = useRef(null);
+  
+  // Create refs for wind segment fields
+  const windSegmentRefs = useRef({});
+  
+  // Helper function to get or create a ref for a wind segment field
+  const getWindSegmentRef = (index, field) => {
+    const key = `wind_${index}_${field}`;
+    if (!windSegmentRefs.current[key]) {
+      windSegmentRefs.current[key] = React.createRef();
+    }
+    return windSegmentRefs.current[key];
+  };
+
   // Get API key from Zustand store to determine if configured
   const apiKey = useAppConfigStore(state => state.apiKey);
   // Derive isConfigured from apiKey presence
@@ -262,9 +306,9 @@ const CalculatorPage = () => {
 
   
   const handleAtmosphereChange = (field, value) => {
-    updateAtmosphere(prev => {
+    setAtmosphere(prev => {
       const newAtmosphere = { ...prev };
-      const fieldParts = field.split('.'); // Fix the syntax error here
+      const fieldParts = field.split('.');
       
       if (fieldParts.length === 1) {
         newAtmosphere[field] = value;
@@ -277,9 +321,9 @@ const CalculatorPage = () => {
   };
   
   const handleShotChange = (field, value) => {
-    updateShot(prev => {
+    setShot(prev => {
       const newShot = { ...prev };
-      const fieldParts = field.split('.'); // Fix the syntax error here
+      const fieldParts = field.split('.');
       
       if (fieldParts.length === 1) {
         newShot[field] = value;
@@ -333,7 +377,7 @@ const CalculatorPage = () => {
         onSubmit={handleSubmit}
         enableReinitialize
       >
-        {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+        {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue }) => (
           <FormikForm>
             <Row>
               <Col md={6}>
@@ -353,6 +397,7 @@ const CalculatorPage = () => {
                           }}
                           onBlur={handleBlur}
                           className="me-2"
+                          ref={temperatureInputRef}
                         />
                         <UnitSelector
                           fieldName="atmosphere.temperature.unit"
@@ -366,6 +411,10 @@ const CalculatorPage = () => {
                             { value: 'CELSIUS', label: t('unitCelsius') },
                             { value: 'KELVIN', label: t('unitKelvin') }
                           ]}
+                          currentValue={values.atmosphere.temperature.value}
+                          onValueChange={(newValue) => handleAtmosphereChange('temperature.value', newValue)}
+                          targetRef={temperatureInputRef}
+                          setFieldValue={setFieldValue}
                         />
                       </div>
                     </Form.Group>
@@ -384,6 +433,7 @@ const CalculatorPage = () => {
                           }}
                           onBlur={handleBlur}
                           className="me-2"
+                          ref={pressureInputRef}
                         />
                         <UnitSelector
                           fieldName="atmosphere.pressure.unit"
@@ -393,11 +443,15 @@ const CalculatorPage = () => {
                             handleAtmosphereChange('pressure.unit', e.target.value);
                           }}
                           options={[
-                            { value: 'INCHES_MERCURY', label: t('unitInHg') },
-                            { value: 'MILLIBARS', label: t('unitMbar') },
-                            { value: 'MILLIMETERS_MERCURY', label: t('unitMmHg') },
-                            { value: 'HECTOPASCALS', label: t('unitHpa') }
+                            { value: 'INHG', label: t('unitInHg') },
+                            { value: 'MMHG', label: t('unitMmHg') },
+                            { value: 'HPASCAL', label: t('unitHPa') },
+                            { value: 'MBAR', label: t('unitMbar') }
                           ]}
+                          currentValue={values.atmosphere.pressure.value}
+                          onValueChange={(newValue) => handleAtmosphereChange('pressure.value', newValue)}
+                          targetRef={pressureInputRef}
+                          setFieldValue={setFieldValue}
                         />
                       </div>
                     </Form.Group>
@@ -447,6 +501,7 @@ const CalculatorPage = () => {
                           }}
                           onBlur={handleBlur}
                           className="me-2"
+                          ref={altitudeInputRef}
                         />
                         <UnitSelector
                           fieldName="atmosphere.altitude.unit"
@@ -456,10 +511,14 @@ const CalculatorPage = () => {
                             handleAtmosphereChange('altitude.unit', e.target.value);
                           }}
                           options={[
-                            { value: 'FEET', label: 'Feet' },
-                            { value: 'METERS', label: 'Meters' },
-                            { value: 'YARDS', label: 'Yards' }
+                            { value: 'FEET', label: t('unitFeet') },
+                            { value: 'METERS', label: t('unitMeters') },
+                            { value: 'YARDS', label: t('unitYards') }
                           ]}
+                          currentValue={values.atmosphere.altitude.value}
+                          onValueChange={(newValue) => handleAtmosphereChange('altitude.value', newValue)}
+                          targetRef={altitudeInputRef}
+                          setFieldValue={setFieldValue}
                         />
                       </div>
                     </Form.Group>
@@ -495,6 +554,7 @@ const CalculatorPage = () => {
                           onBlur={handleBlur}
                           isInvalid={touched.shot?.range?.value && errors.shot?.range?.value}
                           className="me-2"
+                          ref={rangeInputRef}
                         />
                         <UnitSelector
                           fieldName="shot.range.unit"
@@ -504,10 +564,14 @@ const CalculatorPage = () => {
                             handleShotChange('range.unit', e.target.value);
                           }}
                           options={[
-                            { value: 'YARDS', label: 'Yards' },
-                            { value: 'METERS', label: 'Meters' },
-                            { value: 'FEET', label: 'Feet' }
+                            { value: 'YARDS', label: t('unitYards') },
+                            { value: 'METERS', label: t('unitMeters') },
+                            { value: 'FEET', label: t('unitFeet') }
                           ]}
+                          currentValue={values.shot.range.value}
+                          onValueChange={(newValue) => handleShotChange('range.value', newValue)}
+                          targetRef={rangeInputRef}
+                          setFieldValue={setFieldValue}
                         />
                         <Form.Control.Feedback type="invalid">
                           {errors.shot?.range?.value}
@@ -528,6 +592,7 @@ const CalculatorPage = () => {
                           }}
                           onBlur={handleBlur}
                           className="me-2"
+                          ref={elevationAngleInputRef}
                         />
                         <UnitSelector
                           fieldName="shot.elevationAngle.unit"
@@ -537,10 +602,14 @@ const CalculatorPage = () => {
                             handleShotChange('elevationAngle.unit', e.target.value);
                           }}
                           options={[
-                            { value: 'DEGREES', label: 'Degrees' },
-                            { value: 'MILS', label: 'Mils' },
-                            { value: 'MOA', label: 'MOA' }
+                            { value: 'DEGREES', label: t('unitDegrees') },
+                            { value: 'MILS', label: t('unitMils') },
+                            { value: 'MOA', label: t('unitMoa') }
                           ]}
+                          currentValue={values.shot.elevationAngle.value}
+                          onValueChange={(newValue) => handleShotChange('elevationAngle.value', newValue)}
+                          targetRef={elevationAngleInputRef}
+                          setFieldValue={setFieldValue}
                         />
                       </div>
                     </Form.Group>
@@ -623,6 +692,7 @@ const CalculatorPage = () => {
                               }}
                               onBlur={handleBlur}
                               className="me-2"
+                              ref={getWindSegmentRef(index, 'maxRange')}
                             />
                             <UnitSelector
                               fieldName={`shot.windSegments[${index}].maxRange.unit`}
@@ -632,10 +702,13 @@ const CalculatorPage = () => {
                                 handleShotChange(`windSegments.${index}.maxRange.unit`, e.target.value);
                               }}
                               options={[
-                                { value: 'YARDS', label: 'Yards' },
-                                { value: 'METERS', label: 'Meters' },
-                                { value: 'FEET', label: 'Feet' }
+                                { value: 'YARDS', label: t('unitYards') },
+                                { value: 'METERS', label: t('unitMeters') },
+                                { value: 'FEET', label: t('unitFeet') }
                               ]}
+                              currentValue={segment.maxRange.value}
+                              onValueChange={(newValue) => handleShotChange(`windSegments.${index}.maxRange.value`, newValue)}
+                              targetRef={getWindSegmentRef(index, 'maxRange')}
                             />
                           </div>
                         </Form.Group>
@@ -653,6 +726,7 @@ const CalculatorPage = () => {
                               }}
                               onBlur={handleBlur}
                               className="me-2"
+                              ref={getWindSegmentRef(index, 'speed')}
                             />
                             <UnitSelector
                               fieldName={`shot.windSegments[${index}].speed.unit`}
@@ -662,11 +736,14 @@ const CalculatorPage = () => {
                                 handleShotChange(`windSegments.${index}.speed.unit`, e.target.value);
                               }}
                               options={[
-                                { value: 'MILES_PER_HOUR', label: 'mph' },
-                                { value: 'KILOMETERS_PER_HOUR', label: 'km/h' },
-                                { value: 'METERS_PER_SECOND', label: 'm/s' },
-                                { value: 'KNOTS', label: 'knots' }
+                                { value: 'MILES_PER_HOUR', label: t('unitMph') },
+                                { value: 'KILOMETERS_PER_HOUR', label: t('unitKph') },
+                                { value: 'METERS_PER_SECOND', label: t('unitMps') }
                               ]}
+                              currentValue={segment.speed.value}
+                              onValueChange={(newValue) => handleShotChange(`windSegments.${index}.speed.value`, newValue)}
+                              targetRef={getWindSegmentRef(index, 'speed')}
+                              setFieldValue={setFieldValue}
                             />
                           </div>
                         </Form.Group>
@@ -694,11 +771,15 @@ const CalculatorPage = () => {
                                       handleShotChange(`windSegments.${index}.direction.unit`, e.target.value);
                                     }}
                                     options={[
-                                      { value: 'CLOCK', label: 'Clock' },
-                                      { value: 'DEGREES', label: 'Degrees' },
-                                      { value: 'MILS', label: 'Mils' },
-                                      { value: 'MOA', label: 'MOA' }
+                                      { value: 'CLOCK', label: t('unitClock') },
+                                      { value: 'DEGREES', label: t('unitDegrees') },
+                                      { value: 'MILS', label: t('unitMils') },
+                                      { value: 'MOA', label: t('unitMoa') }
                                     ]}
+                                    currentValue={segment.direction.value}
+                                    onValueChange={(newValue) => handleShotChange(`windSegments.${index}.direction.value`, newValue)}
+                                    targetRef={getWindSegmentRef(index, 'direction')}
+                                    setFieldValue={setFieldValue}
                                   />
                                 </div>
                               </div>
@@ -723,11 +804,15 @@ const CalculatorPage = () => {
                                     handleShotChange(`windSegments.${index}.direction.unit`, e.target.value);
                                   }}
                                   options={[
-                                    { value: 'CLOCK', label: 'Clock' },
-                                    { value: 'DEGREES', label: 'Degrees' },
-                                    { value: 'MILS', label: 'Mils' },
-                                    { value: 'MOA', label: 'MOA' }
+                                    { value: 'CLOCK', label: t('unitClock') },
+                                    { value: 'DEGREES', label: t('unitDegrees') },
+                                    { value: 'MILS', label: t('unitMils') },
+                                    { value: 'MOA', label: t('unitMoa') }
                                   ]}
+                                  currentValue={segment.direction.value}
+                                  onValueChange={(newValue) => handleShotChange(`windSegments.${index}.direction.value`, newValue)}
+                                  targetRef={getWindSegmentRef(index, 'direction')}
+                                  setFieldValue={setFieldValue}
                                 />
                               </div>
                             )}
@@ -740,17 +825,18 @@ const CalculatorPage = () => {
                             <Form.Control
                               type="number"
                               name={`shot.windSegments[${index}].verticalComponent.value`}
-                              value={segment.verticalComponent.value}
+                              value={segment.verticalComponent?.value || 0}
                               onChange={(e) => {
                                 handleChange(e);
                                 handleShotChange(`windSegments.${index}.verticalComponent.value`, parseFloat(e.target.value));
                               }}
                               onBlur={handleBlur}
                               className="me-2"
+                              ref={getWindSegmentRef(index, 'verticalComponent')}
                             />
                             <UnitSelector
                               fieldName={`shot.windSegments[${index}].verticalComponent.unit`}
-                              value={segment.verticalComponent.unit}
+                              value={segment.verticalComponent?.unit || segment.speed.unit}
                               onChange={(e) => {
                                 handleChange(e);
                                 handleShotChange(`windSegments.${index}.verticalComponent.unit`, e.target.value);
@@ -758,9 +844,11 @@ const CalculatorPage = () => {
                               options={[
                                 { value: 'MILES_PER_HOUR', label: t('unitMph') },
                                 { value: 'KILOMETERS_PER_HOUR', label: t('unitKph') },
-                                { value: 'METERS_PER_SECOND', label: t('unitMs') },
-                                { value: 'KNOTS', label: t('unitKnots') }
+                                { value: 'METERS_PER_SECOND', label: t('unitMps') }
                               ]}
+                              currentValue={segment.verticalComponent?.value || 0}
+                              onValueChange={(newValue) => handleShotChange(`windSegments.${index}.verticalComponent.value`, newValue)}
+                              targetRef={getWindSegmentRef(index, 'verticalComponent')}
                             />
                           </div>
                         </Form.Group>

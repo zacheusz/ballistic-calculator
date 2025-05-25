@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import debounce from 'lodash/debounce';
 import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
 import { useAppConfigStore } from '../context/useAppConfigStore';
@@ -10,20 +10,19 @@ import { useTranslation } from 'react-i18next';
 import storageService, { STORAGE_KEYS } from '../services/storageService';
 import '../i18n';
 
-// Helper function to render unit selection dropdown
-const UnitSelector = ({ fieldName, value, onChange, options }) => (
-  <Form.Select 
-    size="sm"
-    name={fieldName}
+import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
+
+// Helper function to render unit selection dropdown with conversion
+const UnitSelector = ({ fieldName, value, onChange, options, currentValue, onValueChange, targetRef }) => (
+  <UnitSelectorWithConversion
+    fieldName={fieldName}
     value={value}
     onChange={onChange}
-    className="ms-2"
-    style={{ width: 'auto', display: 'inline-block' }}
-  >
-    {options.map(option => (
-      <option key={option.value} value={option.value}>{option.label}</option>
-    ))}
-  </Form.Select>
+    options={options}
+    currentValue={currentValue}
+    onValueChange={onValueChange}
+    targetRef={targetRef}
+  />
 );
 
 const ConfigPage = () => {
@@ -39,6 +38,14 @@ const ConfigPage = () => {
     language,
     setLanguage
   } = useAppConfigStore();
+  
+  // Create refs for input fields to position tooltips
+  const sightHeightInputRef = useRef(null);
+  const barrelTwistInputRef = useRef(null);
+  const bulletDiameterInputRef = useRef(null);
+  const bulletLengthInputRef = useRef(null);
+  const bulletWeightInputRef = useRef(null);
+  const muzzleVelocityInputRef = useRef(null);
 
   // Alias for UI compatibility
   const environment = apiStage;
@@ -211,10 +218,22 @@ const debouncedUpdateApiKey = debounce((key) => {
       } else if (fieldParts.length === 2) {
         newFirearm[fieldParts[0]][fieldParts[1]] = value;
       }
-      updateFirearmProfile(newFirearm);
       return newFirearm;
     });
   };
+  
+  // Use useEffect to update the firearmProfile in the store when firearm state changes
+  useEffect(() => {
+    // Only update if firearm has been initialized and is different from the current firearmProfile
+    if (Object.keys(firearm).length > 0 && JSON.stringify(firearm) !== JSON.stringify(firearmProfile)) {
+      // Use a timeout to prevent the update from happening in the same render cycle
+      const timeoutId = setTimeout(() => {
+        updateFirearmProfile(firearm);
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [firearm, firearmProfile, updateFirearmProfile]);
   
   const handleAmmoChange = (field, value) => {
     setAmmunition(prev => {
@@ -232,10 +251,22 @@ const debouncedUpdateApiKey = debounce((key) => {
         }
         newAmmo.ballisticCoefficients[parseInt(fieldParts[1])][fieldParts[2]] = value;
       }
-      updateAmmo(newAmmo);
       return newAmmo;
     });
   };
+  
+  // Use useEffect to update the ammo in the store when ammunition state changes
+  useEffect(() => {
+    // Only update if ammunition has been initialized and is different from the current ammo
+    if (Object.keys(ammunition).length > 0 && JSON.stringify(ammunition) !== JSON.stringify(ammo)) {
+      // Use a timeout to prevent the update from happening in the same render cycle
+      const timeoutId = setTimeout(() => {
+        updateAmmo(ammunition);
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [ammunition, ammo, updateAmmo]);
   
   const handleCalcOptionsChange = (field, value) => {
     // Update calculation options in the ballistics store
@@ -492,9 +523,11 @@ const debouncedUpdateApiKey = debounce((key) => {
                         <div className="d-flex align-items-center">
                           <Form.Control
                             type="number"
+                            step="0.001"
                             value={firearm.sightHeight.value}
                             onChange={(e) => handleFirearmChange('sightHeight.value', parseFloat(e.target.value))}
                             className="me-2"
+                            ref={sightHeightInputRef}
                           />
                           <UnitSelector
                             fieldName="sightHeight.unit"
@@ -505,6 +538,9 @@ const debouncedUpdateApiKey = debounce((key) => {
                               { value: 'CENTIMETERS', label: t('centimeters') },
                               { value: 'MILLIMETERS', label: t('millimeters') }
                             ]}
+                            currentValue={firearm.sightHeight.value}
+                            onValueChange={(newValue) => handleFirearmChange('sightHeight.value', newValue)}
+                            targetRef={sightHeightInputRef}
                           />
                         </div>
                       </Form.Group>
@@ -517,6 +553,7 @@ const debouncedUpdateApiKey = debounce((key) => {
                             value={firearm.barrelTwist.value}
                             onChange={(e) => handleFirearmChange('barrelTwist.value', parseFloat(e.target.value))}
                             className="me-2"
+                            ref={barrelTwistInputRef}
                           />
                           <UnitSelector
                             fieldName="barrelTwist.unit"
@@ -527,6 +564,9 @@ const debouncedUpdateApiKey = debounce((key) => {
                               { value: 'CENTIMETERS', label: t('centimeters') },
                               { value: 'MILLIMETERS', label: t('millimeters') }
                             ]}
+                            currentValue={firearm.barrelTwist.value}
+                            onValueChange={(newValue) => handleFirearmChange('barrelTwist.value', newValue)}
+                            targetRef={barrelTwistInputRef}
                           />
                         </div>
                       </Form.Group>
@@ -602,19 +642,23 @@ const debouncedUpdateApiKey = debounce((key) => {
                           <Form.Control
                             type="number"
                             step="0.001"
-                            value={ammunition.diameter.value}
+                            value={ammunition.diameter?.value || 0}
                             onChange={(e) => handleAmmoChange('diameter.value', parseFloat(e.target.value))}
                             className="me-2"
+                            ref={bulletDiameterInputRef}
                           />
                           <UnitSelector
                             fieldName="diameter.unit"
-                            value={ammunition.diameter.unit}
+                            value={ammunition.diameter?.unit || 'INCHES'}
                             onChange={(e) => handleAmmoChange('diameter.unit', e.target.value)}
                             options={[
                               { value: 'INCHES', label: t('inches') },
                               { value: 'CENTIMETERS', label: t('centimeters') },
                               { value: 'MILLIMETERS', label: t('millimeters') }
                             ]}
+                            currentValue={ammunition.diameter?.value || 0}
+                            onValueChange={(newValue) => handleAmmoChange('diameter.value', newValue)}
+                            targetRef={bulletDiameterInputRef}
                           />
                         </div>
                       </Form.Group>
@@ -628,6 +672,7 @@ const debouncedUpdateApiKey = debounce((key) => {
                             value={ammunition.length?.value || 1.305}
                             onChange={(e) => handleAmmoChange('length.value', parseFloat(e.target.value))}
                             className="me-2"
+                            ref={bulletLengthInputRef}
                           />
                           <UnitSelector
                             fieldName="length.unit"
@@ -638,6 +683,9 @@ const debouncedUpdateApiKey = debounce((key) => {
                               { value: 'CENTIMETERS', label: t('centimeters') },
                               { value: 'MILLIMETERS', label: t('millimeters') }
                             ]}
+                            currentValue={ammunition.length?.value || 1.305}
+                            onValueChange={(newValue) => handleAmmoChange('length.value', newValue)}
+                            targetRef={bulletLengthInputRef}
                           />
                         </div>
                         <Form.Text className="text-muted">
@@ -650,18 +698,23 @@ const debouncedUpdateApiKey = debounce((key) => {
                         <div className="d-flex align-items-center">
                           <Form.Control
                             type="number"
-                            value={ammunition.mass.value}
+                            step="0.1"
+                            value={ammunition.mass?.value || 0}
                             onChange={(e) => handleAmmoChange('mass.value', parseFloat(e.target.value))}
                             className="me-2"
+                            ref={bulletWeightInputRef}
                           />
                           <UnitSelector
                             fieldName="mass.unit"
-                            value={ammunition.mass.unit}
+                            value={ammunition.mass?.unit || 'GRAINS'}
                             onChange={(e) => handleAmmoChange('mass.unit', e.target.value)}
                             options={[
                               { value: 'GRAINS', label: t('grains') },
                               { value: 'GRAMS', label: t('grams') }
                             ]}
+                            currentValue={ammunition.mass?.value || 0}
+                            onValueChange={(newValue) => handleAmmoChange('mass.value', newValue)}
+                            targetRef={bulletWeightInputRef}
                           />
                         </div>
                       </Form.Group>
@@ -671,18 +724,23 @@ const debouncedUpdateApiKey = debounce((key) => {
                         <div className="d-flex align-items-center">
                           <Form.Control
                             type="number"
-                            value={ammunition.muzzleVelocity.value}
+                            step="1"
+                            value={ammunition.muzzleVelocity?.value || 0}
                             onChange={(e) => handleAmmoChange('muzzleVelocity.value', parseFloat(e.target.value))}
                             className="me-2"
+                            ref={muzzleVelocityInputRef}
                           />
                           <UnitSelector
                             fieldName="muzzleVelocity.unit"
-                            value={ammunition.muzzleVelocity.unit}
+                            value={ammunition.muzzleVelocity?.unit || 'FEET_PER_SECOND'}
                             onChange={(e) => handleAmmoChange('muzzleVelocity.unit', e.target.value)}
                             options={[
                               { value: 'FEET_PER_SECOND', label: t('feetPerSecond') },
                               { value: 'METERS_PER_SECOND', label: t('metersPerSecond') }
                             ]}
+                            currentValue={ammunition.muzzleVelocity?.value || 0}
+                            onValueChange={(newValue) => handleAmmoChange('muzzleVelocity.value', newValue)}
+                            targetRef={muzzleVelocityInputRef}
                           />
                         </div>
                       </Form.Group>
