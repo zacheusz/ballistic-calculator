@@ -63,6 +63,7 @@
   "calcAddWindSegment": "Add Wind Segment",
   "calcComputing": "Computing...",
   "calcCalculateBallistics": "Calculate Ballistics",
+  "pleaseConfigureApiKey": "Please configure your API key in the Configuration page",
   "calcBallisticSolution": "Ballistic Solution",
   "theme": "Theme",
   "language": "Language",

@@ -63,6 +63,7 @@
   "calcAddWindSegment": "Dodaj segment wiatru",
   "calcComputing": "Obliczanie...",
   "calcCalculateBallistics": "Oblicz balistykę",
+  "pleaseConfigureApiKey": "Skonfiguruj klucz API na stronie konfiguracji",
   "calcBallisticSolution": "Tabela balistczna",
   "theme": "Motyw",
   "language": "Język",

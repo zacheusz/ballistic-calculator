@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import configService from '../services/configService';
 import storageService, { STORAGE_KEYS } from '../services/storageService';
+import { useAppConfigStore } from './useAppConfigStore';
 
 const AppContext = createContext();
 
@@ -17,6 +18,10 @@ const defaultDisplayPreferences = {
 };
 
 export const AppProvider = ({ children }) => {
+  // Get API key and stage from Zustand store
+  const zustandApiKey = useAppConfigStore(state => state.apiKey);
+  const zustandApiStage = useAppConfigStore(state => state.apiStage);
+  
   const [apiKey, setApiKey] = useState('');
   // Initialize with empty string, will be set from localStorage or API service in useEffect
   const [environment, setEnvironment] = useState('');
@@ -62,12 +67,6 @@ export const AppProvider = ({ children }) => {
       console.log('No saved calculation options found, using defaults:', defaultCalculationOptions);
     }
     
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-      setIsConfigured(true);
-      api.setApiKey(savedApiKey);
-    }
-    
     // Apply theme from localStorage or default to light
     const themeToApply = savedTheme;
     setDisplayPreferences(prev => ({ ...prev, theme: themeToApply }));
@@ -76,11 +75,27 @@ export const AppProvider = ({ children }) => {
     console.log('Initial theme applied:', themeToApply);
   }, []);
 
+  // Sync with Zustand store when its API key or stage changes
+  useEffect(() => {
+    if (zustandApiKey) {
+      console.log('Syncing API key from Zustand store:', zustandApiKey);
+      setApiKey(zustandApiKey);
+      setIsConfigured(true);
+      api.setApiKey(zustandApiKey);
+    }
+    if (zustandApiStage) {
+      console.log('Syncing API stage from Zustand store:', zustandApiStage);
+      setEnvironment(zustandApiStage);
+      api.setEnvironment(zustandApiStage);
+    }
+  }, [zustandApiKey, zustandApiStage]);
+
   const updateApiKey = (newApiKey) => {
     setApiKey(newApiKey);
     storageService.saveToStorage(STORAGE_KEYS.API_KEY, newApiKey);
     setIsConfigured(true);
     api.setApiKey(newApiKey);
+    // No need to update Zustand store here as it's handled in ConfigPage
   };
   
   const updateEnvironment = (newEnvironment) => {

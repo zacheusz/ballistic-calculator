@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Button, Card, Spinner, Alert, Table, Form } from 'react-bootstrap';
 import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
+import { useAppConfigStore } from '../context/useAppConfigStore';
 import { useAppContext } from '../context/AppContext';
 import api from '../services/api';
 import configService from '../services/configService';
@@ -69,8 +70,12 @@ const UnitSelector = ({ fieldName, value, onChange, options }) => (
 
 const CalculatorPage = () => {
   const { t } = useTranslation();
+  // Get API key from Zustand store to determine if configured
+  const apiKey = useAppConfigStore(state => state.apiKey);
+  // Derive isConfigured from apiKey presence
+  const isConfigured = !!apiKey;
+  
   const { 
-    isConfigured, 
     firearmProfile,
     ammo,
     calculationOptions,
@@ -799,6 +804,7 @@ const CalculatorPage = () => {
                   size="lg"
                   className="w-100" 
                   disabled={isSubmitting || !isConfigured || loading}
+                  title={!isConfigured ? t('pleaseConfigureApiKey') : ''}
                   onClick={() => {
                     // Update the form values with the current state before submission
                     const updatedValues = {
