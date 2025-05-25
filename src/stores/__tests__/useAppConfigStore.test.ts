@@ -58,7 +58,7 @@ describe('useAppConfigStore', () => {
       useAppConfigStore.getState().setApiKey('persist-key');
     });
     // Force Zustand to flush to localStorage
-    const persisted = window.localStorage.getItem('app-config');
+    const persisted = window.localStorage.getItem('app-config-v2');
     expect(persisted).toContain('dark');
     expect(persisted).toContain('fr');
     expect(persisted).toContain('dev');

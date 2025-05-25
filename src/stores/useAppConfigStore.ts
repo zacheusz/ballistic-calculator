@@ -27,6 +27,6 @@ export const useAppConfigStore = create<AppConfigState>()(
       setApiStage: (apiStage) => set({ apiStage }),
       setApiKey: (apiKey) => set({ apiKey }),
     }),
-    { name: 'app-config' }
+    { name: 'app-config-v2' }
   )
 );
