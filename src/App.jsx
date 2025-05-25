@@ -9,6 +9,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AppProvider } from './context/AppContext';
 import { useAppConfigStore } from './context/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
+import { BallisticsStoreProvider } from './context/BallisticsStoreProvider'; // Add this import
 import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
@@ -42,7 +43,8 @@ function ThemedApp() {
   return (
     <MuiThemeProvider key={`mui-theme-${theme}`}>
       <LocalizationProvider dateAdapter={AdapterDayjs} key={`localization-${theme}`}>
-        <AppProvider>
+        <BallisticsStoreProvider>
+          <AppProvider>
           <Router>
             <Navigation />
             <main>
@@ -56,7 +58,8 @@ function ThemedApp() {
             </main>
             <ThemedToastContainer />
           </Router>
-        </AppProvider>
+          </AppProvider>
+        </BallisticsStoreProvider>
       </LocalizationProvider>
     </MuiThemeProvider>
   );

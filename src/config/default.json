@@ -56,23 +56,25 @@
       }
     ]
   },
-  "calculationOptions": {
+  "preferences": {
     "calculateSpinDrift": true,
     "calculateCoriolisEffect": true,
     "calculateAeroJump": true,
     "rangeCardStart": { "value": 100, "unit": "YARDS" },
-    "rangeCardStep": { "value": 100, "unit": "YARDS" }
-  },
-  "unitPreferences": {
-    "Range": "YARDS",
-    "ScopeAdjustment": "MOA",
-    "Temperature": "FAHRENHEIT",
-    "BulletVelocity": "FEET_PER_SECOND",
-    "WindSpeed": "MILES_PER_HOUR",
-    "WindDirection": "CLOCK",
-    "AtmosphericPressure": "INCHES_MERCURY",
-    "BulletWeight": "GRAINS",
-    "BulletEnergy": "FOOT_POUNDS",
-    "TimeOfFlight": "SECONDS"
+    "rangeCardStep": { "value": 100, "unit": "YARDS" },
+    "unitPreferences": {
+      "unitMappings": [
+        { "unitTypeClassName": "Range", "unitName": "YARDS" },
+        { "unitTypeClassName": "ScopeAdjustment", "unitName": "MOA" },
+        { "unitTypeClassName": "Temperature", "unitName": "FAHRENHEIT" },
+        { "unitTypeClassName": "BulletVelocity", "unitName": "FEET_PER_SECOND" },
+        { "unitTypeClassName": "WindSpeed", "unitName": "MILES_PER_HOUR" },
+        { "unitTypeClassName": "WindDirection", "unitName": "CLOCK" },
+        { "unitTypeClassName": "AtmosphericPressure", "unitName": "INCHES_MERCURY" },
+        { "unitTypeClassName": "BulletWeight", "unitName": "GRAINS" },
+        { "unitTypeClassName": "BulletEnergy", "unitName": "FOOT_POUNDS" },
+        { "unitTypeClassName": "TimeOfFlight", "unitName": "SECONDS" }
+      ]
+    }
   }
 }

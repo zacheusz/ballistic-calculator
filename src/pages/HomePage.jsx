@@ -1,10 +1,10 @@
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { useBallistics } from '../hooks/useBallistics';
 import { useTranslation } from 'react-i18next';
 
 const HomePage = () => {
-  const { isConfigured } = useAppContext();
+  const { isConfigured } = useBallistics();
   const { t } = useTranslation();
 
   return (

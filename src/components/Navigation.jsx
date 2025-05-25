@@ -1,11 +1,11 @@
 import { Navbar, Nav, Container, Badge } from 'react-bootstrap';
 import { Link, NavLink } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { useBallistics } from '../hooks/useBallistics';
 import { useAppConfigStore } from '../context/useAppConfigStore';
 import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {
-  const { isConfigured } = useAppContext();
+  const { isConfigured } = useBallistics();
   const { apiStage } = useAppConfigStore();
   const { t } = useTranslation();
   

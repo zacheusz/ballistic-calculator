@@ -79,14 +79,53 @@ class BallisticsApi {
   }
   
   getUnitPreferencesForApi() {
-    // Format unit preferences for API request
-    const unitMappings = Object.entries(this.unitPreferences).map(([unitTypeClassName, unitName]) => ({
-      unitTypeClassName,
-      unitName
-    }));
+    // First, try to use the user's saved unit preferences
+    if (this.unitPreferences && this.unitPreferences.unitMappings && 
+        Array.isArray(this.unitPreferences.unitMappings) && 
+        this.unitPreferences.unitMappings.length > 0) {
+      console.log('Using saved unit preferences:', this.unitPreferences);
+      return this.unitPreferences;
+    }
     
+    // If the saved preferences aren't in the correct format, convert them
+    if (this.unitPreferences && typeof this.unitPreferences === 'object' && 
+        Object.keys(this.unitPreferences).length > 0) {
+      console.log('Converting unit preferences format:', this.unitPreferences);
+      
+      const unitMappings = Object.entries(this.unitPreferences).map(([unitTypeClassName, unitName]) => ({
+        unitTypeClassName,
+        unitName
+      }));
+      
+      return {
+        unitMappings
+      };
+    }
+    
+    // Fall back to default preferences if no saved preferences exist
+    const defaultPreferences = configService.getDefaultUnitPreferences();
+    console.log('Using default unit preferences:', defaultPreferences);
+    
+    if (defaultPreferences && defaultPreferences.unitMappings && 
+        Array.isArray(defaultPreferences.unitMappings) && 
+        defaultPreferences.unitMappings.length > 0) {
+      return defaultPreferences;
+    }
+    
+    // Last resort: create a default structure based on the OpenAPI spec
     return {
-      unitMappings
+      unitMappings: [
+        { unitTypeClassName: "Range", unitName: "YARDS" },
+        { unitTypeClassName: "ScopeAdjustment", unitName: "MOA" },
+        { unitTypeClassName: "Temperature", unitName: "FAHRENHEIT" },
+        { unitTypeClassName: "BulletVelocity", unitName: "FEET_PER_SECOND" },
+        { unitTypeClassName: "WindSpeed", unitName: "MILES_PER_HOUR" },
+        { unitTypeClassName: "WindDirection", unitName: "CLOCK" },
+        { unitTypeClassName: "AtmosphericPressure", unitName: "INCHES_MERCURY" },
+        { unitTypeClassName: "BulletWeight", unitName: "GRAINS" },
+        { unitTypeClassName: "BulletEnergy", unitName: "FOOT_POUNDS" },
+        { unitTypeClassName: "TimeOfFlight", unitName: "SECONDS" }
+      ]
     };
   }
 

@@ -4,7 +4,7 @@ import { Container, Row, Col, Button, Card, Spinner, Alert, Table, Form } from '
 import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
 import { useAppConfigStore } from '../context/useAppConfigStore';
-import { useAppContext } from '../context/AppContext';
+import { useBallistics } from '../hooks/useBallistics';
 import api from '../services/api';
 import configService from '../services/configService';
 import storageService, { STORAGE_KEYS } from '../services/storageService';
@@ -78,11 +78,18 @@ const CalculatorPage = () => {
   const { 
     firearmProfile,
     ammo,
-    calculationOptions,
-    unitPreferences,
-    loading, 
-    setLoading 
-  } = useAppContext();
+    preferences
+  } = useBallistics();
+  
+  // Add local loading state
+  const [loading, setLoading] = useState(false);
+  
+  // Extract calculation options and unit preferences from the preferences object
+  const calculationOptions = preferences || {};
+  const unitPreferences = preferences?.unitPreferences?.unitMappings?.reduce((acc, mapping) => {
+    acc[mapping.unitTypeClassName] = mapping.unitName;
+    return acc;
+  }, {}) || {};
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
   const [atmosphere, setAtmosphere] = useState(getInitialAtmosphere(unitPreferences));
@@ -105,32 +112,37 @@ const CalculatorPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
-  // Update units when unit preferences change
+  // Update units when unit preferences change - only run once on initial mount
   useEffect(() => {
-    // Update atmosphere units
-    setAtmosphere(prev => ({
-      ...prev,
-      temperature: { ...prev.temperature, unit: unitPreferences.Temperature },
-      pressure: { ...prev.pressure, unit: unitPreferences.AtmosphericPressure },
-      altitude: { ...prev.altitude, unit: unitPreferences.Range }
-    }));
-    
-    // Update shot units
-    setShot(prev => {
-      const updatedShot = {
+    // Only update if we have valid unit preferences and atmosphere/shot data
+    if (unitPreferences && Object.keys(unitPreferences).length > 0 && 
+        atmosphere && atmosphere.temperature && 
+        shot && shot.range) {
+      
+      // Update local atmosphere state instead of using updateAtmosphere
+      setAtmosphere(prev => ({
         ...prev,
-        range: { ...prev.range, unit: unitPreferences.Range },
+        temperature: { ...prev.temperature, unit: unitPreferences.Temperature || prev.temperature.unit },
+        pressure: { ...prev.pressure, unit: unitPreferences.AtmosphericPressure || prev.pressure.unit },
+        altitude: { ...prev.altitude, unit: unitPreferences.Range || prev.altitude.unit }
+      }));
+      
+      // Update local shot state instead of using updateShot
+      setShot(prev => ({
+        ...prev,
+        range: { ...prev.range, unit: unitPreferences.Range || prev.range.unit },
         windSegments: prev.windSegments.map(segment => ({
           ...segment,
-          maxRange: { ...segment.maxRange, unit: unitPreferences.Range },
-          speed: { ...segment.speed, unit: unitPreferences.WindSpeed },
-          direction: { ...segment.direction, unit: unitPreferences.WindDirection },
-          verticalComponent: { ...segment.verticalComponent, unit: unitPreferences.WindSpeed }
+          maxRange: { ...segment.maxRange, unit: unitPreferences.Range || segment.maxRange.unit },
+          speed: { ...segment.speed, unit: unitPreferences.WindSpeed || segment.speed.unit },
+          direction: { ...segment.direction, unit: unitPreferences.WindDirection || segment.direction.unit },
+          verticalComponent: { ...segment.verticalComponent, unit: unitPreferences.WindSpeed || segment.verticalComponent.unit }
         }))
-      };
-      return updatedShot;
-    });
-  }, [unitPreferences]);
+      }));
+    }
+    // Only run this effect once on component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Log initial calculation options from localStorage
   useEffect(() => {
@@ -250,9 +262,9 @@ const CalculatorPage = () => {
 
   
   const handleAtmosphereChange = (field, value) => {
-    setAtmosphere(prev => {
+    updateAtmosphere(prev => {
       const newAtmosphere = { ...prev };
-      const fieldParts = field.split('.');
+      const fieldParts = field.split('.'); // Fix the syntax error here
       
       if (fieldParts.length === 1) {
         newAtmosphere[field] = value;
@@ -265,9 +277,9 @@ const CalculatorPage = () => {
   };
   
   const handleShotChange = (field, value) => {
-    setShot(prev => {
+    updateShot(prev => {
       const newShot = { ...prev };
-      const fieldParts = field.split('.');
+      const fieldParts = field.split('.'); // Fix the syntax error here
       
       if (fieldParts.length === 1) {
         newShot[field] = value;
@@ -534,13 +546,7 @@ const CalculatorPage = () => {
                     </Form.Group>
 
                     {/* Only show Coriolis effect fields when the feature is enabled */}
-                    {(() => {
-                      // Get the latest value directly from storage service to ensure consistency
-                      const storedOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS, calculationOptions);
-                      const isCoriolisEnabled = storedOptions?.calculateCoriolisEffect === true;
-                      console.log('Rendering Coriolis fields, enabled:', isCoriolisEnabled);
-                      return isCoriolisEnabled;
-                    })() && (
+                    {calculationOptions?.calculateCoriolisEffect === true && (
                       <>
                         <Form.Group className="mb-3">
                           <Form.Label>{t('shotAzimuth')}</Form.Label>

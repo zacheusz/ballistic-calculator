@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import debounce from 'lodash/debounce';
 import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
 import { useAppConfigStore } from '../context/useAppConfigStore';
-import { useAppContext } from '../context/AppContext';
+import { useBallistics } from '../hooks/useBallistics';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ThemeSelector from '../components/ThemeSelector';
 import LanguageSelector from '../components/LanguageSelector';
@@ -44,19 +44,37 @@ const ConfigPage = () => {
   const environment = apiStage;
   const setEnvironment = setApiStage;
   
-  // Get other values from AppContext until fully migrated to Zustand
+  // Get values from Ballistics store
   const {
-    unitPreferences,
     firearmProfile,
     ammo,
-    calculationOptions,
-    displayPreferences,
-    updateUnitPreferences,
+    preferences: ballPreferences,
+    atmosphere,
+    shot,
     updateFirearmProfile,
     updateAmmo,
-    updateCalculationOptions,
-    updateDisplayPreferences
-  } = useAppContext();
+    updatePreferences,
+    updateAtmosphere,
+    updateShot
+  } = useBallistics();
+  
+  // Extract unit preferences from the preferences object
+  const unitPreferences = ballPreferences?.unitPreferences?.unitMappings?.reduce((acc, mapping) => {
+    acc[mapping.unitTypeClassName] = mapping.unitName;
+    return acc;
+  }, {}) || {};
+  
+  // For backward compatibility
+  const calculationOptions = {
+    calculateSpinDrift: ballPreferences?.calculateSpinDrift || false,
+    calculateCoriolisEffect: ballPreferences?.calculateCoriolisEffect || false,
+    calculateAeroJump: ballPreferences?.calculateAeroJump || false,
+    rangeCardStart: ballPreferences?.rangeCardStart || { value: 100, unit: 'YARDS' },
+    rangeCardStep: ballPreferences?.rangeCardStep || { value: 100, unit: 'YARDS' }
+  };
+  
+  // For backward compatibility
+  const displayPreferences = { theme };
 
   const [inputApiKey, setInputApiKey] = useState(apiKey);
 
@@ -96,20 +114,90 @@ const debouncedUpdateApiKey = debounce((key) => {
     setSearchParams(newParams);
   };
   
+  // Initialize local state from props - only run once on initial mount or when dependencies significantly change
   useEffect(() => {
-    setSelectedEnvironment(environment);
-    setPreferences({...unitPreferences});
-    setFirearm({...firearmProfile});
-    setAmmunition({...ammo});
-    setCalcOptions({...calculationOptions});
-    setDisplayOptionsState({...displayPreferences});
+    // Only update if we have valid data to prevent unnecessary re-renders
+    if (environment) {
+      setSelectedEnvironment(environment);
+    }
+    
+    // Only update preferences if they exist and have changed
+    if (unitPreferences && Object.keys(unitPreferences).length > 0) {
+      setPreferences(prev => {
+        // Only update if different to prevent unnecessary re-renders
+        return JSON.stringify(prev) !== JSON.stringify(unitPreferences) ? {...unitPreferences} : prev;
+      });
+    }
+    
+    // Only update firearm if it exists and has changed
+    if (firearmProfile && Object.keys(firearmProfile).length > 0) {
+      setFirearm(prev => {
+        // Only update if different to prevent unnecessary re-renders
+        return JSON.stringify(prev) !== JSON.stringify(firearmProfile) ? {...firearmProfile} : prev;
+      });
+    }
+    
+    // Only update ammo if it exists and has changed
+    if (ammo && Object.keys(ammo).length > 0) {
+      setAmmunition(prev => {
+        // Only update if different to prevent unnecessary re-renders
+        return JSON.stringify(prev) !== JSON.stringify(ammo) ? {...ammo} : prev;
+      });
+    }
+    
+    // Only update calculation options if they exist
+    if (calculationOptions) {
+      setCalcOptions(prev => {
+        // Only update if different to prevent unnecessary re-renders
+        return JSON.stringify(prev) !== JSON.stringify(calculationOptions) ? {...calculationOptions} : prev;
+      });
+    }
+    
+    // Only update display options if they exist
+    if (displayPreferences) {
+      setDisplayOptionsState(prev => {
+        // Only update if different to prevent unnecessary re-renders
+        return JSON.stringify(prev) !== JSON.stringify(displayPreferences) ? {...displayPreferences} : prev;
+      });
+    }
+  // We're using JSON.stringify comparison inside the effect to prevent unnecessary updates,
+  // so it's safe to include these dependencies
   }, [environment, unitPreferences, firearmProfile, ammo, calculationOptions, displayPreferences]);
 
   const handleUnitChange = (unitType, value) => {
-    setPreferences(prev => {
-      const newPrefs = { ...prev, [unitType]: value };
-      updateUnitPreferences(newPrefs);
-      return newPrefs;
+    // Update the unit preferences in the ballistics store
+    const unitMapping = {
+      unitTypeClassName: unitType,
+      unitName: value
+    };
+    
+    // Create updated unit mappings array
+    const currentMappings = ballPreferences?.unitPreferences?.unitMappings || [];
+    const updatedMappings = currentMappings.filter(m => m.unitTypeClassName !== unitType);
+    updatedMappings.push(unitMapping);
+    
+    // Create the updated unit preferences object
+    const updatedUnitPreferences = {
+      unitMappings: updatedMappings
+    };
+    
+    // Update preferences in the store
+    updatePreferences({
+      unitPreferences: updatedUnitPreferences
+    });
+    
+    // Update local state
+    setPreferences(prev => ({
+      ...prev,
+      [unitType]: value
+    }));
+    
+    // Also update the unit preferences in the API service
+    // This ensures they're used in API requests
+    import('../services/api').then(apiModule => {
+      const api = apiModule.default;
+      api.setUnitPreferences(updatedUnitPreferences);
+      console.log('Updated API service unit preferences:', updatedUnitPreferences);
     });
   };
   
@@ -150,14 +238,16 @@ const debouncedUpdateApiKey = debounce((key) => {
   };
   
   const handleCalcOptionsChange = (field, value) => {
-    setCalcOptions(prev => {
-      const newOptions = {
-        ...prev,
-        [field]: value
-      };
-      updateCalculationOptions(newOptions);
-      return newOptions;
+    // Update calculation options in the ballistics store
+    updatePreferences({
+      [field]: value
     });
+    
+    // Update local state
+    setCalcOptions(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   // Get theme setter from Zustand store
@@ -172,12 +262,20 @@ const debouncedUpdateApiKey = debounce((key) => {
   
   // Handle other display options if needed
   const handleDisplayOptionsChange = (field, value) => {
+    // Update local state
     const newDisplayOptions = {
       ...displayOptionsState,
       [field]: value
     };
     setDisplayOptionsState(newDisplayOptions);
-    updateDisplayPreferences(newDisplayOptions);
+    
+    // If it's a theme change, we already handle it through Zustand
+    if (field !== 'theme') {
+      // For other display options, update them in the store if needed
+      updatePreferences({
+        [field]: value
+      });
+    }
   };
 
   return (

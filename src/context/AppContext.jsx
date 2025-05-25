@@ -49,11 +49,11 @@ export const AppProvider = ({ children }) => {
     }
     
     if (savedFirearmProfile) {
-      setFirearmProfile(savedFirearmProfile);
+      updateFirearmProfile({ firearmProfile: savedFirearmProfile });
     }
     
     if (savedAmmo) {
-      setAmmo(savedAmmo);
+      updateAmmo({ ammo: savedAmmo });
     }
     
     if (savedCalculationOptions) {
@@ -103,12 +103,12 @@ export const AppProvider = ({ children }) => {
   };
   
   const updateFirearmProfile = (newFirearmProfile) => {
-    setFirearmProfile(newFirearmProfile);
+    updateFirearmProfile({ firearmProfile: newFirearmProfile });
     storageService.saveToStorage(STORAGE_KEYS.FIREARM_PROFILE, newFirearmProfile);
   };
   
   const updateAmmo = (newAmmo) => {
-    setAmmo(newAmmo);
+    updateAmmo({ ammo: newAmmo });
     storageService.saveToStorage(STORAGE_KEYS.AMMO, newAmmo);
   };
   
