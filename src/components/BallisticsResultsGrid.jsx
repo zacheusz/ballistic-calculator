@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 
@@ -10,11 +10,11 @@ const BallisticsResultsGrid = ({ results, unitPreferences }) => {
   const { theme } = useAppConfigStore();
 
   // Helper to extract unit from object fields, fallback to unitPreferences
-  function extractUnitOrPref(field, prefKey) {
+  const extractUnitOrPref = useCallback((field, prefKey) => {
     if (field && typeof field === 'object' && 'unit' in field && field.unit) return getUnitLabel(field.unit);
     if (unitPreferences && prefKey && unitPreferences[prefKey]) return getUnitLabel(unitPreferences[prefKey]);
     return '';
-  }
+  }, [unitPreferences]);
 
   // Define columns based on the available data and actual units from the first row, fallback to preferences
   const columns = useMemo(() => {
@@ -38,7 +38,7 @@ const BallisticsResultsGrid = ({ results, unitPreferences }) => {
       { field: 'wind', headerName: headerWithUnit('Wind Drift', first.wind, 'ScopeAdjustment'), width: 120, type: 'number' },
       { field: 'aeroJump', headerName: headerWithUnit('Aero Jump', first.aeroJump, 'ScopeAdjustment'), width: 120, type: 'number' },
     ];
-  }, [results, unitPreferences]);
+  }, [results, extractUnitOrPref]);
 
   // Helper to extract .value from object fields or return primitive if number
   const extractValue = (field) => {

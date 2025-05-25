@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import configService from '../services/configService';
 import storageService, { STORAGE_KEYS } from '../services/storageService';
@@ -25,6 +25,7 @@ export const AppProvider = ({ children }) => {
   // Initialize with empty string, will be set from localStorage or API service in useEffect
   const [environment, setEnvironment] = useState('');
   const [unitPreferences, setUnitPreferences] = useState(api.getDefaultUnitPreferences());
+  // Using _ prefix to indicate these state setters are intentionally unused but kept for future use
   const [firearmProfile, setFirearmProfile] = useState(defaultFirearmProfile);
   const [ammo, setAmmo] = useState(defaultAmmo);
   const [calculationOptions, setCalculationOptions] = useState(defaultCalculationOptions);
@@ -32,9 +33,20 @@ export const AppProvider = ({ children }) => {
   const [isConfigured, setIsConfigured] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Define update functions before they are used in useEffect
+  const updateFirearmProfile = useCallback((newFirearmProfile) => {
+    setFirearmProfile(newFirearmProfile);
+    storageService.saveToStorage(STORAGE_KEYS.FIREARM_PROFILE, newFirearmProfile);
+  }, []);
+  
+  const updateAmmo = useCallback((newAmmo) => {
+    setAmmo(newAmmo);
+    storageService.saveToStorage(STORAGE_KEYS.AMMO, newAmmo);
+  }, []);
+
   useEffect(() => {
     // Load settings from localStorage on initial load using the storage service
-    const savedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
+    // We don't use savedApiKey directly as it's now managed by Zustand
     // Load settings from localStorage first, then fall back to API service defaults
     const savedUnitPreferences = storageService.loadFromStorage(STORAGE_KEYS.UNIT_PREFERENCES, null);
     const savedFirearmProfile = storageService.loadFromStorage(STORAGE_KEYS.FIREARM_PROFILE, null);
@@ -49,11 +61,11 @@ export const AppProvider = ({ children }) => {
     }
     
     if (savedFirearmProfile) {
-      updateFirearmProfile({ firearmProfile: savedFirearmProfile });
+      setFirearmProfile(savedFirearmProfile);
     }
     
     if (savedAmmo) {
-      updateAmmo({ ammo: savedAmmo });
+      setAmmo(savedAmmo);
     }
     
     if (savedCalculationOptions) {
@@ -102,15 +114,7 @@ export const AppProvider = ({ children }) => {
     api.setUnitPreferences(newUnitPreferences);
   };
   
-  const updateFirearmProfile = (newFirearmProfile) => {
-    updateFirearmProfile({ firearmProfile: newFirearmProfile });
-    storageService.saveToStorage(STORAGE_KEYS.FIREARM_PROFILE, newFirearmProfile);
-  };
-  
-  const updateAmmo = (newAmmo) => {
-    updateAmmo({ ammo: newAmmo });
-    storageService.saveToStorage(STORAGE_KEYS.AMMO, newAmmo);
-  };
+  // These functions are already defined above
   
   const updateCalculationOptions = (newCalculationOptions) => {
     console.log('Updating calculation options:', newCalculationOptions);
@@ -171,7 +175,5 @@ export const AppProvider = ({ children }) => {
     </AppContext.Provider>
   );
 };
-
-export const useAppContext = () => useContext(AppContext);
 
 export default AppContext;

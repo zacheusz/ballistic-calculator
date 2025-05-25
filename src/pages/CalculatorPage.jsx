@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Card, Spinner, Alert, Table, Form } from 'react-bootstrap';
@@ -8,7 +8,7 @@ import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import api from '../services/api';
 import configService from '../services/configService';
-import storageService, { STORAGE_KEYS } from '../services/storageService';
+import { STORAGE_KEYS } from '../services/storageService';
 import ClockTimePicker from '../components/ClockTimePicker';
 import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
 import ModePanel from '../components/ModePanel';
@@ -91,7 +91,8 @@ const UnitSelector = ({
 
 const CalculatorPage = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  // We're not using navigation in this component, but keeping the hook for future use
+  const _navigate = useNavigate();
   
   // Create refs for input fields to position tooltips
   const temperatureInputRef = useRef(null);
@@ -99,8 +100,9 @@ const CalculatorPage = () => {
   const altitudeInputRef = useRef(null);
   const rangeInputRef = useRef(null);
   const elevationAngleInputRef = useRef(null);
-  const windSpeedInputRef = useRef(null);
-  const windAngleInputRef = useRef(null);
+  // These refs are defined but not currently used - keeping them for future use
+  const _windSpeedInputRef = useRef(null);
+  const _windAngleInputRef = useRef(null);
   
   // Create refs for wind segment fields
   const windSegmentRefs = useRef({});
@@ -129,7 +131,7 @@ const CalculatorPage = () => {
   const [loading, setLoading] = useState(false);
   
   // Extract calculation options and unit preferences from the preferences object
-  const calculationOptions = preferences || {};
+  const calculationOptions = useMemo(() => preferences || {}, [preferences]);
   const unitPreferences = preferences?.unitPreferences?.unitMappings?.reduce((acc, mapping) => {
     acc[mapping.unitTypeClassName] = mapping.unitName;
     return acc;

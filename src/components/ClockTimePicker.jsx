@@ -6,7 +6,7 @@ import { TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 // Styled component to match Bootstrap styling
-const StyledTimePicker = styled(TimePicker)(({ theme }) => ({
+const StyledTimePicker = styled(TimePicker)(() => ({
   '& .MuiInputBase-root': {
     borderRadius: '0.375rem',
     fontSize: '1rem',
@@ -44,14 +44,7 @@ const ClockTimePicker = ({ value, onChange }) => {
     return hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   };
   
-  // Format the time for display
-  const formatClockPosition = (time) => {
-    if (!time) return "";
-    const hour = time.hour();
-    const minute = time.minute();
-    const clockHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    return `${clockHour}:${minute.toString().padStart(2, '0')}`;
-  };
+  // We don't need to format the time for display as MUI TimePicker handles this
 
   const [time, setTime] = useState(clockToTime(value || 12));
 

@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import debounce from 'lodash/debounce';
 import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import ThemeSelector from '../components/ThemeSelector';
 import LanguageSelector from '../components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
-import storageService, { STORAGE_KEYS } from '../services/storageService';
 import '../i18n';
 
 import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
@@ -33,10 +32,7 @@ const ConfigPage = () => {
     apiStage,
     setApiKey,
     setApiStage,
-    theme,
-    setTheme,
-    language,
-    setLanguage
+    theme
   } = useAppConfigStore();
   
   // Create refs for input fields to position tooltips
@@ -56,32 +52,30 @@ const ConfigPage = () => {
     firearmProfile,
     ammo,
     preferences: ballPreferences,
-    atmosphere,
-    shot,
     updateFirearmProfile,
     updateAmmo,
-    updatePreferences,
-    updateAtmosphere,
-    updateShot
+    updatePreferences
   } = useBallistics();
   
   // Extract unit preferences from the preferences object
-  const unitPreferences = ballPreferences?.unitPreferences?.unitMappings?.reduce((acc, mapping) => {
-    acc[mapping.unitTypeClassName] = mapping.unitName;
-    return acc;
-  }, {}) || {};
+  const unitPreferences = useMemo(() => {
+    return ballPreferences?.unitPreferences?.unitMappings?.reduce((acc, mapping) => {
+      acc[mapping.unitTypeClassName] = mapping.unitName;
+      return acc;
+    }, {}) || {};
+  }, [ballPreferences]);
   
   // For backward compatibility
-  const calculationOptions = {
+  const calculationOptions = useMemo(() => ({
     calculateSpinDrift: ballPreferences?.calculateSpinDrift || false,
     calculateCoriolisEffect: ballPreferences?.calculateCoriolisEffect || false,
     calculateAeroJump: ballPreferences?.calculateAeroJump || false,
     rangeCardStart: ballPreferences?.rangeCardStart || { value: 100, unit: 'YARDS' },
     rangeCardStep: ballPreferences?.rangeCardStep || { value: 100, unit: 'YARDS' }
-  };
+  }), [ballPreferences]);
   
   // For backward compatibility
-  const displayPreferences = { theme };
+  const displayPreferences = useMemo(() => ({ theme }), [theme]);
 
   const [inputApiKey, setInputApiKey] = useState(apiKey);
 
@@ -95,7 +89,7 @@ const debouncedUpdateApiKey = debounce((key) => {
   const [ammunition, setAmmunition] = useState({...ammo});
   const [calcOptions, setCalcOptions] = useState({...calculationOptions});
   const [displayOptionsState, setDisplayOptionsState] = useState({...displayPreferences});
-  const [error, setError] = useState('');
+  const [error, _setError] = useState(''); // Prefixed with _ to indicate intentionally unused
   
   const handleEnvironmentChange = (e) => {
     const newEnv = e.target.value;
@@ -107,8 +101,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     }
   };
 
-  const navigate = useNavigate();
-  const location = useLocation();
+  // We're using searchParams for tab state management
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Get active tab from URL or default to 'api'
@@ -283,25 +276,23 @@ const debouncedUpdateApiKey = debounce((key) => {
 
   // Get theme setter from Zustand store
   // Note: We already have setTheme from useAppConfigStore at the top of the component
-  const setAppTheme = setTheme; // Alias for compatibility
+  // Theme is now handled directly by ThemeSelector component
   
   // Handle theme change directly through Zustand
-  const handleThemeChange = (value) => {
-    setAppTheme(value);
-    console.log('Theme changed through Zustand store to:', value);
-  };
+  // Theme is now handled directly by the ThemeSelector component
   
-  // Handle other display options if needed
-  const handleDisplayOptionsChange = (field, value) => {
-    // Update local state
-    const newDisplayOptions = {
-      ...displayOptionsState,
-      [field]: value
-    };
-    setDisplayOptionsState(newDisplayOptions);
-    
-    // If it's a theme change, we already handle it through Zustand
+  // Handle other display options if needed - keeping this for future use
+  // Prefixed with _ to indicate intentionally unused
+  const _handleDisplayOptionsChange = (field, value) => {
+    // Only if we add more display options beyond theme in the future
     if (field !== 'theme') {
+      // Update local state
+      const newDisplayOptions = {
+        ...displayOptionsState,
+        [field]: value
+      };
+      setDisplayOptionsState(newDisplayOptions);
+      
       // For other display options, update them in the store if needed
       updatePreferences({
         [field]: value
