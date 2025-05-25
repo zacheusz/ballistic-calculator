@@ -52,9 +52,8 @@ export const AppProvider = ({ children }) => {
     const savedFirearmProfile = storageService.loadFromStorage(STORAGE_KEYS.FIREARM_PROFILE, null);
     const savedAmmo = storageService.loadFromStorage(STORAGE_KEYS.AMMO, null);
     const savedCalculationOptions = storageService.loadFromStorage(STORAGE_KEYS.CALCULATION_OPTIONS, null);
-    // Get environment from localStorage or use the one from API service (which falls back to env var)
-    const savedEnvironment = storageService.loadFromStorage(STORAGE_KEYS.API_ENVIRONMENT, api.environment);
-    setEnvironment(savedEnvironment);
+    // We're now using Zustand store as the single source of truth for the API environment
+    // The environment will be set from the Zustand store in the useEffect below
     
     if (savedUnitPreferences) {
       setUnitPreferences(savedUnitPreferences);
@@ -104,8 +103,10 @@ export const AppProvider = ({ children }) => {
   
   const updateEnvironment = (newEnvironment) => {
     setEnvironment(newEnvironment);
-    storageService.saveToStorage(STORAGE_KEYS.API_ENVIRONMENT, newEnvironment);
+    // No longer storing in localStorage as we're using Zustand store as the single source of truth
     api.setEnvironment(newEnvironment);
+    // We should also update the Zustand store to keep it in sync
+    useAppConfigStore.getState().setApiStage(newEnvironment);
   };
   
   const updateUnitPreferences = (newUnitPreferences) => {

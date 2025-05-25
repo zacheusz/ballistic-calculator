@@ -18,10 +18,9 @@ class BallisticsApi {
     // Load API key from localStorage
     this.apiKey = localStorage.getItem('snipe_ballistics_api_key') || '';
     
-    // Use environment from localStorage if it exists, otherwise use VITE_API_STAGE or 'prod' as default
-    this.environment = localStorage.getItem('snipe_ballistics_api_environment') || 
-                      import.meta.env.VITE_API_STAGE || 
-                      'prod';
+    // Use environment from Zustand store if available, otherwise use VITE_API_STAGE or 'prod' as default
+    // Note: This will be updated by AppContext when the Zustand store is loaded
+    this.environment = import.meta.env.VITE_API_STAGE || 'prod';
     
     // Log the final configuration
     console.log('API Configuration:', {
@@ -61,7 +60,7 @@ class BallisticsApi {
   
   setEnvironment(environment) {
     this.environment = environment;
-    localStorage.setItem('snipe_ballistics_api_environment', environment);
+    // No longer storing in localStorage as we're using Zustand store as the single source of truth
     this.updateClient();
   }
   

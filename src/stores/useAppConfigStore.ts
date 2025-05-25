@@ -20,7 +20,7 @@ export const useAppConfigStore = create<AppConfigState>()(
     (set) => ({
       theme: 'dark',
       language: 'en',
-      apiStage: 'prod',
+      apiStage: (import.meta.env.VITE_API_STAGE as string || 'prod') as ApiStage,
       apiKey: '',
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
