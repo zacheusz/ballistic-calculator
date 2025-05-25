@@ -1,5 +1,5 @@
 import { act } from 'react';
-import { useAppConfigStore, Theme, ApiStage } from './useAppConfigStore';
+import { useAppConfigStore, Theme, ApiStage } from '../useAppConfigStore';
 
 describe('useAppConfigStore', () => {
   beforeEach(() => {

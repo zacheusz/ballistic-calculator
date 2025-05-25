@@ -1,5 +1,5 @@
 import { act } from 'react';
-import { useAppConfigStore } from './stores/useAppConfigStore';
+import { useAppConfigStore } from '../stores/useAppConfigStore';
 
 describe('Zustand Integration Tests', () => {
   // Reset store before each test
