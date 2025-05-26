@@ -27,8 +27,10 @@ export const CONVERSION_FACTORS = {
   KILOMETERS_PER_HOUR: 0.911344415281,
   
   // Pressure units - Base unit: INCHES_MERCURY
-  INCHES_MERCURY: 1.0,
-  HECTOPASCALS: 0.0295333727,
+  INHG: 1.0,
+  MMHG: 0.03937008,       // 1 mmHg = 0.03937008 inHg
+  HPASCAL: 0.0295333727,  // 1 hPa = 0.0295333727 inHg
+  MBAR: 0.0295333727,     // 1 mbar = 1 hPa = 0.0295333727 inHg
   
   // Energy units - Base unit: FOOT_POUNDS
   FOOT_POUNDS: 1.0,
@@ -62,7 +64,7 @@ export const convertUnit = (
   toUnit: string
 ): number => {
   if (fromUnit === toUnit) return value;
-  
+
   // Special case for temperature
   if (fromUnit === 'FAHRENHEIT' && toUnit === 'CELSIUS') {
     return (value - 32) * 5/9;
@@ -88,16 +90,43 @@ export const convertUnit = (
   if (fromUnit === 'KELVIN' && toUnit === 'FAHRENHEIT') {
     return (value - 273.15) * 9/5 + 32;
   }
-  
+
+  // Special case: CLOCK <-> IPHY (via degrees)
+  // 1 o'clock = 30°, 2 o'clock = 60°, ..., 12 o'clock = 0° (or 360°)
+  // IPHY <-> DEGREES handled by factors; CLOCK <-> DEGREES by mapping
+  if ((fromUnit === 'CLOCK' && toUnit === 'IPHY') || (fromUnit === 'IPHY' && toUnit === 'CLOCK')) {
+    // CLOCK to IPHY (support decimal clock values)
+    if (fromUnit === 'CLOCK' && toUnit === 'IPHY') {
+      // Convert decimal clock value to degrees
+      let degrees = (value % 12) * 30;
+      if (degrees === 0) degrees = 360; // 12 o'clock is 360°
+      // Convert degrees to IPHY
+      const degToIphy = convertUnit(degrees, 'DEGREES', 'IPHY');
+      return degToIphy;
+    }
+    // IPHY to CLOCK (support decimals)
+    if (fromUnit === 'IPHY' && toUnit === 'CLOCK') {
+      // Convert IPHY to degrees
+      const degrees = convertUnit(value, 'IPHY', 'DEGREES');
+      // Map degrees to decimal clock value (1-12)
+      let clock = (degrees / 30);
+      if (clock <= 0) clock = 12;
+      // Clamp to [1,12]
+      if (clock > 12) clock = clock % 12;
+      if (clock === 0) clock = 12;
+      return clock;
+    }
+  }
+
   // For other units, convert to internal units and then to target units
   const fromFactor = CONVERSION_FACTORS[fromUnit as keyof typeof CONVERSION_FACTORS];
   const toFactor = CONVERSION_FACTORS[toUnit as keyof typeof CONVERSION_FACTORS];
-  
+
   if (!fromFactor || !toFactor) {
     console.warn(`Conversion factor not found for ${fromUnit} or ${toUnit}`);
     return value; // Return original value if conversion factors are missing
   }
-  
+
   // Convert to internal units, then to target units
   const internalValue = value * fromFactor;
   return internalValue / toFactor;

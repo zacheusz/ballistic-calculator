@@ -10,6 +10,7 @@ import api from '../services/api';
 import configService from '../services/configService';
 import { STORAGE_KEYS } from '../services/storageService';
 import ClockTimePicker from '../components/ClockTimePicker';
+import MeasurementInput from '../components/MeasurementInput';
 import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
 import ModePanel from '../components/ModePanel';
 import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
@@ -307,19 +308,20 @@ const CalculatorPage = () => {
   };
 
   
-  const handleAtmosphereChange = (field, value) => {
-    setAtmosphere(prev => {
-      const newAtmosphere = { ...prev };
-      const fieldParts = field.split('.');
-      
-      if (fieldParts.length === 1) {
-        newAtmosphere[field] = value;
-      } else if (fieldParts.length === 2) {
-        newAtmosphere[fieldParts[0]][fieldParts[1]] = value;
-      }
-      
-      return newAtmosphere;
-    });
+  // Updated to only accept field name and measurement object
+  const handleAtmosphereChange = (field, measurement) => {
+    setAtmosphere(prev => ({
+      ...prev,
+      [field]: measurement
+    }));
+  };
+  
+  // New helper for non-measurement fields (pressureType, humidity)
+  const handleAtmosphereSimpleChange = (field, value) => {
+    setAtmosphere(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
   
   const handleShotChange = (field, value) => {
@@ -388,74 +390,48 @@ const CalculatorPage = () => {
                   <Card.Body>
                     <Form.Group className="mb-3">
                       <Form.Label>{t('calcTemperature')}</Form.Label>
-                      <div className="d-flex align-items-center">
-                        <Form.Control
-                          type="number"
-                          name="atmosphere.temperature.value"
-                          value={values.atmosphere.temperature.value}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleAtmosphereChange('temperature.value', parseFloat(e.target.value));
-                          }}
-                          onBlur={handleBlur}
-                          className="me-2"
-                          ref={temperatureInputRef}
-                        />
-                        <UnitSelector
-                          fieldName="atmosphere.temperature.unit"
-                          value={values.atmosphere.temperature.unit}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleAtmosphereChange('temperature.unit', e.target.value);
-                          }}
-                          options={[
-                            { value: 'FAHRENHEIT', label: t('unitFahrenheit') },
-                            { value: 'CELSIUS', label: t('unitCelsius') },
-                            { value: 'KELVIN', label: t('unitKelvin') }
-                          ]}
-                          currentValue={values.atmosphere.temperature.value}
-                          onValueChange={(newValue) => handleAtmosphereChange('temperature.value', newValue)}
-                          targetRef={temperatureInputRef}
-                          setFieldValue={setFieldValue}
-                        />
-                      </div>
+                      <MeasurementInput
+                        value={values.atmosphere.temperature}
+                        onChange={(newMeasurement) => {
+                          handleAtmosphereChange('temperature', newMeasurement);
+                        }}
+                        unitOptions={[
+                          { value: 'FAHRENHEIT', label: t('unitFahrenheit') },
+                          { value: 'CELSIUS', label: t('unitCelsius') },
+                          { value: 'KELVIN', label: t('unitKelvin') }
+                        ]}
+                        label={null}
+                        inputProps={{
+                          name: 'atmosphere.temperature.value',
+                          onBlur: handleBlur,
+                          ref: temperatureInputRef
+                        }}
+                        disabled={loading}
+                      />
                     </Form.Group>
 
                     <Form.Group className="mb-3">
                       <Form.Label>{t('calcPressure')}</Form.Label>
-                      <div className="d-flex align-items-center">
-                        <Form.Control
-                          type="number"
-                          step="0.01"
-                          name="atmosphere.pressure.value"
-                          value={values.atmosphere.pressure.value}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleAtmosphereChange('pressure.value', parseFloat(e.target.value));
-                          }}
-                          onBlur={handleBlur}
-                          className="me-2"
-                          ref={pressureInputRef}
-                        />
-                        <UnitSelector
-                          fieldName="atmosphere.pressure.unit"
-                          value={values.atmosphere.pressure.unit}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleAtmosphereChange('pressure.unit', e.target.value);
-                          }}
-                          options={[
-                            { value: 'INHG', label: t('unitInHg') },
-                            { value: 'MMHG', label: t('unitMmHg') },
-                            { value: 'HPASCAL', label: t('unitHPa') },
-                            { value: 'MBAR', label: t('unitMbar') }
-                          ]}
-                          currentValue={values.atmosphere.pressure.value}
-                          onValueChange={(newValue) => handleAtmosphereChange('pressure.value', newValue)}
-                          targetRef={pressureInputRef}
-                          setFieldValue={setFieldValue}
-                        />
-                      </div>
+                      <MeasurementInput
+                        value={values.atmosphere.pressure}
+                        onChange={(newMeasurement) => {
+                          handleAtmosphereChange('pressure', newMeasurement);
+                        }}
+                        unitOptions={[
+                          { value: 'INHG', label: t('unitInHg') },
+                          { value: 'MMHG', label: t('unitMmHg') },
+                          { value: 'HPASCAL', label: t('unitHPa') },
+                          { value: 'MBAR', label: t('unitMbar') }
+                        ]}
+                        label={null}
+                        inputProps={{
+                          name: 'atmosphere.pressure.value',
+                          onBlur: handleBlur,
+                          ref: pressureInputRef,
+                          step: '0.01'
+                        }}
+                        disabled={loading}
+                      />
                     </Form.Group>
 
                     <Form.Group className="mb-3">
@@ -465,7 +441,7 @@ const CalculatorPage = () => {
                         value={values.atmosphere.pressureType}
                         onChange={(e) => {
                           handleChange(e);
-                          handleAtmosphereChange('pressureType', e.target.value);
+                          handleAtmosphereSimpleChange('pressureType', e.target.value);
                         }}
                         onBlur={handleBlur}
                       >
@@ -484,7 +460,7 @@ const CalculatorPage = () => {
                         value={values.atmosphere.humidity}
                         onChange={(e) => {
                           handleChange(e);
-                          handleAtmosphereChange('humidity', parseFloat(e.target.value));
+                          handleAtmosphereSimpleChange('humidity', parseFloat(e.target.value));
                         }}
                         onBlur={handleBlur}
                       />
@@ -492,37 +468,24 @@ const CalculatorPage = () => {
 
                     <Form.Group className="mb-3">
                       <Form.Label>{t('calcAltitude')}</Form.Label>
-                      <div className="d-flex align-items-center">
-                        <Form.Control
-                          type="number"
-                          name="atmosphere.altitude.value"
-                          value={values.atmosphere.altitude.value}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleAtmosphereChange('altitude.value', parseFloat(e.target.value));
-                          }}
-                          onBlur={handleBlur}
-                          className="me-2"
-                          ref={altitudeInputRef}
-                        />
-                        <UnitSelector
-                          fieldName="atmosphere.altitude.unit"
-                          value={values.atmosphere.altitude.unit}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleAtmosphereChange('altitude.unit', e.target.value);
-                          }}
-                          options={[
-                            { value: 'FEET', label: t('unitFeet') },
-                            { value: 'METERS', label: t('unitMeters') },
-                            { value: 'YARDS', label: t('unitYards') }
-                          ]}
-                          currentValue={values.atmosphere.altitude.value}
-                          onValueChange={(newValue) => handleAtmosphereChange('altitude.value', newValue)}
-                          targetRef={altitudeInputRef}
-                          setFieldValue={setFieldValue}
-                        />
-                      </div>
+                      <MeasurementInput
+                        value={values.atmosphere.altitude}
+                        onChange={(newMeasurement) => {
+                          handleAtmosphereChange('altitude', newMeasurement);
+                        }}
+                        unitOptions={[
+                          { value: 'FEET', label: t('unitFeet') },
+                          { value: 'METERS', label: t('unitMeters') },
+                          { value: 'YARDS', label: t('unitYards') }
+                        ]}
+                        label={null}
+                        inputProps={{
+                          name: 'atmosphere.altitude.value',
+                          onBlur: handleBlur,
+                          ref: altitudeInputRef
+                        }}
+                        disabled={loading}
+                      />
                     </Form.Group>
                   </Card.Body>
                 </Card>
@@ -544,76 +507,51 @@ const CalculatorPage = () => {
                   <Card.Body>
                     <Form.Group className="mb-3">
                       <Form.Label>{t('calcRange')}</Form.Label>
-                      <div className="d-flex align-items-center">
-                        <Form.Control
-                          type="number"
-                          name="shot.range.value"
-                          value={values.shot.range.value}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleShotChange('range.value', parseFloat(e.target.value));
-                          }}
-                          onBlur={handleBlur}
-                          isInvalid={touched.shot?.range?.value && errors.shot?.range?.value}
-                          className="me-2"
-                          ref={rangeInputRef}
-                        />
-                        <UnitSelector
-                          fieldName="shot.range.unit"
-                          value={values.shot.range.unit}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleShotChange('range.unit', e.target.value);
-                          }}
-                          options={[
-                            { value: 'YARDS', label: t('unitYards') },
-                            { value: 'METERS', label: t('unitMeters') },
-                            { value: 'FEET', label: t('unitFeet') }
-                          ]}
-                          currentValue={values.shot.range.value}
-                          onValueChange={(newValue) => handleShotChange('range.value', newValue)}
-                          targetRef={rangeInputRef}
-                          setFieldValue={setFieldValue}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.shot?.range?.value}
-                        </Form.Control.Feedback>
-                      </div>
+                      <MeasurementInput
+                        label={null}
+                        value={values.shot.range}
+                        unitOptions={[
+                          { value: 'YARDS', label: t('unitYards') },
+                          { value: 'METERS', label: t('unitMeters') },
+                          { value: 'FEET', label: t('unitFeet') }
+                        ]}
+                        onChange={(newValue) => {
+                          setFieldValue('shot.range', newValue);
+                          handleShotChange('range', newValue);
+                        }}
+                        inputProps={{
+                          name: 'shot.range.value',
+                          onBlur: handleBlur,
+                          isInvalid: touched.shot?.range?.value && errors.shot?.range?.value,
+                          ref: rangeInputRef
+                        }}
+                        disabled={loading}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.shot?.range?.value}
+                      </Form.Control.Feedback>
                     </Form.Group>
 
                     <Form.Group className="mb-3">
                       <Form.Label>{t('calcElevationAngle')}</Form.Label>
-                      <div className="d-flex align-items-center">
-                        <Form.Control
-                          type="number"
-                          name="shot.elevationAngle.value"
-                          value={values.shot.elevationAngle.value}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleShotChange('elevationAngle.value', parseFloat(e.target.value));
-                          }}
-                          onBlur={handleBlur}
-                          className="me-2"
-                          ref={elevationAngleInputRef}
-                        />
-                        <UnitSelector
-                          fieldName="shot.elevationAngle.unit"
-                          value={values.shot.elevationAngle.unit}
-                          onChange={(e) => {
-                            handleChange(e);
-                            handleShotChange('elevationAngle.unit', e.target.value);
-                          }}
-                          options={[
-                            { value: 'DEGREES', label: t('unitDegrees') },
-                            { value: 'MILS', label: t('unitMils') },
-                            { value: 'MOA', label: t('unitMoa') }
-                          ]}
-                          currentValue={values.shot.elevationAngle.value}
-                          onValueChange={(newValue) => handleShotChange('elevationAngle.value', newValue)}
-                          targetRef={elevationAngleInputRef}
-                          setFieldValue={setFieldValue}
-                        />
-                      </div>
+                      <MeasurementInput
+                        value={values.shot.elevationAngle}
+                        onChange={(newMeasurement) => {
+                          handleShotChange('elevationAngle', newMeasurement);
+                        }}
+                        unitOptions={[
+                          { value: 'DEGREES', label: t('unitDegrees') },
+                          { value: 'MILS', label: t('unitMils') },
+                          { value: 'MOA', label: t('unitMoa') }
+                        ]}
+                        label={null}
+                        inputProps={{
+                          name: 'shot.elevationAngle.value',
+                          onBlur: handleBlur,
+                          ref: elevationAngleInputRef
+                        }}
+                        disabled={loading}
+                      />
                     </Form.Group>
 
                     {/* Only show Coriolis effect fields when the feature is enabled */}
@@ -621,58 +559,40 @@ const CalculatorPage = () => {
                       <>
                         <Form.Group className="mb-3">
                           <Form.Label>{t('shotAzimuth')}</Form.Label>
-                          <div className="d-flex align-items-center">
-                            <Form.Control
-                              type="number"
-                              name="shot.azimuth.value"
-                              value={values.shot.azimuth.value}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange('azimuth.value', parseFloat(e.target.value));
-                              }}
-                              onBlur={handleBlur}
-                              className="me-2"
-                            />
-                            <UnitSelector
-                              fieldName="shot.azimuth.unit"
-                              value={values.shot.azimuth.unit}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange('azimuth.unit', e.target.value);
-                              }}
-                              options={[
-                                { value: 'DEGREES', label: t('unitDegrees') }
-                              ]}
-                            />
-                          </div>
+                          <MeasurementInput
+                            value={values.shot.azimuth}
+                            onChange={(newMeasurement) => {
+                              handleShotChange('azimuth', newMeasurement);
+                            }}
+                            unitOptions={[
+                              { value: 'DEGREES', label: t('unitDegrees') }
+                            ]}
+                            label={null}
+                            inputProps={{
+                              name: 'shot.azimuth.value',
+                              onBlur: handleBlur
+                            }}
+                            disabled={loading}
+                          />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
                           <Form.Label>{t('shooterLatitude')}</Form.Label>
-                          <div className="d-flex align-items-center">
-                            <Form.Control
-                              type="number"
-                              name="shot.latitude.value"
-                              value={values.shot.latitude.value}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange('latitude.value', parseFloat(e.target.value));
-                              }}
-                              onBlur={handleBlur}
-                              className="me-2"
-                            />
-                            <UnitSelector
-                              fieldName="shot.latitude.unit"
-                              value={values.shot.latitude.unit}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange('latitude.unit', e.target.value);
-                              }}
-                              options={[
-                                { value: 'DEGREES', label: t('unitDegrees') }
-                              ]}
-                            />
-                          </div>
+                          <MeasurementInput
+                            value={values.shot.latitude}
+                            onChange={(newMeasurement) => {
+                              handleShotChange('latitude', newMeasurement);
+                            }}
+                            unitOptions={[
+                              { value: 'DEGREES', label: t('unitDegrees') }
+                            ]}
+                            label={null}
+                            inputProps={{
+                              name: 'shot.latitude.value',
+                              onBlur: handleBlur
+                            }}
+                            disabled={loading}
+                          />
                         </Form.Group>
                       </>
                     )}
@@ -683,176 +603,84 @@ const CalculatorPage = () => {
                         <h6>{t('calcWindSegment')} {index + 1}</h6>
                         <Form.Group className="mb-3">
                           <Form.Label>{t('calcMaxRange')}</Form.Label>
-                          <div className="d-flex align-items-center">
-                            <Form.Control
-                              type="number"
-                              name={`shot.windSegments[${index}].maxRange.value`}
-                              value={segment.maxRange.value}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange(`windSegments.${index}.maxRange.value`, parseFloat(e.target.value));
-                              }}
-                              onBlur={handleBlur}
-                              className="me-2"
-                              ref={getWindSegmentRef(index, 'maxRange')}
-                            />
-                            <UnitSelector
-                              fieldName={`shot.windSegments[${index}].maxRange.unit`}
-                              value={segment.maxRange.unit}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange(`windSegments.${index}.maxRange.unit`, e.target.value);
-                              }}
-                              options={[
-                                { value: 'YARDS', label: t('unitYards') },
-                                { value: 'METERS', label: t('unitMeters') },
-                                { value: 'FEET', label: t('unitFeet') }
-                              ]}
-                              currentValue={segment.maxRange.value}
-                              onValueChange={(newValue) => handleShotChange(`windSegments.${index}.maxRange.value`, newValue)}
-                              targetRef={getWindSegmentRef(index, 'maxRange')}
-                            />
-                          </div>
+                          <MeasurementInput
+                            value={segment.maxRange}
+                            onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.maxRange`, newMeasurement)}
+                            unitOptions={[
+                              { value: 'YARDS', label: t('unitYards') },
+                              { value: 'METERS', label: t('unitMeters') },
+                              { value: 'FEET', label: t('unitFeet') }
+                            ]}
+                            label={null}
+                            inputProps={{
+                              name: `shot.windSegments[${index}].maxRange.value`,
+                              onBlur: handleBlur,
+                              ref: getWindSegmentRef(index, 'maxRange')
+                            }}
+                            disabled={loading}
+                          />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
                           <Form.Label>{t('calcWindSpeed')}</Form.Label>
-                          <div className="d-flex align-items-center">
-                            <Form.Control
-                              type="number"
-                              name={`shot.windSegments[${index}].speed.value`}
-                              value={segment.speed.value}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange(`windSegments.${index}.speed.value`, parseFloat(e.target.value));
-                              }}
-                              onBlur={handleBlur}
-                              className="me-2"
-                              ref={getWindSegmentRef(index, 'speed')}
-                            />
-                            <UnitSelector
-                              fieldName={`shot.windSegments[${index}].speed.unit`}
-                              value={segment.speed.unit}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange(`windSegments.${index}.speed.unit`, e.target.value);
-                              }}
-                              options={[
-                                { value: 'MILES_PER_HOUR', label: t('unitMph') },
-                                { value: 'KILOMETERS_PER_HOUR', label: t('unitKph') },
-                                { value: 'METERS_PER_SECOND', label: t('unitMps') }
-                              ]}
-                              currentValue={segment.speed.value}
-                              onValueChange={(newValue) => handleShotChange(`windSegments.${index}.speed.value`, newValue)}
-                              targetRef={getWindSegmentRef(index, 'speed')}
-                              setFieldValue={setFieldValue}
-                            />
-                          </div>
+                          <MeasurementInput
+                            value={segment.speed}
+                            onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.speed`, newMeasurement)}
+                            unitOptions={[
+                              { value: 'MILES_PER_HOUR', label: t('unitMph') },
+                              { value: 'KILOMETERS_PER_HOUR', label: t('unitKph') },
+                              { value: 'METERS_PER_SECOND', label: t('unitMps') }
+                            ]}
+                            label={null}
+                            inputProps={{
+                              name: `shot.windSegments[${index}].speed.value`,
+                              onBlur: handleBlur,
+                              ref: getWindSegmentRef(index, 'speed')
+                            }}
+                            disabled={loading}
+                          />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
                           <Form.Label>{t('calcWindDirection')}</Form.Label>
-                          <div className="d-flex align-items-center">
-                            {segment.direction.unit === 'CLOCK' ? (
-                              <div className="d-flex align-items-center" style={{ width: '100%', overflow: 'hidden' }}>
-                                <div style={{ flex: '1', marginRight: '10px', maxWidth: 'calc(100% - 110px)', overflow: 'hidden' }}>
-                                  <ClockTimePicker 
-                                    value={segment.direction.value} 
-                                    onChange={(value) => {
-                                      // Only update the clock position value (1-12)
-                                      handleShotChange(`windSegments.${index}.direction.value`, value);
-                                    }}
-                                  />
-                                </div>
-                                <div style={{ width: '100px', flexShrink: 0 }}>
-                                  <UnitSelector
-                                    fieldName={`shot.windSegments[${index}].direction.unit`}
-                                    value={segment.direction.unit}
-                                    onChange={(e) => {
-                                      handleChange(e);
-                                      handleShotChange(`windSegments.${index}.direction.unit`, e.target.value);
-                                    }}
-                                    options={[
-                                      { value: 'CLOCK', label: t('unitClock') },
-                                      { value: 'DEGREES', label: t('unitDegrees') },
-                                      { value: 'MILS', label: t('unitMils') },
-                                      { value: 'MOA', label: t('unitMoa') }
-                                    ]}
-                                    currentValue={segment.direction.value}
-                                    onValueChange={(newValue) => handleShotChange(`windSegments.${index}.direction.value`, newValue)}
-                                    targetRef={getWindSegmentRef(index, 'direction')}
-                                    setFieldValue={setFieldValue}
-                                  />
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="d-flex align-items-center">
-                                <Form.Control
-                                  type="number"
-                                  name={`shot.windSegments[${index}].direction.value`}
-                                  value={segment.direction.value}
-                                  onChange={(e) => {
-                                    handleChange(e);
-                                    handleShotChange(`windSegments.${index}.direction.value`, parseFloat(e.target.value));
-                                  }}
-                                  onBlur={handleBlur}
-                                  className="me-2"
-                                />
-                                <UnitSelector
-                                  fieldName={`shot.windSegments[${index}].direction.unit`}
-                                  value={segment.direction.unit}
-                                  onChange={(e) => {
-                                    handleChange(e);
-                                    handleShotChange(`windSegments.${index}.direction.unit`, e.target.value);
-                                  }}
-                                  options={[
-                                    { value: 'CLOCK', label: t('unitClock') },
-                                    { value: 'DEGREES', label: t('unitDegrees') },
-                                    { value: 'MILS', label: t('unitMils') },
-                                    { value: 'MOA', label: t('unitMoa') }
-                                  ]}
-                                  currentValue={segment.direction.value}
-                                  onValueChange={(newValue) => handleShotChange(`windSegments.${index}.direction.value`, newValue)}
-                                  targetRef={getWindSegmentRef(index, 'direction')}
-                                  setFieldValue={setFieldValue}
-                                />
-                              </div>
-                            )}
-                          </div>
+                          <MeasurementInput
+                            value={segment.direction}
+                            onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.direction`, newMeasurement)}
+                            unitOptions={[
+                              { value: 'CLOCK', label: t('unitClock') },
+                              { value: 'DEGREES', label: t('unitDegrees') },
+                              { value: 'MILS', label: t('unitMils') },
+                              { value: 'MOA', label: t('unitMoa') }
+                            ]}
+                            label={null}
+                            inputProps={{
+                              name: `shot.windSegments[${index}].direction.value`,
+                              onBlur: handleBlur,
+                              ref: getWindSegmentRef(index, 'direction'),
+                              min: 0
+                            }}
+                            disabled={loading}
+                          />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
                           <Form.Label>{t('calcVerticalComponent')}</Form.Label>
-                          <div className="d-flex align-items-center">
-                            <Form.Control
-                              type="number"
-                              name={`shot.windSegments[${index}].verticalComponent.value`}
-                              value={segment.verticalComponent?.value || 0}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange(`windSegments.${index}.verticalComponent.value`, parseFloat(e.target.value));
-                              }}
-                              onBlur={handleBlur}
-                              className="me-2"
-                              ref={getWindSegmentRef(index, 'verticalComponent')}
-                            />
-                            <UnitSelector
-                              fieldName={`shot.windSegments[${index}].verticalComponent.unit`}
-                              value={segment.verticalComponent?.unit || segment.speed.unit}
-                              onChange={(e) => {
-                                handleChange(e);
-                                handleShotChange(`windSegments.${index}.verticalComponent.unit`, e.target.value);
-                              }}
-                              options={[
-                                { value: 'MILES_PER_HOUR', label: t('unitMph') },
-                                { value: 'KILOMETERS_PER_HOUR', label: t('unitKph') },
-                                { value: 'METERS_PER_SECOND', label: t('unitMps') }
-                              ]}
-                              currentValue={segment.verticalComponent?.value || 0}
-                              onValueChange={(newValue) => handleShotChange(`windSegments.${index}.verticalComponent.value`, newValue)}
-                              targetRef={getWindSegmentRef(index, 'verticalComponent')}
-                            />
-                          </div>
+                          <MeasurementInput
+                            value={segment.verticalComponent || { value: 0, unit: segment.speed.unit }}
+                            onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.verticalComponent`, newMeasurement)}
+                            unitOptions={[
+                              { value: 'MILES_PER_HOUR', label: t('unitMph') },
+                              { value: 'KILOMETERS_PER_HOUR', label: t('unitKph') },
+                              { value: 'METERS_PER_SECOND', label: t('unitMps') }
+                            ]}
+                            label={null}
+                            inputProps={{
+                              name: `shot.windSegments[${index}].verticalComponent.value`,
+                              onBlur: handleBlur,
+                              ref: getWindSegmentRef(index, 'verticalComponent')
+                            }}
+                            disabled={loading}
+                          />
                         </Form.Group>
 
                         {index > 0 && (

@@ -29,21 +29,29 @@ const StyledTimePicker = styled(TimePicker)(() => ({
 }));
 
 const ClockTimePicker = ({ value, onChange }) => {
-  // Convert clock value (1-12) to a time
+  // Convert clock value (decimal, 1-12) to a time
   const clockToTime = (clockValue) => {
-    // Map clock positions to hours (12 o'clock = 0 hours, 3 o'clock = 3 hours, etc.)
-    const hour = clockValue === 12 ? 0 : clockValue;
-    return dayjs().hour(hour).minute(0);
+    // Accept decimals (e.g., 5.5 for 5:30)
+    let hour = Math.floor(clockValue);
+    let minute = Math.round((clockValue - hour) * 60);
+    if (hour === 12) hour = 0;
+    return dayjs().hour(hour).minute(minute);
   };
 
-  // Convert time back to clock position (1-12)
+  // Convert time back to clock position (1-12, decimal)
   const timeToClock = (time) => {
     if (!time) return 12;
-    const hour = time.hour();
+    let hour = time.hour();
+    let minute = time.minute();
     // Map hours back to clock positions (0 hours = 12 o'clock, 3 hours = 3 o'clock, etc.)
-    return hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    let clockHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    let clockValue = clockHour + (minute / 60);
+    // Clamp to [1,12]
+    if (clockValue < 1) clockValue = 12;
+    if (clockValue > 12) clockValue = clockValue % 12;
+    return clockValue;
   };
-  
+
   // We don't need to format the time for display as MUI TimePicker handles this
 
   const [time, setTime] = useState(clockToTime(value || 12));
@@ -56,11 +64,8 @@ const ClockTimePicker = ({ value, onChange }) => {
   const handleTimeChange = (newTime) => {
     setTime(newTime);
     if (newTime) {
-      // For wind direction, we're primarily interested in the hour hand position
-      // as it corresponds to the clock position (1-12)
+      // For wind direction, use hour + minute/60 as decimal
       const clockValue = timeToClock(newTime);
-      
-      // Pass the clock position value to the parent component
       onChange(clockValue);
     }
   };
