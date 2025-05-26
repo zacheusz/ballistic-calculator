@@ -22,6 +22,7 @@ const Navigation = () => {
             <Nav.Link as={NavLink} to="/" end>{t('navHome')}</Nav.Link>
             <Nav.Link as={NavLink} to="/calculator">{t('navCalculator')}</Nav.Link>
             <Nav.Link as={NavLink} to="/config">{t('navConfig')}</Nav.Link>
+            <Nav.Link as={NavLink} to="/mui-test">MUI Test</Nav.Link>
           </Nav>
           <Nav className="ms-auto">
             {environment && (

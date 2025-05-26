@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Form, Row, Col } from 'react-bootstrap';
-import MeasurementInput from './MeasurementInput';
+import MeasurementInputMUI from './MeasurementInputMUI';
 
 const ModeComponent = ({
   mode,
@@ -58,7 +58,7 @@ const ModeComponent = ({
             <Form.Group as={Row} className="mb-3" controlId="rangeCardStart">
               <Form.Label column sm="4">{t('calcRangeCardStart')}</Form.Label>
               <Col sm="8">
-                <MeasurementInput
+                <MeasurementInputMUI
                   value={{ value: Number(rangeCardStart) || 0, unit: startUnit }}
                   onChange={(newMeasurement) => {
                     onRangeCardStartChange(newMeasurement.value);
@@ -85,7 +85,7 @@ const ModeComponent = ({
             <Form.Group as={Row} className="mb-3" controlId="rangeCardStep">
               <Form.Label column sm="4">{t('calcRangeCardStep')}</Form.Label>
               <Col sm="8">
-                <MeasurementInput
+                <MeasurementInputMUI
                   value={{ value: Number(rangeCardStep) || 0, unit: stepUnit }}
                   onChange={(newMeasurement) => {
                     onRangeCardStepChange(newMeasurement.value);

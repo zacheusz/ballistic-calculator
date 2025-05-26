@@ -1,4 +1,5 @@
 // Mock Vite's import.meta.env for Jest tests
+/* global global */
 global.import = {
   meta: {
     env: {
