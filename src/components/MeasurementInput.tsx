@@ -23,7 +23,6 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
 }) => {
   const valueInputRef = useRef<HTMLInputElement>(null);
   const [localMeasurement, setLocalMeasurement] = useState<Measurement>(value);
-  const [showTooltip, setShowTooltip] = useState(false);
 
   // Sync local state with props
   useEffect(() => {
@@ -47,43 +46,11 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
     const updated = { value: roundedValue, unit: newUnit };
     setLocalMeasurement(updated);
     onChange(updated);
-    setShowTooltip(true);
-    setTimeout(() => setShowTooltip(false), 3000);
   };
 
   // Always render value input and unit selector side-by-side
   return (
     <div className="position-relative">
-      {/* Conversion tooltip overlay - positioned outside the form group */}
-      {showTooltip && (
-        <div 
-          style={{ 
-            position: 'absolute', 
-            top: '-40px', 
-            left: '50%', 
-            transform: 'translateX(-50%)', 
-            textAlign: 'center', 
-            zIndex: 9999,
-            width: '100%',
-            cursor: 'pointer'
-          }}
-          onClick={() => setShowTooltip(false)}
-          title="Click to dismiss"
-        >
-          <div className="unit-conversion-tooltip" style={{ 
-            background: '#222', 
-            color: '#fff', 
-            padding: '6px 16px', 
-            borderRadius: 6, 
-            fontSize: 13, 
-            display: 'inline-block', 
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)' 
-          }}>
-            <strong>Unit converted</strong><br />Value was converted to match new unit.
-            <div style={{ fontSize: 11, marginTop: 3, opacity: 0.8 }}>Click to dismiss</div>
-          </div>
-        </div>
-      )}
       <Form.Group className="d-flex align-items-center" controlId={label ? `measurement-input-${label}` : undefined}>
         {label && <Form.Label className="me-2 mb-0">{label}</Form.Label>}
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
@@ -117,10 +84,10 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
               max={inputProps.max as number | undefined}
               step={inputProps.step ? inputProps.step.toString() : 'any'}
               onChange={e => handleValueChange(Number(e.target.value))}
-              ref={valueInputRef}
               disabled={disabled}
               style={{ marginRight: 10, minWidth: 0, maxWidth: '100%' }}
-              {...inputProps}
+              {...inputProps} // Spread all inputProps
+              ref={valueInputRef} // Apply our ref last to ensure it's not overridden
             />
             <div style={{ flexShrink: 0, minWidth: 0, maxWidth: '100%' }}>
               <UnitSelectorWithConversion

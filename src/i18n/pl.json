@@ -130,6 +130,7 @@
   "dragModelCDM": "CDM",
   "unitConversionNotice": "Zmieniono jednostkę - Wartość przeliczona",
   "unitConversionDescription": "Wartość została automatycznie przeliczona na nową jednostkę. Proszę sprawdzić, czy przeliczenie jest poprawne.",
+  "clickToDismiss": "Kliknij, aby zamknąć",
   "unitMph": "mph",
   "unitKph": "km/h",
   "unitMps": "m/s",
@@ -148,5 +149,12 @@
   "shooterLatitude": "Szerokość geograficzna strzelca",
   "showTrajectoryGraph": "Pokaż wykres trajektorii",
   "showWindTable": "Pokaż tabelę wiatru",
-  "showDropTable": "Pokaż tabelę opadu"
+  "showDropTable": "Pokaż tabelę opadu",
+  "calcMode": "Tryb",
+  "calcCalculationMode": "Tryb obliczeń",
+  "calcHudMode": "HUD",
+  "calcRangeCardMode": "Tabela balistyczna",
+  "calcRangeCardStart": "Początek tabeli",
+  "calcRangeCardStep": "Krok tabeli",
+  "calcRangeCardUnit": "Jednostka"
 }

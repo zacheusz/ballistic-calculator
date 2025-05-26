@@ -48,10 +48,10 @@ const UnitSelectorWithConversion = ({
       // Show the tooltip notification
       setShowTooltip(true);
       
-      // Hide tooltip after 5 seconds
+      // Hide tooltip after 3 seconds
       setTimeout(() => {
         setShowTooltip(false);
-      }, 5000);
+      }, 3000);
     }
   };
 
@@ -81,6 +81,7 @@ const UnitSelectorWithConversion = ({
             <Tooltip id={`tooltip-${fieldName}`} {...props} className="unit-conversion-tooltip">
               <strong>{t('unitConversionNotice')}</strong>
               <div>{t('unitConversionDescription')}</div>
+              <div className="mt-1 small text-muted">{t('clickToDismiss')}</div>
             </Tooltip>
           )}
         </Overlay>
