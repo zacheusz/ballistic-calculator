@@ -102,23 +102,23 @@ export const getDefaultConfig = (): BallisticsRequest => {
   return {
     firearmProfile: deepClone({
       ...defaultFirearmProfile,
-      ...(defaultConfig.firearmProfile || {})
+      ...((defaultConfig.firearmProfile || {}) as Partial<FirearmProfile>)
     }),
     ammo: deepClone({
       ...defaultAmmo,
-      ...(defaultConfig.ammo || {})
+      ...((defaultConfig.ammo || {}) as Partial<Ammo>)
     }),
     atmosphere: deepClone({
       ...defaultAtmosphere,
-      ...(defaultConfig.atmosphere || {})
+      ...((defaultConfig.atmosphere || {}) as Partial<Atmosphere>)
     }),
     shot: deepClone({
       ...defaultShot,
-      ...(defaultConfig.shot || {})
+      ...((defaultConfig.shot || {}) as Partial<Shot>)
     }),
     preferences: deepClone({
       ...defaultPreferences,
-      ...(defaultConfig.preferences || {})
+      ...((defaultConfig.preferences || {}) as Partial<Preferences>)
     }),
   };
 };
