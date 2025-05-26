@@ -1,8 +1,8 @@
-import { BallisticsRequest, FirearmProfile, Ammo, Atmosphere, Shot, Preferences } from '@/types/ballistics';
+import { BallisticsRequest, FirearmProfile, Ammo, Atmosphere, Shot, Preferences, Unit, Measurement } from '@/types/ballistics';
 import defaultConfig from '@/config/default.json';
 
 // Helper function to create a measurement object
-export const createMeasurement = (value: number, unit: string) => ({
+export const createMeasurement = (value: number, unit: Unit): Measurement => ({
   value,
   unit,
 });
