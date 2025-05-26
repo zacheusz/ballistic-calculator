@@ -48,7 +48,7 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
     setLocalMeasurement(updated);
     onChange(updated);
     setShowTooltip(true);
-    setTimeout(() => setShowTooltip(false), 5000);
+    setTimeout(() => setShowTooltip(false), 3000);
   };
 
   // Always render value input and unit selector side-by-side
