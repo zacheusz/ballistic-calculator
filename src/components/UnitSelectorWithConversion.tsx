@@ -15,7 +15,9 @@ interface UnitSelectorWithConversionProps {
   value: Unit;
   options: UnitOption[];
   currentValue: number;
-  onUnitAndValueChange: (newUnit: Unit, convertedValue: number) => void;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onValueChange?: (value: number) => void;
+  onUnitAndValueChange?: (newUnit: Unit, convertedValue: number) => void;
   targetRef: RefObject<HTMLInputElement | null>;
   style?: React.CSSProperties;
 }
@@ -28,6 +30,8 @@ const UnitSelectorWithConversion: React.FC<UnitSelectorWithConversionProps> = ({
   value, 
   options, 
   currentValue,
+  onChange,
+  onValueChange,
   onUnitAndValueChange,
   targetRef,
   style
@@ -40,6 +44,11 @@ const UnitSelectorWithConversion: React.FC<UnitSelectorWithConversionProps> = ({
     const newUnit = e.target.value as Unit;
     const oldUnit = value;
     
+    // Call original onChange handler if provided
+    if (onChange) {
+      onChange(e);
+    }
+    
     // Only convert if units are different and we have a valid current value
     if (newUnit !== oldUnit && currentValue !== undefined && !isNaN(currentValue)) {
       // Convert the value from old unit to new unit
@@ -48,9 +57,14 @@ const UnitSelectorWithConversion: React.FC<UnitSelectorWithConversionProps> = ({
       // Round to 4 decimal places for better display
       const roundedValue = Math.round(convertedValue * 10000) / 10000;
       
-      // Call the parent's handler with both new unit and converted value
+      // Call the parent's handlers with the new values
       if (onUnitAndValueChange) {
         onUnitAndValueChange(newUnit, roundedValue);
+      }
+      
+      // Call onValueChange if provided
+      if (onValueChange) {
+        onValueChange(roundedValue);
       }
       
       // Show the tooltip notification

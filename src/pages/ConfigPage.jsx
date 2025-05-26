@@ -9,7 +9,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
 
-import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
+import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion.tsx';
 import MeasurementInput from '../components/MeasurementInput';
 
 // Helper function to render unit selection dropdown with conversion

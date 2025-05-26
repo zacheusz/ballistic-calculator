@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
-import dayjs from 'dayjs';
-import { TextField } from '@mui/material';
+import dayjs, { Dayjs } from 'dayjs';
+
 import { styled } from '@mui/material/styles';
+
+interface ClockTimePickerProps {
+  value: number;
+  onChange: (value: number) => void;
+}
 
 // Styled component to match Bootstrap styling
 const StyledTimePicker = styled(TimePicker)(() => ({
@@ -28,9 +33,9 @@ const StyledTimePicker = styled(TimePicker)(() => ({
   marginRight: '0.5rem',
 }));
 
-const ClockTimePicker = ({ value, onChange }) => {
+const ClockTimePicker: React.FC<ClockTimePickerProps> = ({ value, onChange }) => {
   // Convert clock value (decimal, 1-12) to a time
-  const clockToTime = (clockValue) => {
+  const clockToTime = (clockValue: number): Dayjs => {
     // Accept decimals (e.g., 5.5 for 5:30)
     let hour = Math.floor(clockValue);
     let minute = Math.round((clockValue - hour) * 60);
@@ -39,7 +44,7 @@ const ClockTimePicker = ({ value, onChange }) => {
   };
 
   // Convert time back to clock position (1-12, decimal)
-  const timeToClock = (time) => {
+  const timeToClock = (time: Dayjs | null): number => {
     if (!time) return 12;
     let hour = time.hour();
     let minute = time.minute();
@@ -54,16 +59,16 @@ const ClockTimePicker = ({ value, onChange }) => {
 
   // We don't need to format the time for display as MUI TimePicker handles this
 
-  const [time, setTime] = useState(clockToTime(value || 12));
+  const [time, setTime] = useState<Dayjs>(clockToTime(value || 12));
 
   // Update time when value changes externally
   useEffect(() => {
     setTime(clockToTime(value || 12));
   }, [value]);
 
-  const handleTimeChange = (newTime) => {
-    setTime(newTime);
+  const handleTimeChange = (newTime: Dayjs | null) => {
     if (newTime) {
+      setTime(newTime);
       // For wind direction, use hour + minute/60 as decimal
       const clockValue = timeToClock(newTime);
       onChange(clockValue);

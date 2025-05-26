@@ -9,10 +9,10 @@ import { useBallistics } from '../hooks/useBallistics';
 import api from '../services/api';
 import configService from '../services/configService';
 import { STORAGE_KEYS } from '../services/storageService';
-import ClockTimePicker from '../components/ClockTimePicker';
+import ClockTimePicker from '../components/ClockTimePicker.tsx';
 import MeasurementInput from '../components/MeasurementInput';
 import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
-import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
+import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion.tsx';
 // Import new components
 import AtmosphereComponent from '../components/AtmosphereComponent';
 import ShotComponent from '../components/ShotComponent';

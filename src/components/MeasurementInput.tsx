@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Form } from 'react-bootstrap';
 import UnitSelectorWithConversion from './UnitSelectorWithConversion';
-import ClockTimePicker from './ClockTimePicker';
+import ClockTimePicker from './ClockTimePicker.tsx';
 import { Measurement, Unit } from '../types/ballistics';
 
 interface MeasurementInputProps {
