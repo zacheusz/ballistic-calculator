@@ -71,7 +71,7 @@ export const defaultShot: Shot = {
 export const defaultPreferences: Preferences = {
   calculateSpinDrift: true,
   calculateCoriolisEffect: true,
-  calculateAeroJump: true,
+  calculateAeroJump: false,
   rangeCardStart: createMeasurement(100, 'YARDS'),
   rangeCardStep: createMeasurement(100, 'YARDS'),
   unitPreferences: {
@@ -96,13 +96,32 @@ const deepClone = <T>(obj: T): T => {
 };
 
 // Function to load default configuration
-export const getDefaultConfig = (): BallisticsRequest => ({
-  firearmProfile: deepClone(defaultFirearmProfile),
-  ammo: deepClone(defaultAmmo),
-  atmosphere: deepClone(defaultAtmosphere),
-  shot: deepClone(defaultShot),
-  preferences: deepClone(defaultPreferences),
-});
+export const getDefaultConfig = (): BallisticsRequest => {
+  // Use values from default.json as the primary source
+  // Fall back to hardcoded defaults if needed
+  return {
+    firearmProfile: deepClone({
+      ...defaultFirearmProfile,
+      ...(defaultConfig.firearmProfile || {})
+    }),
+    ammo: deepClone({
+      ...defaultAmmo,
+      ...(defaultConfig.ammo || {})
+    }),
+    atmosphere: deepClone({
+      ...defaultAtmosphere,
+      ...(defaultConfig.atmosphere || {})
+    }),
+    shot: deepClone({
+      ...defaultShot,
+      ...(defaultConfig.shot || {})
+    }),
+    preferences: deepClone({
+      ...defaultPreferences,
+      ...(defaultConfig.preferences || {})
+    }),
+  };
+};
 
 // Function to merge updates with default values
 export const mergeWithDefaults = <T extends object>(
