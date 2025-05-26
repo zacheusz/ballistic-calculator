@@ -1,35 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, RefObject } from 'react';
 import { Form, Overlay, Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { convertUnit } from '../utils/unitConversion';
 import './UnitSelectorWithConversion.css';
+import { Unit } from '../types/ballistics';
+
+interface UnitOption {
+  value: Unit;
+  label: string;
+}
+
+interface UnitSelectorWithConversionProps {
+  fieldName: string;
+  value: Unit;
+  options: UnitOption[];
+  currentValue: number;
+  onUnitAndValueChange: (newUnit: Unit, convertedValue: number) => void;
+  targetRef: RefObject<HTMLInputElement | null>;
+  style?: React.CSSProperties;
+}
 
 /**
  * UnitSelectorWithConversion - A component that handles unit selection with automatic value conversion
- * 
- * @param {Object} props - Component props
- * @param {string} props.fieldName - Name of the field
- * @param {string} props.value - Current unit value
- * @param {Function} props.onChange - Function to call when unit changes
- * @param {Array} props.options - Array of unit options [{value, label}]
- * @param {number} props.currentValue - Current numeric value
- * @param {Function} props.onValueChange - Function to call when value changes due to unit conversion
- * @param {Object} props.targetRef - Reference to the input field for tooltip positioning
  */
-const UnitSelectorWithConversion = ({ 
+const UnitSelectorWithConversion: React.FC<UnitSelectorWithConversionProps> = ({ 
   fieldName, 
   value, 
   options, 
   currentValue,
   onUnitAndValueChange,
-  targetRef
+  targetRef,
+  style
 }) => {
   const { t } = useTranslation();
   const [showTooltip, setShowTooltip] = useState(false);
   
   // Handle unit change with conversion
-  const handleUnitChange = (e) => {
-    const newUnit = e.target.value;
+  const handleUnitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newUnit = e.target.value as Unit;
     const oldUnit = value;
     
     // Only convert if units are different and we have a valid current value
@@ -55,7 +63,6 @@ const UnitSelectorWithConversion = ({
     }
   };
 
-  
   return (
     <>
       <Form.Select 
@@ -64,14 +71,14 @@ const UnitSelectorWithConversion = ({
         value={value}
         onChange={handleUnitChange}
         className="ms-2"
-        style={{ width: 'auto', display: 'inline-block' }}
+        style={{ width: 'auto', display: 'inline-block', ...style }}
       >
         {options.map(option => (
           <option key={option.value} value={option.value}>{option.label}</option>
         ))}
       </Form.Select>
       
-      {targetRef && (
+      {targetRef && targetRef.current && (
         <Overlay 
           target={targetRef.current} 
           show={showTooltip} 
