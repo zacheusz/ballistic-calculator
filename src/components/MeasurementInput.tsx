@@ -10,7 +10,7 @@ interface MeasurementInputProps {
   unitOptions: Array<{ value: Unit; label: string }>;
   label?: string;
   disabled?: boolean;
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  inputProps?: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
 }
 
 const MeasurementInput: React.FC<MeasurementInputProps> = ({
@@ -78,7 +78,6 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
           <>
             <Form.Control
               type="number"
-              size="sm"
               value={localMeasurement.value.toString()}
               min={inputProps.min as number | undefined}
               max={inputProps.max as number | undefined}
@@ -86,7 +85,8 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
               onChange={e => handleValueChange(Number(e.target.value))}
               disabled={disabled}
               style={{ marginRight: 10, minWidth: 0, maxWidth: '100%' }}
-              {...inputProps} // Spread all inputProps
+              {...(inputProps as any)} // Use type assertion to avoid readonly array issues
+              size="sm" // Apply size after spreading inputProps to ensure correct type
               ref={valueInputRef} // Apply our ref last to ensure it's not overridden
             />
             <div style={{ flexShrink: 0, minWidth: 0, maxWidth: '100%' }}>
