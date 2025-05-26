@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { 
   TextField, 
@@ -51,20 +52,35 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
   const [localMeasurement, setLocalMeasurement] = useState<Measurement>(value);
   const [showTooltip, setShowTooltip] = useState(false);
 
+  // Check if the unit is valid for the current options
+  const mapUnit = (unit: Unit): Unit => {
+    // Check if the unit is already in the options
+    const exactMatch = unitOptions.find(option => option.value === unit);
+    if (exactMatch) return unit;
+    
+    // Default to the first option if no match is found
+    console.warn(`Unit ${unit} not found in options, using default`);
+    return unitOptions.length > 0 ? unitOptions[0].value : unit;
+  };
+
   // Sync local state with props
   useEffect(() => {
     if (value.value !== localMeasurement.value || value.unit !== localMeasurement.unit) {
-      setLocalMeasurement(value);
+      // Map the unit if needed
+      const mappedUnit = mapUnit(value.unit);
+      setLocalMeasurement({
+        ...value,
+        unit: mappedUnit
+      });
     }
-  }, [value]);
+  }, [value, unitOptions]);
 
   // Handle value change (numeric or clock)
   const handleValueChange = (newValue: number) => {
-    setLocalMeasurement(prev => {
-      const updated = { ...prev, value: newValue };
-      onChange(updated);
-      return updated;
-    });
+    const updated = { ...localMeasurement, value: newValue };
+    setLocalMeasurement(updated);
+    // Call onChange separately, not inside setState callback
+    onChange(updated);
   };
 
   // Handle unit change with conversion
@@ -94,11 +110,10 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
       }, 3000);
     } else {
       // Just update the unit without conversion
-      setLocalMeasurement(prev => {
-        const updated = { ...prev, unit: newUnit };
-        onChange(updated);
-        return updated;
-      });
+      const updated = { ...localMeasurement, unit: newUnit };
+      setLocalMeasurement(updated);
+      // Call onChange separately, not inside setState callback
+      onChange(updated);
     }
   };
 

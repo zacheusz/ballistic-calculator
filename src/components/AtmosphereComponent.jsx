@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Form } from 'react-bootstrap';
-import MeasurementInput from './MeasurementInput';
+import MeasurementInputMUI from './MeasurementInputMUI';
 
 const AtmosphereComponent = ({ 
   values, 
@@ -22,7 +22,7 @@ const AtmosphereComponent = ({
       <Card.Body>
         <Form.Group className="mb-3">
           <Form.Label>{t('calcTemperature')}</Form.Label>
-          <MeasurementInput
+          <MeasurementInputMUI
             value={values.atmosphere.temperature}
             onChange={(newMeasurement) => {
               handleAtmosphereChange('temperature', newMeasurement);
@@ -44,16 +44,16 @@ const AtmosphereComponent = ({
 
         <Form.Group className="mb-3">
           <Form.Label>{t('calcPressure')}</Form.Label>
-          <MeasurementInput
+          <MeasurementInputMUI
             value={values.atmosphere.pressure}
             onChange={(newMeasurement) => {
               handleAtmosphereChange('pressure', newMeasurement);
             }}
             unitOptions={[
-              { value: 'INHG', label: t('unitInHg') },
-              { value: 'MMHG', label: t('unitMmHg') },
-              { value: 'HPASCAL', label: t('unitHPa') },
-              { value: 'MBAR', label: t('unitMbar') }
+              // Use the exact unit names from the API for consistency
+              // The API uses INCHES_MERCURY and HECTOPASCALS for atmospheric pressure
+              { value: 'INCHES_MERCURY', label: t('unitInHg') },
+              { value: 'HECTOPASCALS', label: t('unitHPa') }
             ]}
             label={null}
             inputProps={{
@@ -100,7 +100,7 @@ const AtmosphereComponent = ({
 
         <Form.Group className="mb-3">
           <Form.Label>{t('calcAltitude')}</Form.Label>
-          <MeasurementInput
+          <MeasurementInputMUI
             value={values.atmosphere.altitude}
             onChange={(newMeasurement) => {
               handleAtmosphereChange('altitude', newMeasurement);
