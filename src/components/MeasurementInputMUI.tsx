@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { convertUnit } from '../utils/unitConversion';
 import ClockTimePicker from './ClockTimePicker.tsx';
 import { Measurement, Unit } from '../types/ballistics';
+import { MeasurementInputProps } from '../types/componentTypes';
 
 // Styled components for consistent styling
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -35,14 +36,7 @@ const StyledSelect = styled(Select)(() => ({
   },
 }));
 
-interface MeasurementInputProps {
-  value: Measurement;
-  onChange: (value: Measurement) => void;
-  unitOptions: Array<{ value: Unit; label: string }>;
-  label?: string;
-  disabled?: boolean;
-  inputProps?: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
-}
+// Using shared MeasurementInputProps interface from componentTypes.ts
 
 const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
   value,

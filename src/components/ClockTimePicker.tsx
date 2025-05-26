@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import dayjs, { Dayjs } from 'dayjs';
-
 import { styled } from '@mui/material/styles';
+import { ClockTimePickerProps } from '../types/componentTypes';
 
-interface ClockTimePickerProps {
-  value: number;
-  onChange: (value: number) => void;
-}
+// Using shared ClockTimePickerProps interface from componentTypes.ts
 
 // Styled component to match Bootstrap styling
 const StyledTimePicker = styled(TimePicker)(() => ({

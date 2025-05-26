@@ -3,15 +3,9 @@ import { Form } from 'react-bootstrap';
 import UnitSelectorWithConversion from './UnitSelectorWithConversion';
 import ClockTimePicker from './ClockTimePicker.tsx';
 import { Measurement, Unit } from '../types/ballistics';
+import { MeasurementInputProps } from '../types/componentTypes';
 
-interface MeasurementInputProps {
-  value: Measurement;
-  onChange: (value: Measurement) => void;
-  unitOptions: Array<{ value: Unit; label: string }>;
-  label?: string;
-  disabled?: boolean;
-  inputProps?: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
-}
+// Using shared MeasurementInputProps interface from componentTypes.ts
 
 const MeasurementInput: React.FC<MeasurementInputProps> = ({
   value,

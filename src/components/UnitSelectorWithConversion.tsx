@@ -1,31 +1,17 @@
-import React, { useState, RefObject } from 'react';
+import React, { useState } from 'react';
 import { Form, Overlay, Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { convertUnit } from '../utils/unitConversion';
 import './UnitSelectorWithConversion.css';
 import { Unit } from '../types/ballistics';
+import { UnitSelectorProps } from '../types/componentTypes';
 
-interface UnitOption {
-  value: Unit;
-  label: string;
-}
-
-interface UnitSelectorWithConversionProps {
-  fieldName: string;
-  value: Unit;
-  options: UnitOption[];
-  currentValue: number;
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onValueChange?: (value: number) => void;
-  onUnitAndValueChange?: (newUnit: Unit, convertedValue: number) => void;
-  targetRef: RefObject<HTMLInputElement | null>;
-  style?: React.CSSProperties;
-}
+// Using shared UnitSelectorProps interface from componentTypes.ts
 
 /**
  * UnitSelectorWithConversion - A component that handles unit selection with automatic value conversion
  */
-const UnitSelectorWithConversion: React.FC<UnitSelectorWithConversionProps> = ({ 
+const UnitSelectorWithConversion: React.FC<UnitSelectorProps> = ({ 
   fieldName, 
   value, 
   options, 
