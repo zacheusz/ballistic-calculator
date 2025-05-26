@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import '../i18n';
 
 import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
+import MeasurementInput from '../components/MeasurementInput';
 
 // Helper function to render unit selection dropdown with conversion
 const UnitSelector = ({ fieldName, value, onChange, options, currentValue, onValueChange, targetRef }) => (
@@ -42,6 +43,10 @@ const ConfigPage = () => {
   const bulletLengthInputRef = useRef(null);
   const bulletWeightInputRef = useRef(null);
   const muzzleVelocityInputRef = useRef(null);
+  
+  // Refs to track manual updates and prevent circular updates
+  const isUpdatingFirearmRef = useRef(false);
+  const isUpdatingAmmoRef = useRef(false);
 
   // Alias for UI compatibility
   const environment = apiStage;
@@ -63,7 +68,7 @@ const ConfigPage = () => {
       acc[mapping.unitTypeClassName] = mapping.unitName;
       return acc;
     }, {}) || {};
-  }, [ballPreferences]);
+  }, [ballPreferences?.unitPreferences?.unitMappings]);
   
   // For backward compatibility
   const calculationOptions = useMemo(() => ({
@@ -128,23 +133,70 @@ const debouncedUpdateApiKey = debounce((key) => {
         return JSON.stringify(prev) !== JSON.stringify(unitPreferences) ? {...unitPreferences} : prev;
       });
     }
+  }, [environment, unitPreferences]);
+  
+  // Separate useEffect for firearm profile to avoid unnecessary updates
+  useEffect(() => {
+    console.log('[DEBUG] firearmProfile useEffect triggered', {
+      firearmProfile,
+      localFirearm: firearm,
+      isUpdatingFirearm: isUpdatingFirearmRef.current
+    });
+    
+    // Skip if we're in the middle of a manual update
+    if (isUpdatingFirearmRef.current) {
+      console.log('[DEBUG] Skipping firearmProfile update because we are manually updating');
+      return;
+    }
     
     // Only update firearm if it exists and has changed
     if (firearmProfile && Object.keys(firearmProfile).length > 0) {
       setFirearm(prev => {
         // Only update if different to prevent unnecessary re-renders
-        return JSON.stringify(prev) !== JSON.stringify(firearmProfile) ? {...firearmProfile} : prev;
+        const shouldUpdate = JSON.stringify(prev) !== JSON.stringify(firearmProfile);
+        console.log('[DEBUG] Should update firearm state?', shouldUpdate);
+        
+        if (shouldUpdate) {
+          console.log('[DEBUG] Updating firearm state from store', firearmProfile);
+          return {...firearmProfile};
+        }
+        return prev;
       });
+    }
+  }, [firearmProfile]);  // Removed firearm from dependencies
+  
+  // Separate useEffect for ammo to avoid unnecessary updates
+  useEffect(() => {
+    console.log('[DEBUG] ammo useEffect triggered', {
+      ammo,
+      localAmmo: ammunition,
+      isUpdatingAmmo: isUpdatingAmmoRef.current
+    });
+    
+    // Skip if we're in the middle of a manual update
+    if (isUpdatingAmmoRef.current) {
+      console.log('[DEBUG] Skipping ammo update because we are manually updating');
+      return;
     }
     
     // Only update ammo if it exists and has changed
     if (ammo && Object.keys(ammo).length > 0) {
       setAmmunition(prev => {
         // Only update if different to prevent unnecessary re-renders
-        return JSON.stringify(prev) !== JSON.stringify(ammo) ? {...ammo} : prev;
+        const shouldUpdate = JSON.stringify(prev) !== JSON.stringify(ammo);
+        console.log('[DEBUG] Should update ammunition state?', shouldUpdate);
+        
+        if (shouldUpdate) {
+          console.log('[DEBUG] Updating ammunition state from store', ammo);
+          return {...ammo};
+        }
+        return prev;
       });
     }
-    
+  }, [ammo]);  // Removed ammunition from dependencies
+  
+  // Separate useEffect for calculation options
+  useEffect(() => {
     // Only update calculation options if they exist
     if (calculationOptions) {
       setCalcOptions(prev => {
@@ -152,7 +204,10 @@ const debouncedUpdateApiKey = debounce((key) => {
         return JSON.stringify(prev) !== JSON.stringify(calculationOptions) ? {...calculationOptions} : prev;
       });
     }
-    
+  }, [calculationOptions]);
+  
+  // Separate useEffect for display options
+  useEffect(() => {
     // Only update display options if they exist
     if (displayPreferences) {
       setDisplayOptionsState(prev => {
@@ -160,9 +215,7 @@ const debouncedUpdateApiKey = debounce((key) => {
         return JSON.stringify(prev) !== JSON.stringify(displayPreferences) ? {...displayPreferences} : prev;
       });
     }
-  // We're using JSON.stringify comparison inside the effect to prevent unnecessary updates,
-  // so it's safe to include these dependencies
-  }, [environment, unitPreferences, firearmProfile, ammo, calculationOptions, displayPreferences]);
+  }, [displayPreferences]);
 
   const handleUnitChange = (unitType, value) => {
     // Update the unit preferences in the ballistics store
@@ -186,7 +239,7 @@ const debouncedUpdateApiKey = debounce((key) => {
       unitPreferences: updatedUnitPreferences
     });
     
-    // Update local state
+    // Update local state immediately to prevent flickering
     setPreferences(prev => ({
       ...prev,
       [unitType]: value
@@ -215,14 +268,71 @@ const debouncedUpdateApiKey = debounce((key) => {
     });
   };
   
+  // Helper for measurement fields (sightHeight, barrelTwist)
+  const handleFirearmMeasurementChange = (field, measurement) => {
+    console.log(`[DEBUG] handleFirearmMeasurementChange called for ${field}`, {
+      oldValue: firearm[field],
+      newValue: measurement
+    });
+    
+    // Set flag to indicate we're manually updating - do this BEFORE any state updates
+    isUpdatingFirearmRef.current = true;
+    
+    // Update the firearm state with the new measurement
+    // This only updates the local state for this specific field
+    setFirearm(prev => {
+      // Only update if the value or unit has actually changed
+      if (prev[field]?.value === measurement.value && prev[field]?.unit === measurement.unit) {
+        return prev; // No change needed
+      }
+      
+      const updated = {
+        ...prev,
+        [field]: measurement
+      };
+      console.log(`[DEBUG] Updated firearm state for ${field}`, updated);
+      return updated;
+    });
+    
+    // We don't update global unit preferences when changing individual field units
+    // Each measurement field maintains its own unit independently
+    
+    // Keep the flag set for longer to ensure all updates complete
+    // We'll clear it after all the updates have had time to propagate
+    setTimeout(() => {
+      isUpdatingFirearmRef.current = false;
+      console.log(`[DEBUG] Cleared isUpdatingFirearmRef flag for ${field}`);
+    }, 1000);
+  };
+  
   // Use useEffect to update the firearmProfile in the store when firearm state changes
   useEffect(() => {
+    console.log('[DEBUG] firearm state change useEffect triggered', {
+      firearm,
+      firearmProfile,
+      isUpdatingFirearm: isUpdatingFirearmRef.current
+    });
+    
+    // Skip updates if we're in the middle of a manual update
+    if (isUpdatingFirearmRef.current) {
+      console.log('[DEBUG] Skipping firearmProfile store update because we are manually updating');
+      return;
+    }
+    
     // Only update if firearm has been initialized and is different from the current firearmProfile
     if (Object.keys(firearm).length > 0 && JSON.stringify(firearm) !== JSON.stringify(firearmProfile)) {
+      console.log('[DEBUG] Updating firearmProfile in store', firearm);
+      
       // Use a timeout to prevent the update from happening in the same render cycle
       const timeoutId = setTimeout(() => {
-        updateFirearmProfile(firearm);
-      }, 0);
+        // Check again if we're in the middle of a manual update before actually updating
+        if (!isUpdatingFirearmRef.current) {
+          console.log('[DEBUG] Actually updating firearmProfile in store now', firearm);
+          updateFirearmProfile(firearm);
+        } else {
+          console.log('[DEBUG] Cancelled firearmProfile store update because manual update started');
+        }
+      }, 300);
       
       return () => clearTimeout(timeoutId);
     }
@@ -248,14 +358,71 @@ const debouncedUpdateApiKey = debounce((key) => {
     });
   };
   
+  // Helper for measurement fields (diameter, length, mass, muzzleVelocity)
+  const handleAmmoMeasurementChange = (field, measurement) => {
+    console.log(`[DEBUG] handleAmmoMeasurementChange called for ${field}`, {
+      oldValue: ammunition[field],
+      newValue: measurement
+    });
+    
+    // Set flag to indicate we're manually updating - do this BEFORE any state updates
+    isUpdatingAmmoRef.current = true;
+    
+    // Update the ammunition state with the new measurement
+    // This only updates the local state for this specific field
+    setAmmunition(prev => {
+      // Only update if the value or unit has actually changed
+      if (prev[field]?.value === measurement.value && prev[field]?.unit === measurement.unit) {
+        return prev; // No change needed
+      }
+      
+      const updated = {
+        ...prev,
+        [field]: measurement
+      };
+      console.log(`[DEBUG] Updated ammunition state for ${field}`, updated);
+      return updated;
+    });
+    
+    // We don't update global unit preferences when changing individual field units
+    // Each measurement field maintains its own unit independently
+    
+    // Keep the flag set for longer to ensure all updates complete
+    // We'll clear it after all the updates have had time to propagate
+    setTimeout(() => {
+      isUpdatingAmmoRef.current = false;
+      console.log(`[DEBUG] Cleared isUpdatingAmmoRef flag for ${field}`);
+    }, 1000);
+  };
+  
   // Use useEffect to update the ammo in the store when ammunition state changes
   useEffect(() => {
+    console.log('[DEBUG] ammunition state change useEffect triggered', {
+      ammunition,
+      ammo,
+      isUpdatingAmmo: isUpdatingAmmoRef.current
+    });
+    
+    // Skip updates if we're in the middle of a manual update
+    if (isUpdatingAmmoRef.current) {
+      console.log('[DEBUG] Skipping ammo store update because we are manually updating');
+      return;
+    }
+    
     // Only update if ammunition has been initialized and is different from the current ammo
     if (Object.keys(ammunition).length > 0 && JSON.stringify(ammunition) !== JSON.stringify(ammo)) {
+      console.log('[DEBUG] Updating ammo in store', ammunition);
+      
       // Use a timeout to prevent the update from happening in the same render cycle
       const timeoutId = setTimeout(() => {
-        updateAmmo(ammunition);
-      }, 0);
+        // Check again if we're in the middle of a manual update before actually updating
+        if (!isUpdatingAmmoRef.current) {
+          console.log('[DEBUG] Actually updating ammo in store now', ammunition);
+          updateAmmo(ammunition);
+        } else {
+          console.log('[DEBUG] Cancelled ammo store update because manual update started');
+        }
+      }, 300);
       
       return () => clearTimeout(timeoutId);
     }
@@ -511,55 +678,37 @@ const debouncedUpdateApiKey = debounce((key) => {
 
                       <Form.Group className="mb-3">
                         <Form.Label>{t('sightHeight')}</Form.Label>
-                        <div className="d-flex align-items-center">
-                          <Form.Control
-                            type="number"
-                            step="0.001"
-                            value={firearm.sightHeight.value}
-                            onChange={(e) => handleFirearmChange('sightHeight.value', parseFloat(e.target.value))}
-                            className="me-2"
-                            ref={sightHeightInputRef}
-                          />
-                          <UnitSelector
-                            fieldName="sightHeight.unit"
-                            value={firearm.sightHeight.unit}
-                            onChange={(e) => handleFirearmChange('sightHeight.unit', e.target.value)}
-                            options={[
-                              { value: 'INCHES', label: t('inches') },
-                              { value: 'CENTIMETERS', label: t('centimeters') },
-                              { value: 'MILLIMETERS', label: t('millimeters') }
-                            ]}
-                            currentValue={firearm.sightHeight.value}
-                            onValueChange={(newValue) => handleFirearmChange('sightHeight.value', newValue)}
-                            targetRef={sightHeightInputRef}
-                          />
-                        </div>
+                        <MeasurementInput
+                          value={firearm.sightHeight}
+                          onChange={(newMeasurement) => handleFirearmMeasurementChange('sightHeight', newMeasurement)}
+                          unitOptions={[
+                            { value: 'INCHES', label: t('inches') },
+                            { value: 'CENTIMETERS', label: t('centimeters') },
+                            { value: 'MILLIMETERS', label: t('millimeters') }
+                          ]}
+                          label={null}
+                          inputProps={{
+                            step: "0.001",
+                            ref: sightHeightInputRef
+                          }}
+                        />
                       </Form.Group>
 
                       <Form.Group className="mb-3">
                         <Form.Label>{t('barrelTwist')}</Form.Label>
-                        <div className="d-flex align-items-center">
-                          <Form.Control
-                            type="number"
-                            value={firearm.barrelTwist.value}
-                            onChange={(e) => handleFirearmChange('barrelTwist.value', parseFloat(e.target.value))}
-                            className="me-2"
-                            ref={barrelTwistInputRef}
-                          />
-                          <UnitSelector
-                            fieldName="barrelTwist.unit"
-                            value={firearm.barrelTwist.unit}
-                            onChange={(e) => handleFirearmChange('barrelTwist.unit', e.target.value)}
-                            options={[
-                              { value: 'INCHES', label: t('inches') },
-                              { value: 'CENTIMETERS', label: t('centimeters') },
-                              { value: 'MILLIMETERS', label: t('millimeters') }
-                            ]}
-                            currentValue={firearm.barrelTwist.value}
-                            onValueChange={(newValue) => handleFirearmChange('barrelTwist.value', newValue)}
-                            targetRef={barrelTwistInputRef}
-                          />
-                        </div>
+                        <MeasurementInput
+                          value={firearm.barrelTwist}
+                          onChange={(newMeasurement) => handleFirearmMeasurementChange('barrelTwist', newMeasurement)}
+                          unitOptions={[
+                            { value: 'INCHES', label: t('inches') },
+                            { value: 'CENTIMETERS', label: t('centimeters') },
+                            { value: 'MILLIMETERS', label: t('millimeters') }
+                          ]}
+                          label={null}
+                          inputProps={{
+                            ref: barrelTwistInputRef
+                          }}
+                        />
                       </Form.Group>
 
                       <Form.Group className="mb-3">
@@ -629,56 +778,38 @@ const debouncedUpdateApiKey = debounce((key) => {
 
                       <Form.Group className="mb-3">
                         <Form.Label>{t('bulletDiameter')}</Form.Label>
-                        <div className="d-flex align-items-center">
-                          <Form.Control
-                            type="number"
-                            step="0.001"
-                            value={ammunition.diameter?.value || 0}
-                            onChange={(e) => handleAmmoChange('diameter.value', parseFloat(e.target.value))}
-                            className="me-2"
-                            ref={bulletDiameterInputRef}
-                          />
-                          <UnitSelector
-                            fieldName="diameter.unit"
-                            value={ammunition.diameter?.unit || 'INCHES'}
-                            onChange={(e) => handleAmmoChange('diameter.unit', e.target.value)}
-                            options={[
-                              { value: 'INCHES', label: t('inches') },
-                              { value: 'CENTIMETERS', label: t('centimeters') },
-                              { value: 'MILLIMETERS', label: t('millimeters') }
-                            ]}
-                            currentValue={ammunition.diameter?.value || 0}
-                            onValueChange={(newValue) => handleAmmoChange('diameter.value', newValue)}
-                            targetRef={bulletDiameterInputRef}
-                          />
-                        </div>
+                        <MeasurementInput
+                          value={ammunition.diameter || { value: 0, unit: 'INCHES' }}
+                          onChange={(newMeasurement) => handleAmmoMeasurementChange('diameter', newMeasurement)}
+                          unitOptions={[
+                            { value: 'INCHES', label: t('inches') },
+                            { value: 'CENTIMETERS', label: t('centimeters') },
+                            { value: 'MILLIMETERS', label: t('millimeters') }
+                          ]}
+                          label={null}
+                          inputProps={{
+                            step: "0.001",
+                            ref: bulletDiameterInputRef
+                          }}
+                        />
                       </Form.Group>
 
                       <Form.Group className="mb-3">
                         <Form.Label>{t('bulletLength')}</Form.Label>
-                        <div className="d-flex align-items-center">
-                          <Form.Control
-                            type="number"
-                            step="0.001"
-                            value={ammunition.length?.value || 1.305}
-                            onChange={(e) => handleAmmoChange('length.value', parseFloat(e.target.value))}
-                            className="me-2"
-                            ref={bulletLengthInputRef}
-                          />
-                          <UnitSelector
-                            fieldName="length.unit"
-                            value={ammunition.length?.unit || 'INCHES'}
-                            onChange={(e) => handleAmmoChange('length.unit', e.target.value)}
-                            options={[
-                              { value: 'INCHES', label: t('inches') },
-                              { value: 'CENTIMETERS', label: t('centimeters') },
-                              { value: 'MILLIMETERS', label: t('millimeters') }
-                            ]}
-                            currentValue={ammunition.length?.value || 1.305}
-                            onValueChange={(newValue) => handleAmmoChange('length.value', newValue)}
-                            targetRef={bulletLengthInputRef}
-                          />
-                        </div>
+                        <MeasurementInput
+                          value={ammunition.length || { value: 1.305, unit: 'INCHES' }}
+                          onChange={(newMeasurement) => handleAmmoMeasurementChange('length', newMeasurement)}
+                          unitOptions={[
+                            { value: 'INCHES', label: t('inches') },
+                            { value: 'CENTIMETERS', label: t('centimeters') },
+                            { value: 'MILLIMETERS', label: t('millimeters') }
+                          ]}
+                          label={null}
+                          inputProps={{
+                            step: "0.001",
+                            ref: bulletLengthInputRef
+                          }}
+                        />
                         <Form.Text className="text-muted">
                           {t('bulletLengthRequired')}
                         </Form.Text>
@@ -686,76 +817,53 @@ const debouncedUpdateApiKey = debounce((key) => {
 
                       <Form.Group className="mb-3">
                         <Form.Label>{t('bulletWeight')}</Form.Label>
-                        <div className="d-flex align-items-center">
-                          <Form.Control
-                            type="number"
-                            step="0.1"
-                            value={ammunition.mass?.value || 0}
-                            onChange={(e) => handleAmmoChange('mass.value', parseFloat(e.target.value))}
-                            className="me-2"
-                            ref={bulletWeightInputRef}
-                          />
-                          <UnitSelector
-                            fieldName="mass.unit"
-                            value={ammunition.mass?.unit || 'GRAINS'}
-                            onChange={(e) => handleAmmoChange('mass.unit', e.target.value)}
-                            options={[
-                              { value: 'GRAINS', label: t('grains') },
-                              { value: 'GRAMS', label: t('grams') }
-                            ]}
-                            currentValue={ammunition.mass?.value || 0}
-                            onValueChange={(newValue) => handleAmmoChange('mass.value', newValue)}
-                            targetRef={bulletWeightInputRef}
-                          />
-                        </div>
+                        <MeasurementInput
+                          value={ammunition.mass || { value: 0, unit: 'GRAINS' }}
+                          onChange={(newMeasurement) => handleAmmoMeasurementChange('mass', newMeasurement)}
+                          unitOptions={[
+                            { value: 'GRAINS', label: t('grains') },
+                            { value: 'GRAMS', label: t('grams') }
+                          ]}
+                          label={null}
+                          inputProps={{
+                            step: "0.1",
+                            ref: bulletWeightInputRef
+                          }}
+                        />
                       </Form.Group>
 
                       <Form.Group className="mb-3">
                         <Form.Label>{t('muzzleVelocity')}</Form.Label>
-                        <div className="d-flex align-items-center">
-                          <Form.Control
-                            type="number"
-                            step="1"
-                            value={ammunition.muzzleVelocity?.value || 0}
-                            onChange={(e) => handleAmmoChange('muzzleVelocity.value', parseFloat(e.target.value))}
-                            className="me-2"
-                            ref={muzzleVelocityInputRef}
-                          />
-                          <UnitSelector
-                            fieldName="muzzleVelocity.unit"
-                            value={ammunition.muzzleVelocity?.unit || 'FEET_PER_SECOND'}
-                            onChange={(e) => handleAmmoChange('muzzleVelocity.unit', e.target.value)}
-                            options={[
-                              { value: 'FEET_PER_SECOND', label: t('feetPerSecond') },
-                              { value: 'METERS_PER_SECOND', label: t('metersPerSecond') }
-                            ]}
-                            currentValue={ammunition.muzzleVelocity?.value || 0}
-                            onValueChange={(newValue) => handleAmmoChange('muzzleVelocity.value', newValue)}
-                            targetRef={muzzleVelocityInputRef}
-                          />
-                        </div>
+                        <MeasurementInput
+                          value={ammunition.muzzleVelocity || { value: 0, unit: 'FEET_PER_SECOND' }}
+                          onChange={(newMeasurement) => handleAmmoMeasurementChange('muzzleVelocity', newMeasurement)}
+                          unitOptions={[
+                            { value: 'FEET_PER_SECOND', label: t('feetPerSecond') },
+                            { value: 'METERS_PER_SECOND', label: t('metersPerSecond') }
+                          ]}
+                          label={null}
+                          inputProps={{
+                            step: "1",
+                            ref: muzzleVelocityInputRef
+                          }}
+                        />
                       </Form.Group>
 
                       <Form.Group className="mb-3">
                         <Form.Label>{t('zeroRange')}</Form.Label>
-                        <div className="d-flex align-items-center">
-                          <Form.Control
-                            type="number"
-                            value={ammunition.zeroRange.value}
-                            onChange={(e) => handleAmmoChange('zeroRange.value', parseFloat(e.target.value))}
-                            className="me-2"
-                          />
-                          <UnitSelector
-                            fieldName="zeroRange.unit"
-                            value={ammunition.zeroRange.unit}
-                            onChange={(e) => handleAmmoChange('zeroRange.unit', e.target.value)}
-                            options={[
-                              { value: 'YARDS', label: t('yards') },
-                              { value: 'METERS', label: t('meters') },
-                              { value: 'FEET', label: t('feet') }
-                            ]}
-                          />
-                        </div>
+                        <MeasurementInput
+                          value={ammunition.zeroRange}
+                          onChange={(newMeasurement) => handleAmmoMeasurementChange('zeroRange', newMeasurement)}
+                          unitOptions={[
+                            { value: 'YARDS', label: t('yards') },
+                            { value: 'METERS', label: t('meters') },
+                            { value: 'FEET', label: t('feet') }
+                          ]}
+                          label={null}
+                          inputProps={{
+                            step: "1"
+                          }}
+                        />
                       </Form.Group>
                     </Card.Body>
                   </Card>
