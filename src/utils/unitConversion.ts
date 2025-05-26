@@ -28,8 +28,10 @@ export const CONVERSION_FACTORS = {
   
   // Pressure units - Base unit: INCHES_MERCURY
   INHG: 1.0,
+  INCHES_MERCURY: 1.0,    // OpenAPI spec name for INHG
   MMHG: 0.03937008,       // 1 mmHg = 0.03937008 inHg
   HPASCAL: 0.0295333727,  // 1 hPa = 0.0295333727 inHg
+  HECTOPASCALS: 0.0295333727, // OpenAPI spec name for HPASCAL
   MBAR: 0.0295333727,     // 1 mbar = 1 hPa = 0.0295333727 inHg
   
   // Energy units - Base unit: FOOT_POUNDS
