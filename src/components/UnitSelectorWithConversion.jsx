@@ -19,10 +19,9 @@ import './UnitSelectorWithConversion.css';
 const UnitSelectorWithConversion = ({ 
   fieldName, 
   value, 
-  onChange, 
   options, 
   currentValue,
-  onValueChange,
+  onUnitAndValueChange,
   targetRef
 }) => {
   const { t } = useTranslation();
@@ -41,8 +40,10 @@ const UnitSelectorWithConversion = ({
       // Round to 4 decimal places for better display
       const roundedValue = Math.round(convertedValue * 10000) / 10000;
       
-      // Update the value with the converted one
-      onValueChange(roundedValue);
+      // Call the parent's handler with both new unit and converted value
+      if (onUnitAndValueChange) {
+        onUnitAndValueChange(newUnit, roundedValue);
+      }
       
       // Show the tooltip notification
       setShowTooltip(true);
@@ -52,10 +53,8 @@ const UnitSelectorWithConversion = ({
         setShowTooltip(false);
       }, 5000);
     }
-    
-    // Call the original onChange handler
-    onChange(e);
   };
+
   
   return (
     <>
