@@ -1,7 +1,19 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Button, Card, Spinner, Alert, Table, Form } from 'react-bootstrap';
+import { useNavigate, Link } from 'react-router-dom';
+import { 
+  Container, 
+  Grid, 
+  Button, 
+  Card, 
+  CardHeader, 
+  CardContent, 
+  Typography, 
+  Box, 
+  CircularProgress, 
+  Alert, 
+  AlertTitle 
+} from '@mui/material';
 import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
@@ -329,17 +341,24 @@ const CalculatorPage = () => {
   };
 
   return (
-    <Container className="my-4">
-      <h1 className="text-center mb-4">{t('calcTitle')}</h1>
+    <Container maxWidth="lg" sx={{ my: 4 }}>
+      <Typography variant="h4" align="center" sx={{ mb: 4 }}>
+        {t('calcTitle')}
+      </Typography>
 
-      { !isConfigured && (
-        <Alert variant="warning">
+      {!isConfigured && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          <AlertTitle>{t('warning')}</AlertTitle>
           {t('calcConfigAlert')}
         </Alert>
       )}
 
-      <Alert variant="info" className="mb-4">
-        <strong>{t('calcNote')}:</strong> {t('calcNoteText')} <a href="/config">{t('calcConfigPageLink')}</a>.
+      <Alert severity="info" sx={{ mb: 4 }}>
+        <AlertTitle>{t('info')}</AlertTitle>
+        <Typography component="span">
+          <strong>{t('calcNote')}:</strong> {t('calcNoteText')}{' '}
+          <Link to="/config">{t('calcConfigPageLink')}</Link>.
+        </Typography>
       </Alert>
 
       <Formik
@@ -350,55 +369,60 @@ const CalculatorPage = () => {
       >
         {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue }) => (
           <FormikForm>
-            <Row>
-              <Col md={6}>
-                <AtmosphereComponent
-                  values={values}
-                  handleBlur={handleBlur}
-                  handleChange={handleChange}
-                  handleAtmosphereChange={handleAtmosphereChange}
-                  handleAtmosphereSimpleChange={handleAtmosphereSimpleChange}
-                  loading={loading}
-                  temperatureInputRef={temperatureInputRef}
-                  pressureInputRef={pressureInputRef}
-                  altitudeInputRef={altitudeInputRef}
-                />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Two-column layout container for desktop */}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+                {/* Left column for Atmosphere and Mode components */}
+                <Box sx={{ width: { xs: '100%', md: '50%' } }}>
+                  <AtmosphereComponent
+                    values={values}
+                    handleBlur={handleBlur}
+                    handleChange={handleChange}
+                    handleAtmosphereChange={handleAtmosphereChange}
+                    handleAtmosphereSimpleChange={handleAtmosphereSimpleChange}
+                    loading={loading}
+                    temperatureInputRef={temperatureInputRef}
+                    pressureInputRef={pressureInputRef}
+                    altitudeInputRef={altitudeInputRef}
+                  />
 
-                <ModeComponent
-                  mode={mode}
-                  onModeChange={setMode}
-                  rangeCardStart={rangeCardStart}
-                  onRangeCardStartChange={setRangeCardStart}
-                  rangeCardStep={rangeCardStep}
-                  onRangeCardStepChange={setRangeCardStep}
-                  unit={rangeCardUnit}
-                  onUnitChange={setRangeCardUnit}
-                />
-              </Col>
-              <Col md={6}>
-                <ShotComponent
-                  values={values}
-                  handleBlur={handleBlur}
-                  handleShotChange={handleShotChange}
-                  setFieldValue={setFieldValue}
-                  loading={loading}
-                  errors={errors}
-                  touched={touched}
-                  calculationOptions={calculationOptions}
-                  rangeInputRef={rangeInputRef}
-                  elevationAngleInputRef={elevationAngleInputRef}
-                  getWindSegmentRef={getWindSegmentRef}
-                />
-              </Col>
-            </Row>
-
-            <Row className="mt-4 mb-4">
-              <Col>
-                <Button 
-                  type="submit" 
-                  variant="primary" 
-                  size="lg"
-                  className="w-100" 
+                  <ModeComponent
+                    mode={mode}
+                    onModeChange={setMode}
+                    rangeCardStart={rangeCardStart}
+                    onRangeCardStartChange={setRangeCardStart}
+                    rangeCardStep={rangeCardStep}
+                    onRangeCardStepChange={setRangeCardStep}
+                    unit={rangeCardUnit}
+                    onUnitChange={setRangeCardUnit}
+                  />
+                </Box>
+                
+                {/* Right column for Shot component */}
+                <Box sx={{ width: { xs: '100%', md: '50%' } }}>
+                  <ShotComponent
+                    values={values}
+                    handleBlur={handleBlur}
+                    handleShotChange={handleShotChange}
+                    setFieldValue={setFieldValue}
+                    loading={loading}
+                    errors={errors}
+                    touched={touched}
+                    calculationOptions={calculationOptions}
+                    rangeInputRef={rangeInputRef}
+                    elevationAngleInputRef={elevationAngleInputRef}
+                    getWindSegmentRef={getWindSegmentRef}
+                  />
+                </Box>
+              </Box>
+              
+              {/* Full width for the Calculate button */}
+              <Box sx={{ width: '100%', mt: 2, mb: 4 }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  fullWidth
                   disabled={isSubmitting || !isConfigured || loading}
                   title={!isConfigured ? t('pleaseConfigureApiKey') : ''}
                   onClick={() => {
@@ -412,84 +436,59 @@ const CalculatorPage = () => {
                 >
                   {loading ? (
                     <>
-                      <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                      {' '}{t('calcComputing')}
+                      <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                      {t('calcComputing')}
                     </>
                   ) : t('calcCalculateBallistics')}
                 </Button>
-              </Col>
-            </Row>
+              </Box>
+            </Box>
           </FormikForm>
         )}
       </Formik>
 
       {error && (
-        <Alert variant="danger" className="mt-4">
-          {error}
-        </Alert>
+        <Box sx={{ mt: 4 }}>
+          <Alert severity="error">
+            <AlertTitle>{t('error')}</AlertTitle>
+            {error}
+          </Alert>
+        </Box>
       )}
 
       {results && results.solutions && results.solutions.length > 0 && (
-        <Card className="mt-4" id="results">
-          <Card.Header as="h5">{t('calcBallisticSolution')}</Card.Header>
-          <Card.Body>
-            {/* Traditional Table View (Commented out but kept for reference) */}
-            {/* <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Range</th>
-                  <th>Elevation</th>
-                  <th>Windage</th>
-                  <th>Drop</th>
-                  <th>Wind Drift</th>
-                  <th>Velocity</th>
-                  <th>Energy</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.solutions.map((solution, index) => (
-                  <tr key={index}>
-                    <td>{solution.range.value.toFixed(1)} {solution.range.unit}</td>
-                    <td>{solution.verticalAdjustment.value.toFixed(2)} {solution.verticalAdjustment.unit}</td>
-                    <td>{solution.horizontalAdjustment.value.toFixed(2)} {solution.horizontalAdjustment.unit}</td>
-                    <td>{solution.drop.value.toFixed(2)} {solution.drop.unit}</td>
-                    <td>{solution.wind.value.toFixed(2)} {solution.wind.unit}</td>
-                    <td>{solution.velocity.value.toFixed(0)} {solution.velocity.unit}</td>
-                    <td>{solution.energy.value.toFixed(0)} {solution.energy.unit}</td>
-                    <td>{solution.time.toFixed(2)} s</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table> */}
-            
-            {/* MUI X Data Grid View */}
-            <BallisticsResultsGrid 
-              results={results.solutions.map(solution => ({
-                range: solution.range.value,
-                verticalAdjustment: solution.verticalAdjustment.value,
-                horizontalAdjustment: solution.horizontalAdjustment.value,
-                drop: solution.drop.value,
-                wind: solution.wind.value,
-                velocity: solution.velocity.value,
-                energy: solution.energy.value,
-                time: solution.time,
-                mach: solution.mach,
-                spinDrift: solution.spinDrift.value,
-                coroDrift: solution.coroDrift.value,
-                lead: solution.lead.value,
-                aeroJump: solution.aeroJump.value
-              }))}
-              unitPreferences={{
-                Range: results.solutions[0]?.range.unit,
-                ScopeAdjustment: results.solutions[0]?.verticalAdjustment.unit,
-                BulletVelocity: results.solutions[0]?.velocity.unit,
-                BulletEnergy: results.solutions[0]?.energy.unit,
-                TimeOfFlight: 'SECONDS'
-              }}
-            />
-          </Card.Body>
-        </Card>
+        <Box sx={{ mt: 4 }} id="results">
+          <Card>
+            <CardHeader title={t('calcBallisticSolution')} />
+            <CardContent>
+              {/* MUI X Data Grid View */}
+              <BallisticsResultsGrid 
+                results={results.solutions.map(solution => ({
+                  range: solution.range.value,
+                  verticalAdjustment: solution.verticalAdjustment.value,
+                  horizontalAdjustment: solution.horizontalAdjustment.value,
+                  drop: solution.drop.value,
+                  wind: solution.wind.value,
+                  velocity: solution.velocity.value,
+                  energy: solution.energy.value,
+                  time: solution.time,
+                  mach: solution.mach,
+                  spinDrift: solution.spinDrift.value,
+                  coroDrift: solution.coroDrift.value,
+                  lead: solution.lead.value,
+                  aeroJump: solution.aeroJump.value
+                }))}
+                unitPreferences={{
+                  Range: results.solutions[0]?.range.unit,
+                  ScopeAdjustment: results.solutions[0]?.verticalAdjustment.unit,
+                  BulletVelocity: results.solutions[0]?.velocity.unit,
+                  BulletEnergy: results.solutions[0]?.energy.unit,
+                  TimeOfFlight: 'SECONDS'
+                }}
+              />
+            </CardContent>
+          </Card>
+        </Box>
       )}
     </Container>
   );
