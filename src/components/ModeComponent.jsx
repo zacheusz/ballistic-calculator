@@ -52,10 +52,10 @@ const ModeComponent = ({
       <CardContent>
         <StyledFormControl component="fieldset" fullWidth>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <StyledFormLabel>{t('calcCalculationMode')}</StyledFormLabel>
             </Grid>
-            <Grid item xs={12} sm={8}>
+            <Grid size={{ xs: 12, sm: 8 }}>
               <RadioGroup
                 row
                 name="displayMode"
@@ -81,10 +81,10 @@ const ModeComponent = ({
           <>
             <StyledFormControl fullWidth>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <StyledFormLabel>{t('calcRangeCardStart')}</StyledFormLabel>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid size={{ xs: 12, sm: 8 }}>
                   <MeasurementInputMUI
                     value={{ value: Number(rangeCardStart) || 0, unit: startUnit }}
                     onChange={(newMeasurement) => {
@@ -112,10 +112,10 @@ const ModeComponent = ({
             </StyledFormControl>
             <StyledFormControl fullWidth>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <StyledFormLabel>{t('calcRangeCardStep')}</StyledFormLabel>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid size={{ xs: 12, sm: 8 }}>
                   <MeasurementInputMUI
                     value={{ value: Number(rangeCardStep) || 0, unit: stepUnit }}
                     onChange={(newMeasurement) => {
