@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form, Button } from 'react-bootstrap';
-import MeasurementInput from './MeasurementInput';
+import MeasurementInputMUI from './MeasurementInputMUI';
 import { WindSegment } from '../types/ballistics';
 
 interface WindSegmentComponentProps {
@@ -47,7 +47,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
           <h6>{t('calcWindSegment')} {index + 1}</h6>
           <Form.Group className="mb-3">
             <Form.Label>{t('calcMaxRange')}</Form.Label>
-            <MeasurementInput
+            <MeasurementInputMUI
               value={segment.maxRange}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.maxRange`, newMeasurement)}
               unitOptions={[
@@ -69,7 +69,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
 
           <Form.Group className="mb-3">
             <Form.Label>{t('calcWindSpeed')}</Form.Label>
-            <MeasurementInput
+            <MeasurementInputMUI
               value={segment.speed}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.speed`, newMeasurement)}
               unitOptions={[
@@ -91,7 +91,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
 
           <Form.Group className="mb-3">
             <Form.Label>{t('calcWindDirection')}</Form.Label>
-            <MeasurementInput
+            <MeasurementInputMUI
               value={segment.direction}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.direction`, newMeasurement)}
               unitOptions={[
@@ -115,7 +115,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
 
           <Form.Group className="mb-3">
             <Form.Label>{t('calcVerticalComponent')}</Form.Label>
-            <MeasurementInput
+            <MeasurementInputMUI
               value={segment.verticalComponent || { value: 0, unit: segment.speed.unit }}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.verticalComponent`, newMeasurement)}
               unitOptions={[

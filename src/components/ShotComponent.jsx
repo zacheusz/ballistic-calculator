@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Form } from 'react-bootstrap';
-import MeasurementInput from './MeasurementInput';
+import MeasurementInputMUI from './MeasurementInputMUI';
 import WindSegmentComponent from './WindSegmentComponent';
 
 const ShotComponent = ({
@@ -25,7 +25,7 @@ const ShotComponent = ({
       <Card.Body>
         <Form.Group className="mb-3">
           <Form.Label>{t('calcRange')}</Form.Label>
-          <MeasurementInput
+          <MeasurementInputMUI
             label={null}
             value={values.shot.range}
             unitOptions={[
@@ -52,7 +52,7 @@ const ShotComponent = ({
 
         <Form.Group className="mb-3">
           <Form.Label>{t('calcElevationAngle')}</Form.Label>
-          <MeasurementInput
+          <MeasurementInputMUI
             value={values.shot.elevationAngle}
             onChange={(newMeasurement) => {
               handleShotChange('elevationAngle', newMeasurement);
@@ -77,7 +77,7 @@ const ShotComponent = ({
           <>
             <Form.Group className="mb-3">
               <Form.Label>{t('shotAzimuth')}</Form.Label>
-              <MeasurementInput
+              <MeasurementInputMUI
                 value={values.shot.azimuth}
                 onChange={(newMeasurement) => {
                   handleShotChange('azimuth', newMeasurement);
@@ -96,7 +96,7 @@ const ShotComponent = ({
 
             <Form.Group className="mb-3">
               <Form.Label>{t('shooterLatitude')}</Form.Label>
-              <MeasurementInput
+              <MeasurementInputMUI
                 value={values.shot.latitude}
                 onChange={(newMeasurement) => {
                   handleShotChange('latitude', newMeasurement);
