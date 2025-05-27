@@ -137,6 +137,9 @@ const debouncedUpdateApiKey = debounce((key) => {
   
   // Separate useEffect for firearm profile to avoid unnecessary updates
   useEffect(() => {
+    // Create a ref to track the current execution of this effect
+    const isCurrentlyRunning = { current: true };
+    
     console.log('[DEBUG] firearmProfile useEffect triggered', {
       firearmProfile,
       localFirearm: firearm,
@@ -152,6 +155,9 @@ const debouncedUpdateApiKey = debounce((key) => {
     // Only update firearm if it exists and has changed
     if (firearmProfile && Object.keys(firearmProfile).length > 0) {
       setFirearm(prev => {
+        // Only proceed if this effect is still relevant
+        if (!isCurrentlyRunning.current) return prev;
+        
         // Only update if different to prevent unnecessary re-renders
         const shouldUpdate = JSON.stringify(prev) !== JSON.stringify(firearmProfile);
         console.log('[DEBUG] Should update firearm state?', shouldUpdate);
@@ -163,10 +169,18 @@ const debouncedUpdateApiKey = debounce((key) => {
         return prev;
       });
     }
-  }, [firearmProfile]);  // Removed firearm from dependencies
+    
+    // Cleanup function to prevent state updates if the dependencies change before the effect completes
+    return () => {
+      isCurrentlyRunning.current = false;
+    };
+  }, [firearmProfile, firearm, isUpdatingFirearmRef]); // Include all dependencies
   
   // Separate useEffect for ammo to avoid unnecessary updates
   useEffect(() => {
+    // Create a ref to track the current execution of this effect
+    const isCurrentlyRunning = { current: true };
+    
     console.log('[DEBUG] ammo useEffect triggered', {
       ammo,
       localAmmo: ammunition,
@@ -182,6 +196,9 @@ const debouncedUpdateApiKey = debounce((key) => {
     // Only update ammo if it exists and has changed
     if (ammo && Object.keys(ammo).length > 0) {
       setAmmunition(prev => {
+        // Only proceed if this effect is still relevant
+        if (!isCurrentlyRunning.current) return prev;
+        
         // Only update if different to prevent unnecessary re-renders
         const shouldUpdate = JSON.stringify(prev) !== JSON.stringify(ammo);
         console.log('[DEBUG] Should update ammunition state?', shouldUpdate);
@@ -193,7 +210,12 @@ const debouncedUpdateApiKey = debounce((key) => {
         return prev;
       });
     }
-  }, [ammo]);  // Removed ammunition from dependencies
+    
+    // Cleanup function to prevent state updates if the dependencies change before the effect completes
+    return () => {
+      isCurrentlyRunning.current = false;
+    };
+  }, [ammo, ammunition, isUpdatingAmmoRef]); // Include all dependencies
   
   // Separate useEffect for calculation options
   useEffect(() => {
