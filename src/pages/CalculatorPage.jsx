@@ -10,7 +10,6 @@ import api from '../services/api';
 import configService from '../services/configService';
 import { STORAGE_KEYS } from '../services/storageService';
 import ClockTimePicker from '../components/ClockTimePicker.tsx';
-import MeasurementInput from '../components/MeasurementInput';
 import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
 import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion.tsx';
 // Import new components
@@ -57,41 +56,6 @@ const validationSchema = Yup.object({
     }),
   }),
 });
-
-// Custom UnitSelector component that wraps UnitSelectorWithConversion
-const UnitSelector = ({
-  fieldName,
-  value,
-  onChange,
-  options,
-  currentValue,
-  onValueChange,
-  targetRef,
-  setFieldValue // Add setFieldValue from Formik
-}) => (
-  <UnitSelectorWithConversion
-    fieldName={fieldName}
-    value={value}
-    onChange={(e) => {
-      // Call the original onChange handler
-      onChange(e);
-    }}
-    options={options}
-    currentValue={currentValue}
-    onValueChange={(newValue) => {
-      // Update the value in the state
-      onValueChange(newValue);
-      
-      // Also update the Formik form value
-      if (setFieldValue) {
-        // Extract the field name from the full path (e.g., 'shot.range.value' from 'shot.range.unit')
-        const valuePath = fieldName.replace(/\.unit$/, '.value');
-        setFieldValue(valuePath, newValue);
-      }
-    }}
-    targetRef={targetRef}
-  />
-);
 
 const CalculatorPage = () => {
   const { t } = useTranslation();
