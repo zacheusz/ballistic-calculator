@@ -401,17 +401,25 @@ const handleShotChange = (field: string, value: any): void => {
       </Typography>
 
       {!isConfigured && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          <AlertTitle>{t('warning')}</AlertTitle>
+        <Alert 
+          severity="warning" 
+          variant="outlined"
+          sx={{ mb: 2 }}
+        >
           {t('calcConfigAlert')}
         </Alert>
       )}
 
-      <Alert severity="info" sx={{ mb: 4 }}>
-        <AlertTitle>{t('info')}</AlertTitle>
+      <Alert 
+        severity="info" 
+        variant="outlined"
+        sx={{ mb: 4 }}
+      >
         <Typography component="span">
           <strong>{t('calcNote')}:</strong> {t('calcNoteText')}{' '}
-          <Link to="/config">{t('calcConfigPageLink')}</Link>.
+          <Link to="/config">
+            {t('calcConfigPageLink')}
+          </Link>.
         </Typography>
       </Alert>
 
