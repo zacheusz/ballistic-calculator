@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo, RefObject } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useReducer, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Container, 
-  Grid, 
   Button, 
   Card, 
   CardHeader, 
@@ -14,29 +13,36 @@ import {
   Alert, 
   AlertTitle 
 } from '@mui/material';
-import { Formik, Form as FormikForm, FormikHelpers, FormikErrors, FormikTouched } from 'formik';
+import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
-import api from '../services/api';
-import configService from '../services/configService';
-import { STORAGE_KEYS } from '../services/storageService';
-import ClockTimePicker from '../components/ClockTimePicker';
-import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
-import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
-// Import new components
-import AtmosphereComponent from '../components/AtmosphereComponent';
-import ShotComponent from '../components/ShotComponent';
-import ModeComponent from '../components/ModeComponent';
+// Import services with type assertions for JavaScript modules
+import apiModule from '../services/api';
+import configServiceModule from '../services/configService';
+
+// Import components with type assertions for JSX components
+// These are still in JSX format and will be converted to TSX in future improvements
+import BallisticsResultsGridModule from '../components/BallisticsResultsGrid';
+import AtmosphereComponentModule from '../components/AtmosphereComponent';
+import ShotComponentModule from '../components/ShotComponent';
+import ModeComponentModule from '../components/ModeComponent';
+
+// Type assertions for better TypeScript compatibility
+const api = apiModule as any;
+const configService = configServiceModule as any;
+const BallisticsResultsGrid = BallisticsResultsGridModule as React.FC<any>;
+const AtmosphereComponent = AtmosphereComponentModule as React.FC<any>;
+const ShotComponent = ShotComponentModule as React.FC<any>;
+const ModeComponent = ModeComponentModule as React.FC<any>;
 import { 
   Atmosphere, 
   Shot, 
   Measurement, 
   Unit, 
   Ammo, 
-  FirearmProfile, 
   Preferences, 
-  WindSegment 
+  WindSegment,
 } from '../types/ballistics';
 
 // Define form values interface
@@ -70,7 +76,7 @@ const getInitialShot = (unitPrefs: Record<string, Unit>): Shot => {
     targetAngle: defaultShot.targetAngle,
     azimuth: defaultShot.azimuth,
     latitude: defaultShot.latitude,
-    windSegments: defaultShot.windSegments.map(segment => ({
+    windSegments: defaultShot.windSegments.map((segment: any) => ({
       maxRange: { ...segment.maxRange, unit: unitPrefs.Range || segment.maxRange.unit },
       speed: { ...segment.speed, unit: unitPrefs.WindSpeed || segment.speed.unit },
       direction: { ...segment.direction, unit: unitPrefs.WindDirection || segment.direction.unit },
@@ -110,8 +116,8 @@ interface BallisticsResults {
 
 const CalculatorPage: React.FC = () => {
   const { t } = useTranslation();
-  // We're not using navigation in this component, but keeping the hook for future use
-  const navigate = useNavigate();
+  // Navigation hook available for future use if needed
+  useNavigate();
   
   // Create refs for input fields to position tooltips
   const temperatureInputRef = useRef<HTMLInputElement | null>(null);
@@ -121,13 +127,13 @@ const CalculatorPage: React.FC = () => {
   const elevationAngleInputRef = useRef<HTMLInputElement | null>(null);
   
   // Create refs for wind segment fields
-  const windSegmentRefs = useRef<Record<string, RefObject<HTMLInputElement>>>({});
+  const windSegmentRefs = useRef<Record<string, RefObject<HTMLInputElement | null>>>({});
   
   // Helper function to get or create a ref for a wind segment field
-  const getWindSegmentRef = (index: number, field: string): RefObject<HTMLInputElement> => {
+  const getWindSegmentRef = (index: number, field: string): RefObject<HTMLInputElement | null> => {
     const key = `wind_${index}_${field}`;
     if (!windSegmentRefs.current[key]) {
-      windSegmentRefs.current[key] = React.createRef<HTMLInputElement>();
+      windSegmentRefs.current[key] = React.createRef<HTMLInputElement | null>();
     }
     return windSegmentRefs.current[key];
   };
@@ -157,25 +163,66 @@ const CalculatorPage: React.FC = () => {
   const [atmosphere, setAtmosphere] = useState<Atmosphere>(getInitialAtmosphere(unitPreferences));
   const [shot, setShot] = useState<Shot>(getInitialShot(unitPreferences));
 
-  // HUD/Range Card mode state
+  // Define state interfaces and reducer for calculation mode state
+  interface ModeState {
+    mode: CalculationMode;
+    rangeCardStart: number;
+    rangeCardStep: number;
+    rangeCardUnit: Unit;
+  }
+  
+  type ModeAction = 
+    | { type: 'SET_MODE'; payload: CalculationMode }
+    | { type: 'SET_RANGE_CARD_START'; payload: number }
+    | { type: 'SET_RANGE_CARD_STEP'; payload: number }
+    | { type: 'SET_RANGE_CARD_UNIT'; payload: Unit }
+    | { type: 'RESET_RANGE_CARD_VALUES'; payload: { start: number; step: number; unit: Unit } };
+  
   const defaultCalculationOptions = configService.getDefaultCalculationOptions();
-  const [mode, setMode] = useState<CalculationMode>('HUD');
-  const [rangeCardStart, setRangeCardStart] = useState<number>(
-    defaultCalculationOptions.rangeCardStart?.value || 100
-  );
-  const [rangeCardStep, setRangeCardStep] = useState<number>(
-    defaultCalculationOptions.rangeCardStep?.value || 100
-  );
-  const [rangeCardUnit, setRangeCardUnit] = useState<Unit>(
-    defaultCalculationOptions.rangeCardStart?.unit || 'YARDS'
-  );
+  
+  const modeReducer = (state: ModeState, action: ModeAction): ModeState => {
+    switch (action.type) {
+      case 'SET_MODE':
+        return { ...state, mode: action.payload };
+      case 'SET_RANGE_CARD_START':
+        return { ...state, rangeCardStart: action.payload };
+      case 'SET_RANGE_CARD_STEP':
+        return { ...state, rangeCardStep: action.payload };
+      case 'SET_RANGE_CARD_UNIT':
+        return { ...state, rangeCardUnit: action.payload };
+      case 'RESET_RANGE_CARD_VALUES':
+        return { 
+          ...state, 
+          rangeCardStart: action.payload.start,
+          rangeCardStep: action.payload.step,
+          rangeCardUnit: action.payload.unit
+        };
+      default:
+        return state;
+    }
+  };
+  
+  const initialModeState: ModeState = {
+    mode: 'HUD',
+    rangeCardStart: defaultCalculationOptions.rangeCardStart?.value || 100,
+    rangeCardStep: defaultCalculationOptions.rangeCardStep?.value || 100,
+    rangeCardUnit: defaultCalculationOptions.rangeCardStart?.unit || 'YARDS'
+  };
+  
+  const [modeState, dispatchModeAction] = useReducer(modeReducer, initialModeState);
+  const { mode, rangeCardStart, rangeCardStep, rangeCardUnit } = modeState;
 
   // Reset Range Card fields to defaults when switching to RANGE_CARD mode
   useEffect(() => {
     if (mode === 'RANGE_CARD') {
-      setRangeCardStart(defaultCalculationOptions.rangeCardStart?.value || 100);
-      setRangeCardStep(defaultCalculationOptions.rangeCardStep?.value || 100);
-      setRangeCardUnit(defaultCalculationOptions.rangeCardStart?.unit || 'YARDS');
+      dispatchModeAction({
+        type: 'RESET_RANGE_CARD_VALUES',
+        payload: {
+          start: defaultCalculationOptions.rangeCardStart?.value || 100,
+          step: defaultCalculationOptions.rangeCardStep?.value || 100,
+          unit: defaultCalculationOptions.rangeCardStart?.unit || 'YARDS'
+        }
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
@@ -212,7 +259,8 @@ const CalculatorPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmit = async (values: FormValues): Promise<void> => {
+  // Define a proper function signature for form submission
+const handleFormSubmit = async (values: FormValues): Promise<void> => {
     setLoading(true);
     setError('');
     try {
@@ -296,7 +344,10 @@ const CalculatorPage: React.FC = () => {
     }));
   };
   
-  const handleShotChange = (field: string, value: any): void => {
+  // Define a type for wind segment fields to avoid string indexing issues
+type WindSegmentField = keyof Pick<WindSegment, 'maxRange' | 'speed' | 'direction' | 'verticalComponent'>;
+
+const handleShotChange = (field: string, value: any): void => {
     setShot(prev => {
       const newShot = { ...prev };
       const fieldParts = field.split('.');
@@ -316,7 +367,13 @@ const CalculatorPage: React.FC = () => {
             verticalComponent: { value: 0, unit: 'MILES_PER_HOUR' }
           };
         }
-        (newShot.windSegments[index] as any)[fieldParts[2]] = value;
+        // Use the field part as a key with proper type checking
+        const segmentField = fieldParts[2] as WindSegmentField;
+        // Use proper typing for the wind segment field with type assertion
+        if (segmentField === 'maxRange' || segmentField === 'speed' || 
+            segmentField === 'direction' || segmentField === 'verticalComponent') {
+          (newShot.windSegments[index] as any)[segmentField] = value;
+        }
       } else if (fieldParts.length === 4 && fieldParts[0] === 'windSegments') {
         // Handle nested object in wind segments
         const index = parseInt(fieldParts[1], 10);
@@ -328,7 +385,10 @@ const CalculatorPage: React.FC = () => {
             verticalComponent: { value: 0, unit: 'MILES_PER_HOUR' }
           };
         }
-        (newShot.windSegments[index][fieldParts[2]] as any)[fieldParts[3]] = value;
+        // Use the field part as a key with proper type checking
+        const segmentField = fieldParts[2] as WindSegmentField;
+        const measurementField = fieldParts[3] as 'value' | 'unit';
+        (newShot.windSegments[index][segmentField] as Measurement)[measurementField] = value;
       }
       
       return newShot;
@@ -359,10 +419,10 @@ const CalculatorPage: React.FC = () => {
       <Formik
         initialValues={{ atmosphere, shot }}
         validationSchema={validationSchema}
-        onSubmit={handleSubmit}
+        onSubmit={handleFormSubmit}
         enableReinitialize
       >
-        {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldValue }) => (
+        {({ values, errors, touched, handleChange, handleBlur, isSubmitting, setFieldValue }) => (
           <FormikForm>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {/* Two-column layout container for desktop */}
@@ -383,13 +443,13 @@ const CalculatorPage: React.FC = () => {
 
                   <ModeComponent
                     mode={mode}
-                    onModeChange={setMode}
+                    onModeChange={(newMode: CalculationMode) => dispatchModeAction({ type: 'SET_MODE', payload: newMode })}
                     rangeCardStart={rangeCardStart}
-                    onRangeCardStartChange={setRangeCardStart}
+                    onRangeCardStartChange={(value: number) => dispatchModeAction({ type: 'SET_RANGE_CARD_START', payload: value })}
                     rangeCardStep={rangeCardStep}
-                    onRangeCardStepChange={setRangeCardStep}
+                    onRangeCardStepChange={(value: number) => dispatchModeAction({ type: 'SET_RANGE_CARD_STEP', payload: value })}
                     unit={rangeCardUnit}
-                    onUnitChange={setRangeCardUnit}
+                    onUnitChange={(unit: Unit) => dispatchModeAction({ type: 'SET_RANGE_CARD_UNIT', payload: unit })}
                   />
                 </Box>
                 
@@ -422,11 +482,11 @@ const CalculatorPage: React.FC = () => {
                   title={!isConfigured ? t('pleaseConfigureApiKey') : ''}
                   onClick={() => {
                     // Update the form values with the current state before submission
-                    const updatedValues = {
+                    const updatedValues: FormValues = {
                       atmosphere,
                       shot
                     };
-                    handleSubmit(updatedValues);
+                    handleFormSubmit(updatedValues);
                   }}
                 >
                   {loading ? (
