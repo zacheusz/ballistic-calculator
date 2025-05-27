@@ -135,6 +135,7 @@
   "unitKph": "km/h",
   "unitMps": "m/s",
   "unitClock": "Clock",
+  "clockPosition": "Clock Position",
   "ballisticCoefficient": "Ballistic Coefficient ({{dragModel}})",
   "bcRequiredG1G7": "Ballistic coefficient is required when using G1 or G7 drag models.",
   "bulletDiameter": "Bullet Diameter",
@@ -151,10 +152,17 @@
   "showWindTable": "Show Wind Table",
   "showDropTable": "Show Drop Table",
   "calcMode": "Mode",
+  "calcDisplayMode": "Display Mode",
   "calcCalculationMode": "Calculation Mode",
   "calcHudMode": "HUD",
   "calcRangeCardMode": "Range Card",
   "calcRangeCardStart": "Range Card Start",
   "calcRangeCardStep": "Range Card Step",
-  "calcRangeCardUnit": "Unit"
+  "calcRangeCardUnit": "Unit",
+  "muiComponentMigrationTest": "MUI Component Migration Test",
+  "bootstrapComponents": "Bootstrap Components",
+  "muiComponents": "MUI Components",
+  "currentValues": "Current Values",
+  "distance": "Distance",
+  "velocity": "Velocity"
 }

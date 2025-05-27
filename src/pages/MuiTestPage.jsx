@@ -39,12 +39,12 @@ const MuiTestPage = () => {
   
   return (
     <Container className="mt-4">
-      <h1 className="mb-4">MUI Component Migration Test</h1>
+      <h1 className="mb-4">{t('muiComponentMigrationTest')}</h1>
       
       <Row className="mb-5">
         <Col md={6}>
           <Card>
-            <Card.Header as="h5">Bootstrap Components</Card.Header>
+            <Card.Header as="h5">{t('bootstrapComponents')}</Card.Header>
             <Card.Body>
               <div className="mb-3">
                 <MeasurementInput
@@ -76,7 +76,7 @@ const MuiTestPage = () => {
               </div>
               
               <div className="mt-4">
-                <h6>Current Values:</h6>
+                <h6>{t('currentValues')}</h6>
                 <pre>{JSON.stringify({
                   distance: distanceBS,
                   velocity: velocityBS,
@@ -90,7 +90,7 @@ const MuiTestPage = () => {
         <Col md={6}>
           <Paper elevation={2} sx={{ height: '100%' }}>
             <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
-              <Typography variant="h5">MUI Components</Typography>
+              <Typography variant="h5">{t('muiComponents')}</Typography>
             </Box>
             <Box sx={{ p: 3 }}>
               <Box sx={{ mb: 3 }}>
@@ -123,7 +123,7 @@ const MuiTestPage = () => {
               </Box>
               
               <Box sx={{ mt: 4 }}>
-                <Typography variant="subtitle1">Current Values:</Typography>
+                <Typography variant="subtitle1">{t('currentValues')}</Typography>
                 <Box component="pre" sx={{ 
                   bgcolor: 'background.paper', 
                   p: 2, 

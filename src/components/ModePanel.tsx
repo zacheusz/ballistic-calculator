@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardHeader,
@@ -28,7 +29,7 @@ interface ModePanelProps {
   onUnitChange: (unit: string) => void;
 }
 
-const ModePanel: React.FC<ModePanelProps> = ({ 
+const ModePanel: React.FC<ModePanelProps> = ({
   mode, 
   onModeChange, 
   rangeCardStart, 
@@ -38,13 +39,14 @@ const ModePanel: React.FC<ModePanelProps> = ({
   unit, 
   onUnitChange 
 }) => {
+  const { t } = useTranslation();
   return (
     <Card sx={{ mb: 4, width: '100%' }}>
-      <CardHeader title="Mode" />
+      <CardHeader title={t('calcMode')} />
       <CardContent>
         <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <Typography sx={{ width: '33%', fontWeight: 500 }}>Display Mode</Typography>
+            <Typography sx={{ width: '33%', fontWeight: 500 }}>{t('calcDisplayMode')}</Typography>
             <RadioGroup
               row
               name="displayMode"
@@ -54,13 +56,13 @@ const ModePanel: React.FC<ModePanelProps> = ({
               <FormControlLabel
                 value="HUD"
                 control={<Radio />}
-                label="HUD"
+                label={t('calcHudMode')}
                 id="hud-mode"
               />
               <FormControlLabel
                 value="RANGE_CARD"
                 control={<Radio />}
-                label="Range Card"
+                label={t('calcRangeCardMode')}
                 id="range-card-mode"
               />
             </RadioGroup>
@@ -71,7 +73,7 @@ const ModePanel: React.FC<ModePanelProps> = ({
           <>
             <FormControl sx={{ mb: 3, width: '100%' }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-                <Typography sx={{ width: { xs: '100%', sm: '33%' }, fontWeight: 500 }}>Range Card Start</Typography>
+                <Typography sx={{ width: { xs: '100%', sm: '33%' }, fontWeight: 500 }}>{t('calcRangeCardStart')}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '67%' } }}>
                   <TextField
                     type="number"
@@ -87,15 +89,15 @@ const ModePanel: React.FC<ModePanelProps> = ({
                     size="small"
                     sx={{ width: 'auto' }}
                   >
-                    <MenuItem value="YARDS">Yards</MenuItem>
-                    <MenuItem value="METERS">Meters</MenuItem>
+                    <MenuItem value="YARDS">{t('yards')}</MenuItem>
+                    <MenuItem value="METERS">{t('meters')}</MenuItem>
                   </Select>
                 </Box>
               </Stack>
             </FormControl>
             <FormControl sx={{ mb: 3, width: '100%' }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-                <Typography sx={{ width: { xs: '100%', sm: '33%' }, fontWeight: 500 }}>Range Card Step</Typography>
+                <Typography sx={{ width: { xs: '100%', sm: '33%' }, fontWeight: 500 }}>{t('calcRangeCardStep')}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '67%' } }}>
                   <TextField
                     type="number"
@@ -111,8 +113,8 @@ const ModePanel: React.FC<ModePanelProps> = ({
                     size="small"
                     sx={{ width: 'auto' }}
                   >
-                    <MenuItem value="YARDS">Yards</MenuItem>
-                    <MenuItem value="METERS">Meters</MenuItem>
+                    <MenuItem value="YARDS">{t('yards')}</MenuItem>
+                    <MenuItem value="METERS">{t('meters')}</MenuItem>
                   </Select>
                 </Box>
               </Stack>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import dayjs, { Dayjs } from 'dayjs';
@@ -31,6 +32,7 @@ const StyledTimePicker = styled(TimePicker)(() => ({
 }));
 
 const ClockTimePicker: React.FC<ClockTimePickerProps> = ({ value, onChange }) => {
+  const { t } = useTranslation();
   // Convert clock value (decimal, 1-12) to a time
   const clockToTime = (clockValue: number): Dayjs => {
     // Accept decimals (e.g., 5.5 for 5:30)
@@ -90,7 +92,7 @@ const ClockTimePicker: React.FC<ClockTimePickerProps> = ({ value, onChange }) =>
             readOnly: true,
             style: { overflow: 'hidden' }
           },
-          placeholder: "Clock Position",
+          placeholder: t('clockPosition'),
           sx: { overflow: 'hidden' }
         },
         actionBar: {

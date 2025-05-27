@@ -135,6 +135,7 @@
   "unitKph": "km/h",
   "unitMps": "m/s",
   "unitClock": "Tarcza zegara",
+  "clockPosition": "Pozycja na tarczy zegara",
   "ballisticCoefficient": "Współczynnik balistyczny ({{dragModel}})",
   "bcRequiredG1G7": "Współczynnik balistyczny jest wymagany dla modeli G1 lub G7.",
   "bulletDiameter": "Średnica pocisku",
@@ -151,10 +152,17 @@
   "showWindTable": "Pokaż tabelę wiatru",
   "showDropTable": "Pokaż tabelę opadu",
   "calcMode": "Tryb",
+  "calcDisplayMode": "Tryb wyświetlania",
   "calcCalculationMode": "Tryb obliczeń",
   "calcHudMode": "HUD",
   "calcRangeCardMode": "Tabela balistyczna",
   "calcRangeCardStart": "Początek tabeli",
   "calcRangeCardStep": "Krok tabeli",
-  "calcRangeCardUnit": "Jednostka"
+  "calcRangeCardUnit": "Jednostka",
+  "muiComponentMigrationTest": "Test migracji komponentów MUI",
+  "bootstrapComponents": "Komponenty Bootstrap",
+  "muiComponents": "Komponenty MUI",
+  "currentValues": "Aktualne wartości",
+  "distance": "Dystans",
+  "velocity": "Prędkość"
 }

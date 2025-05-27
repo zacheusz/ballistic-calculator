@@ -111,10 +111,11 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
       // Show the tooltip notification
       // Show a Material UI snackbar notification for the unit conversion
       enqueueSnackbar(
-        `Value converted from ${oldUnit.replace(/_/g, ' ').toLowerCase()} to ${newUnit.replace(/_/g, ' ').toLowerCase()}`, 
+        t('unitConversionDescription'), 
         { 
           variant: 'info',
-          autoHideDuration: 3000
+          autoHideDuration: 3000,
+          preventDuplicate: true
         }
       );
     } else {
