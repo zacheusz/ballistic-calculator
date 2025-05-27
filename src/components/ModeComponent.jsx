@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Form, Row, Col } from 'react-bootstrap';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  FormControl,
+  FormLabel,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Grid,
+  styled
+} from '@mui/material';
 import MeasurementInputMUI from './MeasurementInputMUI';
 
 const ModeComponent = ({
@@ -25,92 +36,113 @@ const ModeComponent = ({
     setStepUnit(defaultUnit);
   }, [defaultUnit]);
 
+  // Styled components for consistent styling
+  const StyledFormControl = styled(FormControl)(({ theme }) => ({
+    marginBottom: theme.spacing(3)
+  }));
+
+  const StyledFormLabel = styled(FormLabel)(({ theme }) => ({
+    marginBottom: theme.spacing(1),
+    fontWeight: 500
+  }));
+
   return (
-    <Card className="mb-4 w-100">
-      <Card.Header as="h5">{t('calcMode')}</Card.Header>
-      <Card.Body>
-        <Form.Group as={Row} className="mb-3" controlId="modeSwitch">
-          <Form.Label column sm="4">{t('calcCalculationMode')}</Form.Label>
-          <Col sm="8">
-            <Form.Check
-              inline
-              label={t('calcHudMode')}
-              type="radio"
-              name="displayMode"
-              id="hud-mode"
-              checked={mode === 'HUD'}
-              onChange={() => onModeChange('HUD')}
-            />
-            <Form.Check
-              inline
-              label={t('calcRangeCardMode')}
-              type="radio"
-              name="displayMode"
-              id="range-card-mode"
-              checked={mode === 'RANGE_CARD'}
-              onChange={() => onModeChange('RANGE_CARD')}
-            />
-          </Col>
-        </Form.Group>
+    <Card sx={{ mb: 4, width: '100%' }}>
+      <CardHeader title={t('calcMode')} />
+      <CardContent>
+        <StyledFormControl component="fieldset" fullWidth>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={4}>
+              <StyledFormLabel>{t('calcCalculationMode')}</StyledFormLabel>
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <RadioGroup
+                row
+                name="displayMode"
+                value={mode}
+                onChange={(e) => onModeChange(e.target.value)}
+              >
+                <FormControlLabel
+                  value="HUD"
+                  control={<Radio />}
+                  label={t('calcHudMode')}
+                />
+                <FormControlLabel
+                  value="RANGE_CARD"
+                  control={<Radio />}
+                  label={t('calcRangeCardMode')}
+                />
+              </RadioGroup>
+            </Grid>
+          </Grid>
+        </StyledFormControl>
 
         {mode === 'RANGE_CARD' && (
           <>
-            <Form.Group as={Row} className="mb-3" controlId="rangeCardStart">
-              <Form.Label column sm="4">{t('calcRangeCardStart')}</Form.Label>
-              <Col sm="8">
-                <MeasurementInputMUI
-                  value={{ value: Number(rangeCardStart) || 0, unit: startUnit }}
-                  onChange={(newMeasurement) => {
-                    onRangeCardStartChange(newMeasurement.value);
-                    // Update the local unit state
-                    if (newMeasurement.unit !== startUnit) {
-                      setStartUnit(newMeasurement.unit);
-                      // Also update parent for backward compatibility
-                      onUnitChange(newMeasurement.unit);
-                    }
-                  }}
-                  unitOptions={[
-                    { value: 'YARDS', label: t('unitYards') },
-                    { value: 'METERS', label: t('unitMeters') },
-                    { value: 'FEET', label: t('unitFeet') }
-                  ]}
-                  label={null}
-                  inputProps={{
-                    min: 0,
-                    step: 1
-                  }}
-                />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} className="mb-3" controlId="rangeCardStep">
-              <Form.Label column sm="4">{t('calcRangeCardStep')}</Form.Label>
-              <Col sm="8">
-                <MeasurementInputMUI
-                  value={{ value: Number(rangeCardStep) || 0, unit: stepUnit }}
-                  onChange={(newMeasurement) => {
-                    onRangeCardStepChange(newMeasurement.value);
-                    // Update the local unit state
-                    if (newMeasurement.unit !== stepUnit) {
-                      setStepUnit(newMeasurement.unit);
-                      // We don't update parent unit here to keep them independent
-                    }
-                  }}
-                  unitOptions={[
-                    { value: 'YARDS', label: t('unitYards') },
-                    { value: 'METERS', label: t('unitMeters') },
-                    { value: 'FEET', label: t('unitFeet') }
-                  ]}
-                  label={null}
-                  inputProps={{
-                    min: 1,
-                    step: 1
-                  }}
-                />
-              </Col>
-            </Form.Group>
+            <StyledFormControl fullWidth>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <StyledFormLabel>{t('calcRangeCardStart')}</StyledFormLabel>
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  <MeasurementInputMUI
+                    value={{ value: Number(rangeCardStart) || 0, unit: startUnit }}
+                    onChange={(newMeasurement) => {
+                      onRangeCardStartChange(newMeasurement.value);
+                      // Update the local unit state
+                      if (newMeasurement.unit !== startUnit) {
+                        setStartUnit(newMeasurement.unit);
+                        // Also update parent for backward compatibility
+                        onUnitChange(newMeasurement.unit);
+                      }
+                    }}
+                    unitOptions={[
+                      { value: 'YARDS', label: t('unitYards') },
+                      { value: 'METERS', label: t('unitMeters') },
+                      { value: 'FEET', label: t('unitFeet') }
+                    ]}
+                    label={null}
+                    inputProps={{
+                      min: 0,
+                      step: 1
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </StyledFormControl>
+            <StyledFormControl fullWidth>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <StyledFormLabel>{t('calcRangeCardStep')}</StyledFormLabel>
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  <MeasurementInputMUI
+                    value={{ value: Number(rangeCardStep) || 0, unit: stepUnit }}
+                    onChange={(newMeasurement) => {
+                      onRangeCardStepChange(newMeasurement.value);
+                      // Update the local unit state
+                      if (newMeasurement.unit !== stepUnit) {
+                        setStepUnit(newMeasurement.unit);
+                        // We don't update parent unit here to keep them independent
+                      }
+                    }}
+                    unitOptions={[
+                      { value: 'YARDS', label: t('unitYards') },
+                      { value: 'METERS', label: t('unitMeters') },
+                      { value: 'FEET', label: t('unitFeet') }
+                    ]}
+                    label={null}
+                    inputProps={{
+                      min: 1,
+                      step: 1
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </StyledFormControl>
           </>
         )}
-      </Card.Body>
+      </CardContent>
     </Card>
   );
 };
