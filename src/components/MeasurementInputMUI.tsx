@@ -7,10 +7,9 @@ import {
   FormControl, 
   Box,
   Typography,
-  Tooltip,
-  Fade,
   styled
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { convertUnit } from '../utils/unitConversion';
 import ClockTimePicker from './ClockTimePicker.tsx';
@@ -47,10 +46,11 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
   disabled,
   inputProps = {},
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // Used for translations
   const valueInputRef = useRef<HTMLInputElement>(null);
   const [localMeasurement, setLocalMeasurement] = useState<Measurement>(value);
-  const [showTooltip, setShowTooltip] = useState(false);
+  // Access Material UI's snackbar system
+  const { enqueueSnackbar } = useSnackbar();
 
   // Check if the unit is valid for the current options
   const mapUnit = (unit: Unit): Unit => {
@@ -109,12 +109,14 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
       }, 0);
       
       // Show the tooltip notification
-      setShowTooltip(true);
-      
-      // Hide tooltip after 3 seconds
-      setTimeout(() => {
-        setShowTooltip(false);
-      }, 3000);
+      // Show a Material UI snackbar notification for the unit conversion
+      enqueueSnackbar(
+        `Value converted from ${oldUnit.replace(/_/g, ' ').toLowerCase()} to ${newUnit.replace(/_/g, ' ').toLowerCase()}`, 
+        { 
+          variant: 'info',
+          autoHideDuration: 3000
+        }
+      );
     } else {
       // Just update the unit without conversion
       const updated = { ...localMeasurement, unit: newUnit };
@@ -209,45 +211,7 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
         </Box>
       </Box>
 
-      {/* Tooltip for unit conversion notification */}
-      <Tooltip
-        open={showTooltip}
-        title={
-          <Box sx={{ p: 1 }}>
-            <Typography variant="subtitle2" color="primary" sx={{ mb: 0.5 }}>
-              {t('unitConversionNotice')}
-            </Typography>
-            <Typography variant="body2">
-              {t('unitConversionDescription')}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              {t('clickToDismiss')}
-            </Typography>
-          </Box>
-        }
-        placement="top"
-        arrow
-        TransitionComponent={Fade}
-        TransitionProps={{ timeout: 300 }}
-        onClose={() => setShowTooltip(false)}
-        componentsProps={{
-          tooltip: {
-            sx: {
-              bgcolor: 'background.paper',
-              color: 'text.primary',
-              boxShadow: 3,
-              border: 1,
-              borderColor: 'divider',
-              maxWidth: 300,
-              '& .MuiTooltip-arrow': {
-                color: 'background.paper',
-              },
-            },
-          },
-        }}
-      >
-        <span style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: showTooltip ? 'auto' : 'none' }} />
-      </Tooltip>
+      {/* Tooltip removed in favor of global notification system */}
     </Box>
   );
 };

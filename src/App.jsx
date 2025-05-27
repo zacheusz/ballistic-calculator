@@ -9,7 +9,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AppProvider } from './context/AppContext';
 import { useAppConfigStore } from './stores/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
-import { BallisticsStoreProvider } from './context/BallisticsStoreProvider'; // Add this import
+import { BallisticsStoreProvider } from './context/BallisticsStoreProvider';
+import { SnackbarProvider } from 'notistack';
 import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
@@ -44,24 +45,30 @@ function ThemedApp() {
   return (
     <MuiThemeProvider key={`mui-theme-${theme}`}>
       <LocalizationProvider dateAdapter={AdapterDayjs} key={`localization-${theme}`}>
-        <BallisticsStoreProvider>
-          <AppProvider>
-          <Router>
-            <Navigation />
-            <main>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/calculator" element={<CalculatorPage />} />
-                <Route path="/config" element={<ConfigPage />} />
-                <Route path="/mui-test" element={<MuiTestPage />} />
-                <Route path="/zustand-test" element={<ZustandTest />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            <ThemedToastContainer />
-          </Router>
-          </AppProvider>
-        </BallisticsStoreProvider>
+        <SnackbarProvider 
+          maxSnack={3} 
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          autoHideDuration={3000}
+        >
+          <BallisticsStoreProvider>
+            <AppProvider>
+              <Router>
+                <Navigation />
+                <main>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/calculator" element={<CalculatorPage />} />
+                    <Route path="/config" element={<ConfigPage />} />
+                    <Route path="/mui-test" element={<MuiTestPage />} />
+                    <Route path="/zustand-test" element={<ZustandTest />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </main>
+                <ThemedToastContainer />
+              </Router>
+            </AppProvider>
+          </BallisticsStoreProvider>
+        </SnackbarProvider>
       </LocalizationProvider>
     </MuiThemeProvider>
   );
