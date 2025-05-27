@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -14,23 +14,42 @@ import {
   Alert, 
   AlertTitle 
 } from '@mui/material';
-import { Formik, Form as FormikForm } from 'formik';
+import { Formik, Form as FormikForm, FormikHelpers, FormikErrors, FormikTouched } from 'formik';
 import * as Yup from 'yup';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import api from '../services/api';
 import configService from '../services/configService';
 import { STORAGE_KEYS } from '../services/storageService';
-import ClockTimePicker from '../components/ClockTimePicker.tsx';
+import ClockTimePicker from '../components/ClockTimePicker';
 import BallisticsResultsGrid from '../components/BallisticsResultsGrid';
-import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion.tsx';
+import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
 // Import new components
 import AtmosphereComponent from '../components/AtmosphereComponent';
 import ShotComponent from '../components/ShotComponent';
 import ModeComponent from '../components/ModeComponent';
+import { 
+  Atmosphere, 
+  Shot, 
+  Measurement, 
+  Unit, 
+  Ammo, 
+  FirearmProfile, 
+  Preferences, 
+  WindSegment 
+} from '../types/ballistics';
+
+// Define form values interface
+interface FormValues {
+  atmosphere: Atmosphere;
+  shot: Shot;
+}
+
+// Define mode type
+type CalculationMode = 'HUD' | 'RANGE_CARD';
 
 // Function to get initial values based on unit preferences
-const getInitialAtmosphere = (unitPrefs) => {
+const getInitialAtmosphere = (unitPrefs: Record<string, Unit>): Atmosphere => {
   const defaultAtmosphere = configService.getDefaultAtmosphere();
   return {
     temperature: { ...defaultAtmosphere.temperature, unit: unitPrefs.Temperature || defaultAtmosphere.temperature.unit },
@@ -41,11 +60,10 @@ const getInitialAtmosphere = (unitPrefs) => {
   };
 };
 
-const getInitialShot = (unitPrefs) => {
+const getInitialShot = (unitPrefs: Record<string, Unit>): Shot => {
   const defaultShot = configService.getDefaultShot();
   return {
     range: { ...defaultShot.range, unit: unitPrefs.Range || defaultShot.range.unit },
-    targetDistance: { value: defaultShot.range.value, unit: unitPrefs.Range || defaultShot.range.unit },
     elevationAngle: defaultShot.elevationAngle,
     powderTemp: { ...defaultShot.powderTemp, unit: unitPrefs.Temperature || defaultShot.powderTemp.unit },
     targetSpeed: { ...defaultShot.targetSpeed, unit: unitPrefs.BulletVelocity || defaultShot.targetSpeed.unit },
@@ -69,29 +87,47 @@ const validationSchema = Yup.object({
   }),
 });
 
-const CalculatorPage = () => {
+// Define result interface
+interface BallisticSolution {
+  range: Measurement;
+  verticalAdjustment: Measurement;
+  horizontalAdjustment: Measurement;
+  drop: Measurement;
+  wind: Measurement;
+  velocity: Measurement;
+  energy: Measurement;
+  time: number;
+  mach: number;
+  spinDrift: Measurement;
+  coroDrift: Measurement;
+  lead: Measurement;
+  aeroJump: Measurement;
+}
+
+interface BallisticsResults {
+  solutions: BallisticSolution[];
+}
+
+const CalculatorPage: React.FC = () => {
   const { t } = useTranslation();
   // We're not using navigation in this component, but keeping the hook for future use
-  const _navigate = useNavigate();
+  const navigate = useNavigate();
   
   // Create refs for input fields to position tooltips
-  const temperatureInputRef = useRef(null);
-  const pressureInputRef = useRef(null);
-  const altitudeInputRef = useRef(null);
-  const rangeInputRef = useRef(null);
-  const elevationAngleInputRef = useRef(null);
-  // These refs are defined but not currently used - keeping them for future use
-  const _windSpeedInputRef = useRef(null);
-  const _windAngleInputRef = useRef(null);
+  const temperatureInputRef = useRef<HTMLInputElement | null>(null);
+  const pressureInputRef = useRef<HTMLInputElement | null>(null);
+  const altitudeInputRef = useRef<HTMLInputElement | null>(null);
+  const rangeInputRef = useRef<HTMLInputElement | null>(null);
+  const elevationAngleInputRef = useRef<HTMLInputElement | null>(null);
   
   // Create refs for wind segment fields
-  const windSegmentRefs = useRef({});
+  const windSegmentRefs = useRef<Record<string, RefObject<HTMLInputElement>>>({});
   
   // Helper function to get or create a ref for a wind segment field
-  const getWindSegmentRef = (index, field) => {
+  const getWindSegmentRef = (index: number, field: string): RefObject<HTMLInputElement> => {
     const key = `wind_${index}_${field}`;
     if (!windSegmentRefs.current[key]) {
-      windSegmentRefs.current[key] = React.createRef();
+      windSegmentRefs.current[key] = React.createRef<HTMLInputElement>();
     }
     return windSegmentRefs.current[key];
   };
@@ -108,25 +144,31 @@ const CalculatorPage = () => {
   } = useBallistics();
   
   // Add local loading state
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   
   // Extract calculation options and unit preferences from the preferences object
   const calculationOptions = useMemo(() => preferences || {}, [preferences]);
-  const unitPreferences = preferences?.unitPreferences?.unitMappings?.reduce((acc, mapping) => {
+  const unitPreferences = preferences?.unitPreferences?.unitMappings?.reduce<Record<string, Unit>>((acc, mapping) => {
     acc[mapping.unitTypeClassName] = mapping.unitName;
     return acc;
   }, {}) || {};
-  const [results, setResults] = useState(null);
-  const [error, setError] = useState('');
-  const [atmosphere, setAtmosphere] = useState(getInitialAtmosphere(unitPreferences));
-  const [shot, setShot] = useState(getInitialShot(unitPreferences));
+  const [results, setResults] = useState<BallisticsResults | null>(null);
+  const [error, setError] = useState<string>('');
+  const [atmosphere, setAtmosphere] = useState<Atmosphere>(getInitialAtmosphere(unitPreferences));
+  const [shot, setShot] = useState<Shot>(getInitialShot(unitPreferences));
 
   // HUD/Range Card mode state
   const defaultCalculationOptions = configService.getDefaultCalculationOptions();
-  const [mode, setMode] = useState('HUD');
-  const [rangeCardStart, setRangeCardStart] = useState(defaultCalculationOptions.rangeCardStart?.value || 100);
-  const [rangeCardStep, setRangeCardStep] = useState(defaultCalculationOptions.rangeCardStep?.value || 100);
-  const [rangeCardUnit, setRangeCardUnit] = useState(defaultCalculationOptions.rangeCardStart?.unit || 'YARDS');
+  const [mode, setMode] = useState<CalculationMode>('HUD');
+  const [rangeCardStart, setRangeCardStart] = useState<number>(
+    defaultCalculationOptions.rangeCardStart?.value || 100
+  );
+  const [rangeCardStep, setRangeCardStep] = useState<number>(
+    defaultCalculationOptions.rangeCardStep?.value || 100
+  );
+  const [rangeCardUnit, setRangeCardUnit] = useState<Unit>(
+    defaultCalculationOptions.rangeCardStart?.unit || 'YARDS'
+  );
 
   // Reset Range Card fields to defaults when switching to RANGE_CARD mode
   useEffect(() => {
@@ -169,41 +211,13 @@ const CalculatorPage = () => {
     // Only run this effect once on component mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
-  // Log initial calculation options from localStorage
-  useEffect(() => {
-    // Check localStorage directly to see what's stored there
-    const savedOptions = localStorage.getItem('snipe_ballistics_calculation_options');
-    if (savedOptions) {
-      const parsedOptions = JSON.parse(savedOptions);
-      console.log('Initial calculation options in localStorage:', parsedOptions);
-      console.log('Initial Coriolis effect in localStorage:', parsedOptions.calculateCoriolisEffect);
-    } else {
-      console.log('No calculation options found in localStorage');
-    }
-  }, []); // Empty dependency array means this runs once on mount
-  
-  // Log calculation options for debugging
-  useEffect(() => {
-    console.log('Calculation options updated:', calculationOptions);
-    
-    // Check localStorage directly to see what's stored there
-    const savedOptions = localStorage.getItem('snipe_ballistics_calculation_options');
-    if (savedOptions) {
-      const parsedOptions = JSON.parse(savedOptions);
-      console.log('Calculation options in localStorage:', parsedOptions);
-      console.log('Coriolis effect in localStorage:', parsedOptions.calculateCoriolisEffect);
-    } else {
-      console.log('No calculation options found in localStorage');
-    }
-  }, [calculationOptions]);
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: FormValues): Promise<void> => {
     setLoading(true);
     setError('');
     try {
       // Ensure ammo has required fields
-      const processedAmmo = { ...ammo };
+      const processedAmmo: Ammo = { ...ammo };
       
       // Ensure bullet length is properly set and not zero for all drag models
       if (!processedAmmo.length || processedAmmo.length.value <= 0) {
@@ -220,7 +234,7 @@ const CalculatorPage = () => {
       }
       
       // Construct the request with values from context and form
-      const preferences = {
+      const preferences: Preferences = {
         ...calculationOptions,
         unitPreferences: api.getUnitPreferencesForApi(),
       };
@@ -228,14 +242,14 @@ const CalculatorPage = () => {
         preferences.rangeCardStart = { value: Number(rangeCardStart), unit: rangeCardUnit };
         preferences.rangeCardStep = { value: Number(rangeCardStep), unit: rangeCardUnit };
       } else {
-        preferences.rangeCardStart = undefined;
-        preferences.rangeCardStep = undefined;
+        preferences.rangeCardStart = undefined as any;
+        preferences.rangeCardStep = undefined as any;
       }
       // Prepare shot data and preferences, ensuring Coriolis effect settings are consistent
-      const shotData = { ...values.shot };
+      const shotData: Shot = { ...values.shot };
       
       // Create a copy of the preferences to avoid modifying the original calculationOptions
-      const updatedPreferences = {
+      const updatedPreferences: Preferences = {
         ...preferences,
         // Ensure calculateCoriolisEffect flag is explicitly set to match the context setting
         calculateCoriolisEffect: calculationOptions.calculateCoriolisEffect
@@ -246,17 +260,6 @@ const CalculatorPage = () => {
         // This ensures the API doesn't calculate Coriolis effect even if fields exist
         shotData.azimuth = { value: 0, unit: 'DEGREES' };
         shotData.latitude = { value: 0, unit: 'DEGREES' };
-        console.log('%c 🌍 Coriolis Effect Disabled', 'font-weight: bold; color: #ff6b6b;', { 
-          coriolisEnabled: updatedPreferences.calculateCoriolisEffect,
-          azimuth: shotData.azimuth,
-          latitude: shotData.latitude
-        });
-      } else {
-        console.log('%c 🌍 Coriolis Effect Enabled', 'font-weight: bold; color: #51cf66;', { 
-          coriolisEnabled: updatedPreferences.calculateCoriolisEffect,
-          azimuth: shotData.azimuth,
-          latitude: shotData.latitude
-        });
       }
       
       const request = {
@@ -267,18 +270,9 @@ const CalculatorPage = () => {
         preferences: updatedPreferences,
       };
       
-      // Create a deep copy of the request object to ensure accurate logging
-      const requestCopy = JSON.parse(JSON.stringify(request));
-      
-      // Use a timestamp to distinguish between different API calls
-      const timestamp = new Date().toISOString();
-      
-      // Log the request with timestamp and distinctive formatting
-      console.log('%c ⚡ Ballistics API Request (' + timestamp + ')', 'font-weight: bold; font-size: 14px; color: #0066cc; background: #f0f8ff; padding: 3px 5px; border-radius: 3px;', requestCopy);
-      
       const response = await api.computeBallisticSolution(request);
       setResults(response);
-    } catch (err) {
+    } catch (err: any) {
       console.error('API Error:', err);
       setError(err.response?.data?.error || 'Error computing ballistic solution');
     } finally {
@@ -286,9 +280,8 @@ const CalculatorPage = () => {
     }
   };
 
-  
   // Updated to only accept field name and measurement object
-  const handleAtmosphereChange = (field, measurement) => {
+  const handleAtmosphereChange = (field: keyof Atmosphere, measurement: Measurement): void => {
     setAtmosphere(prev => ({
       ...prev,
       [field]: measurement
@@ -296,44 +289,46 @@ const CalculatorPage = () => {
   };
   
   // New helper for non-measurement fields (pressureType, humidity)
-  const handleAtmosphereSimpleChange = (field, value) => {
+  const handleAtmosphereSimpleChange = (field: keyof Atmosphere, value: any): void => {
     setAtmosphere(prev => ({
       ...prev,
       [field]: value
     }));
   };
   
-  const handleShotChange = (field, value) => {
+  const handleShotChange = (field: string, value: any): void => {
     setShot(prev => {
       const newShot = { ...prev };
       const fieldParts = field.split('.');
       
       if (fieldParts.length === 1) {
-        newShot[field] = value;
+        (newShot as any)[field] = value;
       } else if (fieldParts.length === 2) {
-        newShot[fieldParts[0]][fieldParts[1]] = value;
+        (newShot as any)[fieldParts[0]][fieldParts[1]] = value;
       } else if (fieldParts.length === 3 && fieldParts[0] === 'windSegments') {
         // Handle array access for wind segments
-        if (!newShot.windSegments[parseInt(fieldParts[1])]) {
-          newShot.windSegments[parseInt(fieldParts[1])] = { 
+        const index = parseInt(fieldParts[1], 10);
+        if (!newShot.windSegments[index]) {
+          newShot.windSegments[index] = { 
             maxRange: { value: 1000, unit: 'YARDS' },
             speed: { value: 0, unit: 'MILES_PER_HOUR' },
             direction: { value: 3, unit: 'CLOCK' },
             verticalComponent: { value: 0, unit: 'MILES_PER_HOUR' }
           };
         }
-        newShot.windSegments[parseInt(fieldParts[1])][fieldParts[2]] = value;
+        (newShot.windSegments[index] as any)[fieldParts[2]] = value;
       } else if (fieldParts.length === 4 && fieldParts[0] === 'windSegments') {
         // Handle nested object in wind segments
-        if (!newShot.windSegments[parseInt(fieldParts[1])]) {
-          newShot.windSegments[parseInt(fieldParts[1])] = { 
+        const index = parseInt(fieldParts[1], 10);
+        if (!newShot.windSegments[index]) {
+          newShot.windSegments[index] = { 
             maxRange: { value: 1000, unit: 'YARDS' },
             speed: { value: 0, unit: 'MILES_PER_HOUR' },
             direction: { value: 3, unit: 'CLOCK' },
             verticalComponent: { value: 0, unit: 'MILES_PER_HOUR' }
           };
         }
-        newShot.windSegments[parseInt(fieldParts[1])][fieldParts[2]][fieldParts[3]] = value;
+        (newShot.windSegments[index][fieldParts[2]] as any)[fieldParts[3]] = value;
       }
       
       return newShot;
