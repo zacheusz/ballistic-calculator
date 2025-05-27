@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useReducer, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   Container, 
   Button, 
@@ -116,8 +116,7 @@ interface BallisticsResults {
 
 const CalculatorPage: React.FC = () => {
   const { t } = useTranslation();
-  // Navigation hook available for future use if needed
-  useNavigate();
+  // Navigation removed as it's not used in this component
   
   // Create refs for input fields to position tooltips
   const temperatureInputRef = useRef<HTMLInputElement | null>(null);
