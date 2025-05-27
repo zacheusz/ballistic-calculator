@@ -55,7 +55,7 @@ describe('MeasurementInputMUI', () => {
     expect(screen.getByText('Distance')).toBeInTheDocument();
   });
 
-  test('handles value change', () => {
+  test('handles value change', async () => {
     const handleChange = jest.fn();
     render(
       <MeasurementInputMUI
@@ -68,10 +68,13 @@ describe('MeasurementInputMUI', () => {
     const input = screen.getByDisplayValue('100');
     fireEvent.change(input, { target: { value: '200' } });
     
+    // Wait for the setTimeout to execute
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
     expect(handleChange).toHaveBeenCalledWith({ value: 200, unit: 'YARDS' });
   });
 
-  test('handles unit change with conversion', () => {
+  test('handles unit change with conversion', async () => {
     const handleChange = jest.fn();
     render(
       <MeasurementInputMUI
@@ -88,6 +91,9 @@ describe('MeasurementInputMUI', () => {
     // Select a different unit
     const option = screen.getByText('Meters');
     fireEvent.click(option);
+    
+    // Wait for the setTimeout to execute
+    await new Promise(resolve => setTimeout(resolve, 10));
     
     // Check that onChange was called with converted value
     // 100 yards ≈ 91.44 meters

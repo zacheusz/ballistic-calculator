@@ -27,11 +27,10 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
 
   // Handle value change (numeric or clock)
   const handleValueChange = (newValue: number) => {
-    setLocalMeasurement(prev => {
-      const updated = { ...prev, value: newValue };
-      onChange(updated);
-      return updated;
-    });
+    const updated = { ...localMeasurement, value: newValue };
+    setLocalMeasurement(updated);
+    // Call onChange separately, not inside setState callback
+    onChange(updated);
   };
 
   // Handle unit and value change together (for unit conversion)
@@ -39,7 +38,10 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
     const roundedValue = Math.round(convertedValue * 10000) / 10000;
     const updated = { value: roundedValue, unit: newUnit };
     setLocalMeasurement(updated);
-    onChange(updated);
+    // Use setTimeout to defer the parent update to the next tick
+    setTimeout(() => {
+      onChange(updated);
+    }, 0);
   };
 
   // Always render value input and unit selector side-by-side

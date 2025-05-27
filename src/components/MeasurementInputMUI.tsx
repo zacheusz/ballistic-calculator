@@ -79,8 +79,11 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
   const handleValueChange = (newValue: number) => {
     const updated = { ...localMeasurement, value: newValue };
     setLocalMeasurement(updated);
-    // Call onChange separately, not inside setState callback
-    onChange(updated);
+    
+    // Notify parent in the next tick to avoid React state update during render
+    setTimeout(() => {
+      onChange(updated);
+    }, 0);
   };
 
   // Handle unit change with conversion
@@ -96,10 +99,14 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
       // Round to 4 decimal places for better display
       const roundedValue = Math.round(convertedValue * 10000) / 10000;
       
-      // Update local state and notify parent
+      // Update local state
       const updated = { value: roundedValue, unit: newUnit };
       setLocalMeasurement(updated);
-      onChange(updated);
+      
+      // Notify parent in the next tick to avoid React state update during render
+      setTimeout(() => {
+        onChange(updated);
+      }, 0);
       
       // Show the tooltip notification
       setShowTooltip(true);
@@ -112,8 +119,11 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
       // Just update the unit without conversion
       const updated = { ...localMeasurement, unit: newUnit };
       setLocalMeasurement(updated);
-      // Call onChange separately, not inside setState callback
-      onChange(updated);
+      
+      // Notify parent in the next tick to avoid React state update during render
+      setTimeout(() => {
+        onChange(updated);
+      }, 0);
     }
   };
 
