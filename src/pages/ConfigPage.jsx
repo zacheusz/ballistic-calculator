@@ -8,6 +8,7 @@ import ThemeSelector from '../components/ThemeSelector';
 import LanguageSelector from '../components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
+import { useSafeStateUpdate } from '../hooks/useSafeStateUpdate';
 
 import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion.tsx';
 import MeasurementInput from '../components/MeasurementInput';
@@ -135,87 +136,11 @@ const debouncedUpdateApiKey = debounce((key) => {
     }
   }, [environment, unitPreferences]);
   
-  // Separate useEffect for firearm profile to avoid unnecessary updates
-  useEffect(() => {
-    // Create a ref to track the current execution of this effect
-    const isCurrentlyRunning = { current: true };
-    
-    console.log('[DEBUG] firearmProfile useEffect triggered', {
-      firearmProfile,
-      localFirearm: firearm,
-      isUpdatingFirearm: isUpdatingFirearmRef.current
-    });
-    
-    // Skip if we're in the middle of a manual update
-    if (isUpdatingFirearmRef.current) {
-      console.log('[DEBUG] Skipping firearmProfile update because we are manually updating');
-      return;
-    }
-    
-    // Only update firearm if it exists and has changed
-    if (firearmProfile && Object.keys(firearmProfile).length > 0) {
-      setFirearm(prev => {
-        // Only proceed if this effect is still relevant
-        if (!isCurrentlyRunning.current) return prev;
-        
-        // Only update if different to prevent unnecessary re-renders
-        const shouldUpdate = JSON.stringify(prev) !== JSON.stringify(firearmProfile);
-        console.log('[DEBUG] Should update firearm state?', shouldUpdate);
-        
-        if (shouldUpdate) {
-          console.log('[DEBUG] Updating firearm state from store', firearmProfile);
-          return {...firearmProfile};
-        }
-        return prev;
-      });
-    }
-    
-    // Cleanup function to prevent state updates if the dependencies change before the effect completes
-    return () => {
-      isCurrentlyRunning.current = false;
-    };
-  }, [firearmProfile, firearm, isUpdatingFirearmRef]); // Include all dependencies
+  // Use custom hook for firearm profile updates
+  useSafeStateUpdate(firearmProfile, setFirearm, isUpdatingFirearmRef, 'firearmProfile');
   
-  // Separate useEffect for ammo to avoid unnecessary updates
-  useEffect(() => {
-    // Create a ref to track the current execution of this effect
-    const isCurrentlyRunning = { current: true };
-    
-    console.log('[DEBUG] ammo useEffect triggered', {
-      ammo,
-      localAmmo: ammunition,
-      isUpdatingAmmo: isUpdatingAmmoRef.current
-    });
-    
-    // Skip if we're in the middle of a manual update
-    if (isUpdatingAmmoRef.current) {
-      console.log('[DEBUG] Skipping ammo update because we are manually updating');
-      return;
-    }
-    
-    // Only update ammo if it exists and has changed
-    if (ammo && Object.keys(ammo).length > 0) {
-      setAmmunition(prev => {
-        // Only proceed if this effect is still relevant
-        if (!isCurrentlyRunning.current) return prev;
-        
-        // Only update if different to prevent unnecessary re-renders
-        const shouldUpdate = JSON.stringify(prev) !== JSON.stringify(ammo);
-        console.log('[DEBUG] Should update ammunition state?', shouldUpdate);
-        
-        if (shouldUpdate) {
-          console.log('[DEBUG] Updating ammunition state from store', ammo);
-          return {...ammo};
-        }
-        return prev;
-      });
-    }
-    
-    // Cleanup function to prevent state updates if the dependencies change before the effect completes
-    return () => {
-      isCurrentlyRunning.current = false;
-    };
-  }, [ammo, ammunition, isUpdatingAmmoRef]); // Include all dependencies
+  // Use custom hook for ammunition updates
+  useSafeStateUpdate(ammo, setAmmunition, isUpdatingAmmoRef, 'ammo');
   
   // Separate useEffect for calculation options
   useEffect(() => {
