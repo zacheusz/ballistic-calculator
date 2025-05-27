@@ -1,6 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Form } from 'react-bootstrap';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  FormControl,
+  FormLabel,
+  FormHelperText,
+  Box,
+  Typography,
+  styled
+} from '@mui/material';
 import MeasurementInputMUI from './MeasurementInputMUI';
 import WindSegmentComponent from './WindSegmentComponent';
 
@@ -19,12 +29,22 @@ const ShotComponent = ({
 }) => {
   const { t } = useTranslation();
 
+  // Styled components for consistent styling
+  const StyledFormControl = styled(FormControl)(({ theme }) => ({
+    marginBottom: theme.spacing(3)
+  }));
+
+  const StyledFormLabel = styled(FormLabel)(({ theme }) => ({
+    marginBottom: theme.spacing(1),
+    fontWeight: 500
+  }));
+
   return (
-    <Card className="mb-4">
-      <Card.Header as="h5">{t('calcShot')}</Card.Header>
-      <Card.Body>
-        <Form.Group className="mb-3">
-          <Form.Label>{t('calcRange')}</Form.Label>
+    <Card sx={{ mb: 4 }}>
+      <CardHeader title={t('calcShot')} />
+      <CardContent>
+        <StyledFormControl fullWidth error={touched.shot?.range?.value && Boolean(errors.shot?.range?.value)}>
+          <StyledFormLabel>{t('calcRange')}</StyledFormLabel>
           <MeasurementInputMUI
             label={null}
             value={values.shot.range}
@@ -40,18 +60,17 @@ const ShotComponent = ({
             inputProps={{
               name: 'shot.range.value',
               onBlur: handleBlur,
-              isInvalid: touched.shot?.range?.value && errors.shot?.range?.value,
               ref: rangeInputRef
             }}
             disabled={loading}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.shot?.range?.value}
-          </Form.Control.Feedback>
-        </Form.Group>
+          {touched.shot?.range?.value && errors.shot?.range?.value && (
+            <FormHelperText error>{errors.shot?.range?.value}</FormHelperText>
+          )}
+        </StyledFormControl>
 
-        <Form.Group className="mb-3">
-          <Form.Label>{t('calcElevationAngle')}</Form.Label>
+        <StyledFormControl fullWidth>
+          <StyledFormLabel>{t('calcElevationAngle')}</StyledFormLabel>
           <MeasurementInputMUI
             value={values.shot.elevationAngle}
             onChange={(newMeasurement) => {
@@ -70,13 +89,13 @@ const ShotComponent = ({
             }}
             disabled={loading}
           />
-        </Form.Group>
+        </StyledFormControl>
 
         {/* Only show Coriolis effect fields when the feature is enabled */}
         {calculationOptions?.calculateCoriolisEffect === true && (
           <>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('shotAzimuth')}</Form.Label>
+            <StyledFormControl fullWidth>
+              <StyledFormLabel>{t('shotAzimuth')}</StyledFormLabel>
               <MeasurementInputMUI
                 value={values.shot.azimuth}
                 onChange={(newMeasurement) => {
@@ -92,10 +111,10 @@ const ShotComponent = ({
                 }}
                 disabled={loading}
               />
-            </Form.Group>
+            </StyledFormControl>
 
-            <Form.Group className="mb-3">
-              <Form.Label>{t('shooterLatitude')}</Form.Label>
+            <StyledFormControl fullWidth>
+              <StyledFormLabel>{t('shooterLatitude')}</StyledFormLabel>
               <MeasurementInputMUI
                 value={values.shot.latitude}
                 onChange={(newMeasurement) => {
@@ -111,7 +130,7 @@ const ShotComponent = ({
                 }}
                 disabled={loading}
               />
-            </Form.Group>
+            </StyledFormControl>
           </>
         )}
 
@@ -123,7 +142,7 @@ const ShotComponent = ({
           loading={loading}
           values={values}
         />
-      </Card.Body>
+      </CardContent>
     </Card>
   );
 };

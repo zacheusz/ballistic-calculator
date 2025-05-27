@@ -1,6 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form, Button } from 'react-bootstrap';
+import {
+  Button,
+  Typography,
+  Paper,
+  FormControl,
+  FormLabel,
+  styled
+} from '@mui/material';
 import MeasurementInputMUI from './MeasurementInputMUI';
 import { WindSegment } from '../types/ballistics';
 
@@ -39,14 +46,24 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
     handleShotChange('windSegments', newWindSegments);
   };
 
+  // Styled components for consistent styling
+  const StyledFormControl = styled(FormControl)(({ theme }) => ({
+    marginBottom: theme.spacing(3)
+  }));
+
+  const StyledFormLabel = styled(FormLabel)(({ theme }) => ({
+    marginBottom: theme.spacing(1),
+    fontWeight: 500
+  }));
+
   return (
     <>
-      <h6 className="mt-4 mb-3">{t('calcWindSegments')}</h6>
+      <Typography variant="subtitle1" sx={{ mt: 4, mb: 3 }}>{t('calcWindSegments')}</Typography>
       {windSegments.map((segment, index) => (
-        <div key={index} className="p-3 border rounded mb-3">
-          <h6>{t('calcWindSegment')} {index + 1}</h6>
-          <Form.Group className="mb-3">
-            <Form.Label>{t('calcMaxRange')}</Form.Label>
+        <Paper key={index} elevation={1} sx={{ p: 3, mb: 3, borderRadius: 1 }}>
+          <Typography variant="subtitle2" sx={{ mb: 2 }}>{t('calcWindSegment')} {index + 1}</Typography>
+          <StyledFormControl fullWidth>
+            <StyledFormLabel>{t('calcMaxRange')}</StyledFormLabel>
             <MeasurementInputMUI
               value={segment.maxRange}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.maxRange`, newMeasurement)}
@@ -65,10 +82,10 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
               }}
               disabled={loading}
             />
-          </Form.Group>
+          </StyledFormControl>
 
-          <Form.Group className="mb-3">
-            <Form.Label>{t('calcWindSpeed')}</Form.Label>
+          <StyledFormControl fullWidth>
+            <StyledFormLabel>{t('calcWindSpeed')}</StyledFormLabel>
             <MeasurementInputMUI
               value={segment.speed}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.speed`, newMeasurement)}
@@ -87,10 +104,10 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
               }}
               disabled={loading}
             />
-          </Form.Group>
+          </StyledFormControl>
 
-          <Form.Group className="mb-3">
-            <Form.Label>{t('calcWindDirection')}</Form.Label>
+          <StyledFormControl fullWidth>
+            <StyledFormLabel>{t('calcWindDirection')}</StyledFormLabel>
             <MeasurementInputMUI
               value={segment.direction}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.direction`, newMeasurement)}
@@ -111,10 +128,10 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
               }}
               disabled={loading}
             />
-          </Form.Group>
+          </StyledFormControl>
 
-          <Form.Group className="mb-3">
-            <Form.Label>{t('calcVerticalComponent')}</Form.Label>
+          <StyledFormControl fullWidth>
+            <StyledFormLabel>{t('calcVerticalComponent')}</StyledFormLabel>
             <MeasurementInputMUI
               value={segment.verticalComponent || { value: 0, unit: segment.speed.unit }}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.verticalComponent`, newMeasurement)}
@@ -133,23 +150,26 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
               }}
               disabled={loading}
             />
-          </Form.Group>
+          </StyledFormControl>
 
           {index > 0 && (
             <Button 
-              variant="outline-danger" 
-              size="sm"
+              variant="outlined" 
+              color="error"
+              size="small"
               onClick={() => handleRemoveWindSegment(index)}
+              sx={{ mt: 1 }}
             >
               {t('calcRemoveSegment')}
             </Button>
           )}
-        </div>
+        </Paper>
       ))}
       <Button 
-        variant="outline-primary" 
-        size="sm"
-        className="mt-2"
+        variant="outlined" 
+        color="primary"
+        size="small"
+        sx={{ mt: 2 }}
         onClick={handleAddWindSegment}
       >
         {t('calcAddWindSegment')}

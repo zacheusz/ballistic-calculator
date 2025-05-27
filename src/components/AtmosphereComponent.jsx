@@ -1,6 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Form } from 'react-bootstrap';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  FormControl,
+  FormLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Box,
+  Typography,
+  styled
+} from '@mui/material';
 import MeasurementInputMUI from './MeasurementInputMUI';
 
 const AtmosphereComponent = ({ 
@@ -16,12 +28,22 @@ const AtmosphereComponent = ({
 }) => {
   const { t } = useTranslation();
 
+  // Styled components for consistent styling
+  const StyledFormControl = styled(FormControl)(({ theme }) => ({
+    marginBottom: theme.spacing(3)
+  }));
+
+  const StyledFormLabel = styled(FormLabel)(({ theme }) => ({
+    marginBottom: theme.spacing(1),
+    fontWeight: 500
+  }));
+
   return (
-    <Card className="mb-4">
-      <Card.Header as="h5">{t('calcAtmosphere')}</Card.Header>
-      <Card.Body>
-        <Form.Group className="mb-3">
-          <Form.Label>{t('calcTemperature')}</Form.Label>
+    <Card sx={{ mb: 4 }}>
+      <CardHeader title={t('calcAtmosphere')} />
+      <CardContent>
+        <StyledFormControl fullWidth>
+          <StyledFormLabel>{t('calcTemperature')}</StyledFormLabel>
           <MeasurementInputMUI
             value={values.atmosphere.temperature}
             onChange={(newMeasurement) => {
@@ -40,10 +62,10 @@ const AtmosphereComponent = ({
             }}
             disabled={loading}
           />
-        </Form.Group>
+        </StyledFormControl>
 
-        <Form.Group className="mb-3">
-          <Form.Label>{t('calcPressure')}</Form.Label>
+        <StyledFormControl fullWidth>
+          <StyledFormLabel>{t('calcPressure')}</StyledFormLabel>
           <MeasurementInputMUI
             value={values.atmosphere.pressure}
             onChange={(newMeasurement) => {
@@ -64,30 +86,41 @@ const AtmosphereComponent = ({
             }}
             disabled={loading}
           />
-        </Form.Group>
+        </StyledFormControl>
 
-        <Form.Group className="mb-3">
-          <Form.Label>{t('calcPressureType')}</Form.Label>
-          <Form.Select
+        <StyledFormControl fullWidth>
+          <StyledFormLabel>{t('calcPressureType')}</StyledFormLabel>
+          <Select
             name="atmosphere.pressureType"
             value={values.atmosphere.pressureType}
             onChange={(e) => {
-              handleChange(e);
+              // Create a synthetic event that mimics the structure expected by handleChange
+              const syntheticEvent = {
+                target: {
+                  name: 'atmosphere.pressureType',
+                  value: e.target.value
+                }
+              };
+              handleChange(syntheticEvent);
               handleAtmosphereSimpleChange('pressureType', e.target.value);
             }}
             onBlur={handleBlur}
+            size="small"
+            fullWidth
           >
-            <option value="STATION">{t('calcStationPressure')}</option>
-            <option value="BAROMETRIC">{t('calcBarometricPressure')}</option>
-          </Form.Select>
-        </Form.Group>
+            <MenuItem value="STATION">{t('calcStationPressure')}</MenuItem>
+            <MenuItem value="BAROMETRIC">{t('calcBarometricPressure')}</MenuItem>
+          </Select>
+        </StyledFormControl>
 
-        <Form.Group className="mb-3">
-          <Form.Label>{t('calcHumidity')}</Form.Label>
-          <Form.Control
+        <StyledFormControl fullWidth>
+          <StyledFormLabel>{t('calcHumidity')}</StyledFormLabel>
+          <TextField
             type="number"
-            min="0"
-            max="100"
+            inputProps={{
+              min: 0,
+              max: 100
+            }}
             name="atmosphere.humidity"
             value={values.atmosphere.humidity}
             onChange={(e) => {
@@ -95,11 +128,13 @@ const AtmosphereComponent = ({
               handleAtmosphereSimpleChange('humidity', parseFloat(e.target.value));
             }}
             onBlur={handleBlur}
+            size="small"
+            fullWidth
           />
-        </Form.Group>
+        </StyledFormControl>
 
-        <Form.Group className="mb-3">
-          <Form.Label>{t('calcAltitude')}</Form.Label>
+        <StyledFormControl fullWidth>
+          <StyledFormLabel>{t('calcAltitude')}</StyledFormLabel>
           <MeasurementInputMUI
             value={values.atmosphere.altitude}
             onChange={(newMeasurement) => {
@@ -118,8 +153,8 @@ const AtmosphereComponent = ({
             }}
             disabled={loading}
           />
-        </Form.Group>
-      </Card.Body>
+        </StyledFormControl>
+      </CardContent>
     </Card>
   );
 };
