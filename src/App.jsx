@@ -14,7 +14,7 @@ import { SnackbarProvider } from 'notistack';
 import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
-import ConfigPage from './pages/ConfigPage';
+import ConfigPage from './pages/ConfigPage.tsx';
 import MuiTestPage from './pages/MuiTestPage';
 import ZustandTest from './zustandIntegrationTest';
 

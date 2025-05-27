@@ -1,20 +1,49 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import debounce from 'lodash/debounce';
-import { Form, Button, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
+import { Form, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import { useSearchParams } from 'react-router-dom';
+// @ts-ignore - Using declaration files for these components
 import ThemeSelector from '../components/ThemeSelector';
+// @ts-ignore - Using declaration files for these components
 import LanguageSelector from '../components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
 import { useSafeStateUpdate } from '../hooks/useSafeStateUpdate';
 
-import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion.tsx';
+import UnitSelectorWithConversion from '../components/UnitSelectorWithConversion';
 import MeasurementInput from '../components/MeasurementInput';
+import { 
+  Measurement, 
+  FirearmProfile, 
+  Ammo, 
+  Unit, 
+  UnitPreferences
+} from '../types/ballistics';
 
-// Helper function to render unit selection dropdown with conversion
-const UnitSelector = ({ fieldName, value, onChange, options, currentValue, onValueChange, targetRef }) => (
+// Helper function to render unit selection dropdown with conversion - not used directly in this component
+// but kept for reference and potential future use
+interface UnitSelectorProps {
+  fieldName: string;
+  value: Unit;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  options: Array<{ value: Unit; label: string }>;
+  currentValue: number;
+  onValueChange?: (value: number) => void;
+  targetRef: React.RefObject<HTMLInputElement | null>;
+}
+
+// @ts-ignore - Component not used directly but kept for reference
+const UnitSelector: React.FC<UnitSelectorProps> = ({ 
+  fieldName, 
+  value, 
+  onChange, 
+  options, 
+  currentValue, 
+  onValueChange, 
+  targetRef 
+}) => (
   <UnitSelectorWithConversion
     fieldName={fieldName}
     value={value}
@@ -26,7 +55,25 @@ const UnitSelector = ({ fieldName, value, onChange, options, currentValue, onVal
   />
 );
 
-const ConfigPage = () => {
+// Define interfaces for local state
+interface LocalPreferences {
+  [key: string]: Unit;
+}
+
+interface CalculationOptions {
+  calculateSpinDrift: boolean;
+  calculateCoriolisEffect: boolean;
+  calculateAeroJump: boolean;
+  rangeCardStart: Measurement;
+  rangeCardStep: Measurement;
+}
+
+interface DisplayPreferences {
+  theme: string;
+  [key: string]: any;
+}
+
+const ConfigPage: React.FC = () => {
   const { t } = useTranslation();
   // Zustand store for config values
   const {
@@ -38,16 +85,16 @@ const ConfigPage = () => {
   } = useAppConfigStore();
   
   // Create refs for input fields to position tooltips
-  const sightHeightInputRef = useRef(null);
-  const barrelTwistInputRef = useRef(null);
-  const bulletDiameterInputRef = useRef(null);
-  const bulletLengthInputRef = useRef(null);
-  const bulletWeightInputRef = useRef(null);
-  const muzzleVelocityInputRef = useRef(null);
+  const sightHeightInputRef = useRef<HTMLInputElement>(null);
+  const barrelTwistInputRef = useRef<HTMLInputElement>(null);
+  const bulletDiameterInputRef = useRef<HTMLInputElement>(null);
+  const bulletLengthInputRef = useRef<HTMLInputElement>(null);
+  const bulletWeightInputRef = useRef<HTMLInputElement>(null);
+  const muzzleVelocityInputRef = useRef<HTMLInputElement>(null);
   
   // Refs to track manual updates and prevent circular updates
-  const isUpdatingFirearmRef = useRef(false);
-  const isUpdatingAmmoRef = useRef(false);
+  const isUpdatingFirearmRef = useRef<boolean>(false);
+  const isUpdatingAmmoRef = useRef<boolean>(false);
 
   // Alias for UI compatibility
   const environment = apiStage;
@@ -65,14 +112,14 @@ const ConfigPage = () => {
   
   // Extract unit preferences from the preferences object
   const unitPreferences = useMemo(() => {
-    return ballPreferences?.unitPreferences?.unitMappings?.reduce((acc, mapping) => {
+    return ballPreferences?.unitPreferences?.unitMappings?.reduce<LocalPreferences>((acc, mapping) => {
       acc[mapping.unitTypeClassName] = mapping.unitName;
       return acc;
     }, {}) || {};
   }, [ballPreferences?.unitPreferences?.unitMappings]);
   
   // For backward compatibility
-  const calculationOptions = useMemo(() => ({
+  const calculationOptions = useMemo<CalculationOptions>(() => ({
     calculateSpinDrift: ballPreferences?.calculateSpinDrift || false,
     calculateCoriolisEffect: ballPreferences?.calculateCoriolisEffect || false,
     calculateAeroJump: ballPreferences?.calculateAeroJump || false,
@@ -81,26 +128,27 @@ const ConfigPage = () => {
   }), [ballPreferences]);
   
   // For backward compatibility
-  const displayPreferences = useMemo(() => ({ theme }), [theme]);
+  const displayPreferences = useMemo<DisplayPreferences>(() => ({ theme }), [theme]);
 
-  const [inputApiKey, setInputApiKey] = useState(apiKey);
+  const [inputApiKey, setInputApiKey] = useState<string>(apiKey);
 
-// Debounced API key update to avoid excessive calls
-const debouncedUpdateApiKey = debounce((key) => {
-  if (key.trim()) setApiKey(key.trim());
-}, 400);
-  const [selectedEnvironment, setSelectedEnvironment] = useState(environment);
-  const [preferences, setPreferences] = useState({...unitPreferences});
-  const [firearm, setFirearm] = useState({...firearmProfile});
-  const [ammunition, setAmmunition] = useState({...ammo});
-  const [calcOptions, setCalcOptions] = useState({...calculationOptions});
-  const [displayOptionsState, setDisplayOptionsState] = useState({...displayPreferences});
-  const [error, _setError] = useState(''); // Prefixed with _ to indicate intentionally unused
+  // Debounced API key update to avoid excessive calls
+  const debouncedUpdateApiKey = debounce((key: string) => {
+    if (key.trim()) setApiKey(key.trim());
+  }, 400);
   
-  const handleEnvironmentChange = (e) => {
+  const [selectedEnvironment, setSelectedEnvironment] = useState<string>(environment);
+  const [preferences, setPreferences] = useState<LocalPreferences>({...unitPreferences});
+  const [firearm, setFirearm] = useState<FirearmProfile>({...firearmProfile});
+  const [ammunition, setAmmunition] = useState<Ammo>({...ammo});
+  const [calcOptions, setCalcOptions] = useState<CalculationOptions>({...calculationOptions});
+  const [displayOptionsState, setDisplayOptionsState] = useState<DisplayPreferences>({...displayPreferences});
+  const [error, _setError] = useState<string>(''); // Prefixed with _ to indicate intentionally unused
+  
+  const handleEnvironmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newEnv = e.target.value;
     setSelectedEnvironment(newEnv);
-    setEnvironment(newEnv);
+    setEnvironment(newEnv as any); // Type assertion since we know the values are valid
     // Save immediately when changed
     if (inputApiKey.trim()) {
       setApiKey(inputApiKey.trim());
@@ -114,7 +162,7 @@ const debouncedUpdateApiKey = debounce((key) => {
   const activeTab = searchParams.get('tab') || 'api';
   
   // Function to update the active tab in the URL
-  const setActiveTab = (tab) => {
+  const setActiveTab = (tab: string) => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set('tab', tab);
     setSearchParams(newParams);
@@ -164,7 +212,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     }
   }, [displayPreferences]);
 
-  const handleUnitChange = (unitType, value) => {
+  const handleUnitChange = (unitType: string, value: Unit) => {
     // Update the unit preferences in the ballistics store
     const unitMapping = {
       unitTypeClassName: unitType,
@@ -177,7 +225,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     updatedMappings.push(unitMapping);
     
     // Create the updated unit preferences object
-    const updatedUnitPreferences = {
+    const updatedUnitPreferences: UnitPreferences = {
       unitMappings: updatedMappings
     };
     
@@ -194,6 +242,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     
     // Also update the unit preferences in the API service
     // This ensures they're used in API requests
+    // @ts-ignore - Using declaration file for API service
     import('../services/api').then(apiModule => {
       const api = apiModule.default;
       api.setUnitPreferences(updatedUnitPreferences);
@@ -201,24 +250,24 @@ const debouncedUpdateApiKey = debounce((key) => {
     });
   };
   
-  const handleFirearmChange = (field, value) => {
+  const handleFirearmChange = (field: string, value: any) => {
     setFirearm(prev => {
       const newFirearm = { ...prev };
       const fieldParts = field.split('.');
       
       if (fieldParts.length === 1) {
-        newFirearm[field] = value;
+        (newFirearm as any)[field] = value;
       } else if (fieldParts.length === 2) {
-        newFirearm[fieldParts[0]][fieldParts[1]] = value;
+        (newFirearm as any)[fieldParts[0]][fieldParts[1]] = value;
       }
       return newFirearm;
     });
   };
   
   // Helper for measurement fields (sightHeight, barrelTwist)
-  const handleFirearmMeasurementChange = (field, measurement) => {
+  const handleFirearmMeasurementChange = (field: string, measurement: Measurement) => {
     console.log(`[DEBUG] handleFirearmMeasurementChange called for ${field}`, {
-      oldValue: firearm[field],
+      oldValue: (firearm as any)[field],
       newValue: measurement
     });
     
@@ -229,7 +278,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     // This only updates the local state for this specific field
     setFirearm(prev => {
       // Only update if the value or unit has actually changed
-      if (prev[field]?.value === measurement.value && prev[field]?.unit === measurement.unit) {
+      if ((prev as any)[field]?.value === measurement.value && (prev as any)[field]?.unit === measurement.unit) {
         return prev; // No change needed
       }
       
@@ -275,7 +324,7 @@ const debouncedUpdateApiKey = debounce((key) => {
         // Check again if we're in the middle of a manual update before actually updating
         if (!isUpdatingFirearmRef.current) {
           console.log('[DEBUG] Actually updating firearmProfile in store now', firearm);
-          updateFirearmProfile(firearm);
+          updateFirearmProfile({ firearmProfile: firearm });
         } else {
           console.log('[DEBUG] Cancelled firearmProfile store update because manual update started');
         }
@@ -285,30 +334,33 @@ const debouncedUpdateApiKey = debounce((key) => {
     }
   }, [firearm, firearmProfile, updateFirearmProfile]);
   
-  const handleAmmoChange = (field, value) => {
+  const handleAmmoChange = (field: string, value: any) => {
     setAmmunition(prev => {
       const newAmmo = { ...prev };
       const fieldParts = field.split('.');
       
       if (fieldParts.length === 1) {
-        newAmmo[field] = value;
+        (newAmmo as any)[field] = value;
       } else if (fieldParts.length === 2) {
-        newAmmo[fieldParts[0]][fieldParts[1]] = value;
+        (newAmmo as any)[fieldParts[0]][fieldParts[1]] = value;
       } else if (fieldParts.length === 3 && fieldParts[0] === 'ballisticCoefficients') {
         // Handle array access for ballistic coefficients
-        if (!newAmmo.ballisticCoefficients[parseInt(fieldParts[1])]) {
+        if (!(newAmmo.ballisticCoefficients && newAmmo.ballisticCoefficients[parseInt(fieldParts[1])])) {
+          if (!newAmmo.ballisticCoefficients) {
+            newAmmo.ballisticCoefficients = [];
+          }
           newAmmo.ballisticCoefficients[parseInt(fieldParts[1])] = { value: 0, dragModel: newAmmo.dragModel };
         }
-        newAmmo.ballisticCoefficients[parseInt(fieldParts[1])][fieldParts[2]] = value;
+        (newAmmo.ballisticCoefficients[parseInt(fieldParts[1])] as any)[fieldParts[2]] = value;
       }
       return newAmmo;
     });
   };
   
   // Helper for measurement fields (diameter, length, mass, muzzleVelocity)
-  const handleAmmoMeasurementChange = (field, measurement) => {
+  const handleAmmoMeasurementChange = (field: string, measurement: Measurement) => {
     console.log(`[DEBUG] handleAmmoMeasurementChange called for ${field}`, {
-      oldValue: ammunition[field],
+      oldValue: (ammunition as any)[field],
       newValue: measurement
     });
     
@@ -319,7 +371,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     // This only updates the local state for this specific field
     setAmmunition(prev => {
       // Only update if the value or unit has actually changed
-      if (prev[field]?.value === measurement.value && prev[field]?.unit === measurement.unit) {
+      if ((prev as any)[field]?.value === measurement.value && (prev as any)[field]?.unit === measurement.unit) {
         return prev; // No change needed
       }
       
@@ -365,7 +417,7 @@ const debouncedUpdateApiKey = debounce((key) => {
         // Check again if we're in the middle of a manual update before actually updating
         if (!isUpdatingAmmoRef.current) {
           console.log('[DEBUG] Actually updating ammo in store now', ammunition);
-          updateAmmo(ammunition);
+          updateAmmo({ ammo: ammunition });
         } else {
           console.log('[DEBUG] Cancelled ammo store update because manual update started');
         }
@@ -375,7 +427,7 @@ const debouncedUpdateApiKey = debounce((key) => {
     }
   }, [ammunition, ammo, updateAmmo]);
   
-  const handleCalcOptionsChange = (field, value) => {
+  const handleCalcOptionsChange = (field: string, value: any) => {
     // Update calculation options in the ballistics store
     updatePreferences({
       [field]: value
@@ -397,7 +449,8 @@ const debouncedUpdateApiKey = debounce((key) => {
   
   // Handle other display options if needed - keeping this for future use
   // Prefixed with _ to indicate intentionally unused
-  const _handleDisplayOptionsChange = (field, value) => {
+  // @ts-ignore - Function not used but kept for future reference
+  const _handleDisplayOptionsChange = (field: string, value: any) => {
     // Only if we add more display options beyond theme in the future
     if (field !== 'theme') {
       // Update local state
@@ -415,19 +468,11 @@ const debouncedUpdateApiKey = debounce((key) => {
   };
 
   return (
-    <Container className="mt-5">
-      <Card className="shadow">
-        <Card.Header as="h4" className="bg-primary text-white">
-          {t('snipeBallisticsConfig')}
-        </Card.Header>
+    <Container className="mt-4 mb-4">
+      <Card>
+        <Card.Header as="h4">{t('settings')}</Card.Header>
         <Card.Body>
-          {/* Use a key to force the Tab.Container to maintain its state */}
-          <Tab.Container 
-            id="config-tabs" 
-            activeKey={activeTab} 
-            onSelect={(key) => setActiveTab(key)}
-            mountOnEnter={true}
-            unmountOnExit={false}>
+          <Tab.Container activeKey={activeTab} onSelect={(k) => k && setActiveTab(k)}>
             <Nav variant="tabs" className="mb-3">
               <Nav.Item>
                 <Nav.Link eventKey="api">{t('apiSettings')}</Nav.Link>
@@ -454,46 +499,45 @@ const debouncedUpdateApiKey = debounce((key) => {
                 <Form>
                   {error && <Alert variant="danger">{t(error)}</Alert>}
             
-            <Row>
-              <Col md={8}>
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('apiKey')}</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder={t('enterApiKey')}
-                    value={inputApiKey}
-                    onChange={(e) => {
-                      setInputApiKey(e.target.value);
-                      debouncedUpdateApiKey(e.target.value);
-                    }}
-                    required
-                  />
-                  <Form.Text className="text-muted">
-                    {t('apiKeyRequired')} 
-                    {t('apiKeyStored')}
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('environment')}</Form.Label>
-                  <Form.Select
-                    value={selectedEnvironment}
-                    onChange={handleEnvironmentChange}
-                  >
-                    <option value="dev">{t('development')}</option>
-                    <option value="test">{t('test')}</option>
-                    <option value="stage">{t('staging')}</option>
-                    <option value="prod">{t('production')}</option>
-                  </Form.Select>
-                  <Form.Text className="text-muted">
-                    {t('selectApiEnv')}
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-            </Row>
-
-              </Form>
+                  <Row>
+                    <Col md={8}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>{t('apiKey')}</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder={t('enterApiKey')}
+                          value={inputApiKey}
+                          onChange={(e) => {
+                            setInputApiKey(e.target.value);
+                            debouncedUpdateApiKey(e.target.value);
+                          }}
+                          required
+                        />
+                        <Form.Text className="text-muted">
+                          {t('apiKeyRequired')} 
+                          {t('apiKeyStored')}
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col md={4}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>{t('environment')}</Form.Label>
+                        <Form.Select
+                          value={selectedEnvironment}
+                          onChange={handleEnvironmentChange}
+                        >
+                          <option value="dev">{t('development')}</option>
+                          <option value="test">{t('test')}</option>
+                          <option value="stage">{t('staging')}</option>
+                          <option value="prod">{t('production')}</option>
+                        </Form.Select>
+                        <Form.Text className="text-muted">
+                          {t('selectApiEnv')}
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </Form>
               </Tab.Pane>
               
               <Tab.Pane eventKey="units">
@@ -502,107 +546,107 @@ const debouncedUpdateApiKey = debounce((key) => {
                     <Card.Header as="h5">{t('unitPreferences')}</Card.Header>
                     <Card.Body>
                       <Row>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('range')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.Range} 
-                        onChange={(e) => handleUnitChange('Range', e.target.value)}
-                      >
-                        <option value="YARDS">{t('yards')}</option>
-                        <option value="METERS">{t('meters')}</option>
-                        <option value="FEET">{t('feet')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('scopeAdjustment')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.ScopeAdjustment} 
-                        onChange={(e) => handleUnitChange('ScopeAdjustment', e.target.value)}
-                      >
-                        <option value="MILS">{t('mils')}</option>
-                        <option value="MOA">{t('moa')}</option>
-                        <option value="IPHY">{t('iphy')}</option>
-                        <option value="DEGREES">{t('degrees')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('temperature')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.Temperature} 
-                        onChange={(e) => handleUnitChange('Temperature', e.target.value)}
-                      >
-                        <option value="FAHRENHEIT">{t('fahrenheit')}</option>
-                        <option value="CELSIUS">{t('celsius')}</option>
-                        <option value="RANKINE">{t('rankine')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('bulletVelocity')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.BulletVelocity} 
-                        onChange={(e) => handleUnitChange('BulletVelocity', e.target.value)}
-                      >
-                        <option value="FEET_PER_SECOND">{t('feetPerSecond')}</option>
-                        <option value="METERS_PER_SECOND">{t('metersPerSecond')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('windSpeed')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.WindSpeed} 
-                        onChange={(e) => handleUnitChange('WindSpeed', e.target.value)}
-                      >
-                        <option value="MILES_PER_HOUR">{t('milesPerHour')}</option>
-                        <option value="KILOMETERS_PER_HOUR">{t('kilometersPerHour')}</option>
-                        <option value="METERS_PER_SECOND">{t('metersPerSecond')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('windDirection')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.WindDirection} 
-                        onChange={(e) => handleUnitChange('WindDirection', e.target.value)}
-                      >
-                        <option value="CLOCK">{t('clock')}</option>
-                        <option value="DEGREES">{t('degrees')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('atmosphericPressure')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.AtmosphericPressure} 
-                        onChange={(e) => handleUnitChange('AtmosphericPressure', e.target.value)}
-                      >
-                        <option value="INCHES_MERCURY">{t('inchesMercury')}</option>
-                        <option value="HECTOPASCALS">{t('hectopascals')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <Form.Group>
-                      <Form.Label>{t('bulletWeight')}</Form.Label>
-                      <Form.Select 
-                        value={preferences.BulletWeight} 
-                        onChange={(e) => handleUnitChange('BulletWeight', e.target.value)}
-                      >
-                        <option value="GRAINS">{t('grains')}</option>
-                        <option value="GRAMS">{t('grams')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('range')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.Range} 
+                              onChange={(e) => handleUnitChange('Range', e.target.value as Unit)}
+                            >
+                              <option value="YARDS">{t('yards')}</option>
+                              <option value="METERS">{t('meters')}</option>
+                              <option value="FEET">{t('feet')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('scopeAdjustment')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.ScopeAdjustment} 
+                              onChange={(e) => handleUnitChange('ScopeAdjustment', e.target.value as Unit)}
+                            >
+                              <option value="MILS">{t('mils')}</option>
+                              <option value="MOA">{t('moa')}</option>
+                              <option value="IPHY">{t('iphy')}</option>
+                              <option value="DEGREES">{t('degrees')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('temperature')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.Temperature} 
+                              onChange={(e) => handleUnitChange('Temperature', e.target.value as Unit)}
+                            >
+                              <option value="FAHRENHEIT">{t('fahrenheit')}</option>
+                              <option value="CELSIUS">{t('celsius')}</option>
+                              <option value="RANKINE">{t('rankine')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('bulletVelocity')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.BulletVelocity} 
+                              onChange={(e) => handleUnitChange('BulletVelocity', e.target.value as Unit)}
+                            >
+                              <option value="FEET_PER_SECOND">{t('feetPerSecond')}</option>
+                              <option value="METERS_PER_SECOND">{t('metersPerSecond')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('windSpeed')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.WindSpeed} 
+                              onChange={(e) => handleUnitChange('WindSpeed', e.target.value as Unit)}
+                            >
+                              <option value="MILES_PER_HOUR">{t('milesPerHour')}</option>
+                              <option value="KILOMETERS_PER_HOUR">{t('kilometersPerHour')}</option>
+                              <option value="METERS_PER_SECOND">{t('metersPerSecond')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('windDirection')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.WindDirection} 
+                              onChange={(e) => handleUnitChange('WindDirection', e.target.value as Unit)}
+                            >
+                              <option value="CLOCK">{t('clock')}</option>
+                              <option value="DEGREES">{t('degrees')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('atmosphericPressure')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.AtmosphericPressure} 
+                              onChange={(e) => handleUnitChange('AtmosphericPressure', e.target.value as Unit)}
+                            >
+                              <option value="INCHES_MERCURY">{t('inchesMercury')}</option>
+                              <option value="HECTOPASCALS">{t('hectopascals')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <Form.Group>
+                            <Form.Label>{t('bulletWeight')}</Form.Label>
+                            <Form.Select 
+                              value={preferences.BulletWeight} 
+                              onChange={(e) => handleUnitChange('BulletWeight', e.target.value as Unit)}
+                            >
+                              <option value="GRAINS">{t('grains')}</option>
+                              <option value="GRAMS">{t('grams')}</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
                       </Row>
                     </Card.Body>
                   </Card>
@@ -633,11 +677,12 @@ const debouncedUpdateApiKey = debounce((key) => {
                             { value: 'CENTIMETERS', label: t('centimeters') },
                             { value: 'MILLIMETERS', label: t('millimeters') }
                           ]}
-                          label={null}
+                          label=""
                           inputProps={{
-                            step: "0.001",
-                            ref: sightHeightInputRef
+                            step: "0.001"
                           }}
+                          // @ts-ignore - MeasurementInput component accepts ref in inputProps
+                          inputRef={sightHeightInputRef}
                         />
                       </Form.Group>
 
@@ -651,10 +696,10 @@ const debouncedUpdateApiKey = debounce((key) => {
                             { value: 'CENTIMETERS', label: t('centimeters') },
                             { value: 'MILLIMETERS', label: t('millimeters') }
                           ]}
-                          label={null}
-                          inputProps={{
-                            ref: barrelTwistInputRef
-                          }}
+                          label=""
+                          inputProps={{}}
+                          // @ts-ignore - MeasurementInput component accepts ref in inputProps
+                          inputRef={barrelTwistInputRef}
                         />
                       </Form.Group>
 
@@ -714,7 +759,7 @@ const debouncedUpdateApiKey = debounce((key) => {
                           <Form.Control
                             type="number"
                             step="0.001"
-                            value={ammunition.ballisticCoefficients[0]?.value || ''}
+                            value={ammunition.ballisticCoefficients && ammunition.ballisticCoefficients[0]?.value || ''}
                             onChange={(e) => handleAmmoChange('ballisticCoefficients.0.value', parseFloat(e.target.value))}
                           />
                           <Form.Text className="text-muted">
@@ -733,11 +778,12 @@ const debouncedUpdateApiKey = debounce((key) => {
                             { value: 'CENTIMETERS', label: t('centimeters') },
                             { value: 'MILLIMETERS', label: t('millimeters') }
                           ]}
-                          label={null}
+                          label=""
                           inputProps={{
-                            step: "0.001",
-                            ref: bulletDiameterInputRef
+                            step: "0.001"
                           }}
+                          // @ts-ignore - MeasurementInput component accepts ref in inputProps
+                          inputRef={bulletDiameterInputRef}
                         />
                       </Form.Group>
 
@@ -751,11 +797,12 @@ const debouncedUpdateApiKey = debounce((key) => {
                             { value: 'CENTIMETERS', label: t('centimeters') },
                             { value: 'MILLIMETERS', label: t('millimeters') }
                           ]}
-                          label={null}
+                          label=""
                           inputProps={{
-                            step: "0.001",
-                            ref: bulletLengthInputRef
+                            step: "0.001"
                           }}
+                          // @ts-ignore - MeasurementInput component accepts ref in inputProps
+                          inputRef={bulletLengthInputRef}
                         />
                         <Form.Text className="text-muted">
                           {t('bulletLengthRequired')}
@@ -771,11 +818,12 @@ const debouncedUpdateApiKey = debounce((key) => {
                             { value: 'GRAINS', label: t('grains') },
                             { value: 'GRAMS', label: t('grams') }
                           ]}
-                          label={null}
+                          label=""
                           inputProps={{
-                            step: "0.1",
-                            ref: bulletWeightInputRef
+                            step: "0.1"
                           }}
+                          // @ts-ignore - MeasurementInput component accepts ref in inputProps
+                          inputRef={bulletWeightInputRef}
                         />
                       </Form.Group>
 
@@ -788,11 +836,12 @@ const debouncedUpdateApiKey = debounce((key) => {
                             { value: 'FEET_PER_SECOND', label: t('feetPerSecond') },
                             { value: 'METERS_PER_SECOND', label: t('metersPerSecond') }
                           ]}
-                          label={null}
+                          label=""
                           inputProps={{
-                            step: "1",
-                            ref: muzzleVelocityInputRef
+                            step: "1"
                           }}
+                          // @ts-ignore - MeasurementInput component accepts ref in inputProps
+                          inputRef={muzzleVelocityInputRef}
                         />
                       </Form.Group>
 
@@ -806,7 +855,7 @@ const debouncedUpdateApiKey = debounce((key) => {
                             { value: 'METERS', label: t('meters') },
                             { value: 'FEET', label: t('feet') }
                           ]}
-                          label={null}
+                          label=""
                           inputProps={{
                             step: "1"
                           }}
@@ -852,18 +901,18 @@ const debouncedUpdateApiKey = debounce((key) => {
               </Tab.Pane>
               
               <Tab.Pane eventKey="display">
-  <Form>
-    <Card className="mb-4">
-      <Card.Header as="h5" className="d-flex align-items-center justify-content-between">
-        <span>{t('displayOptions')}</span>
-        <LanguageSelector />
-      </Card.Header>
-      <Card.Body>
-        <ThemeSelector />
-      </Card.Body>
-    </Card>
-  </Form>
-</Tab.Pane>
+                <Form>
+                  <Card className="mb-4">
+                    <Card.Header as="h5" className="d-flex align-items-center justify-content-between">
+                      <span>{t('displayOptions')}</span>
+                      <LanguageSelector />
+                    </Card.Header>
+                    <Card.Body>
+                      <ThemeSelector />
+                    </Card.Body>
+                  </Card>
+                </Form>
+              </Tab.Pane>
             </Tab.Content>
             
           </Tab.Container>
