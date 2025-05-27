@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import debounce from 'lodash/debounce';
-import { Form, Card, Container, Alert, Row, Col, Nav, Tab } from 'react-bootstrap';
+import { Form, Card, Container, Alert, Row, Col } from 'react-bootstrap';
+import { Tabs, Tab, Box } from '@mui/material';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import { useSearchParams } from 'react-router-dom';
@@ -162,9 +163,9 @@ const ConfigPage: React.FC = () => {
   const activeTab = searchParams.get('tab') || 'api';
   
   // Function to update the active tab in the URL
-  const setActiveTab = (tab: string) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
     const newParams = new URLSearchParams(searchParams);
-    newParams.set('tab', tab);
+    newParams.set('tab', newValue);
     setSearchParams(newParams);
   };
   
@@ -472,30 +473,25 @@ const ConfigPage: React.FC = () => {
       <Card>
         <Card.Header as="h4">{t('settings')}</Card.Header>
         <Card.Body>
-          <Tab.Container activeKey={activeTab} onSelect={(k) => k && setActiveTab(k)}>
-            <Nav variant="tabs" className="mb-3">
-              <Nav.Item>
-                <Nav.Link eventKey="api">{t('apiSettings')}</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="units">{t('unitPreferences')}</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="firearm">{t('firearmProfile')}</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="ammo">{t('ammunition')}</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="calc">{t('calculationOptions')}</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="display">{t('displayOptions')}</Nav.Link>
-              </Nav.Item>
-            </Nav>
+          <Box sx={{ width: '100%' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs 
+                value={activeTab} 
+                onChange={handleTabChange}
+                variant="scrollable"
+                scrollButtons="auto"
+                aria-label="settings tabs"
+              >
+                <Tab label={t('apiSettings')} value="api" />
+                <Tab label={t('unitPreferences')} value="units" />
+                <Tab label={t('firearmProfile')} value="firearm" />
+                <Tab label={t('ammunition')} value="ammo" />
+                <Tab label={t('calculationOptions')} value="calc" />
+                <Tab label={t('displayOptions')} value="display" />
+              </Tabs>
+            </Box>
             
-            <Tab.Content>
-              <Tab.Pane eventKey="api">
+            {activeTab === "api" && (
                 <Form>
                   {error && <Alert variant="danger">{t(error)}</Alert>}
             
@@ -538,9 +534,9 @@ const ConfigPage: React.FC = () => {
                     </Col>
                   </Row>
                 </Form>
-              </Tab.Pane>
-              
-              <Tab.Pane eventKey="units">
+            )}
+            
+            {activeTab === "units" && (
                 <Form>
                   <Card className="mb-4">
                     <Card.Header as="h5">{t('unitPreferences')}</Card.Header>
@@ -651,9 +647,9 @@ const ConfigPage: React.FC = () => {
                     </Card.Body>
                   </Card>
                 </Form>
-              </Tab.Pane>
-              
-              <Tab.Pane eventKey="firearm">
+            )}
+            
+            {activeTab === "firearm" && (
                 <Form>
                   <Card className="mb-4">
                     <Card.Header as="h5">{t('firearmProfile')}</Card.Header>
@@ -716,9 +712,9 @@ const ConfigPage: React.FC = () => {
                     </Card.Body>
                   </Card>
                 </Form>
-              </Tab.Pane>
-              
-              <Tab.Pane eventKey="ammo">
+            )}
+            
+            {activeTab === "ammo" && (
                 <Form>
                   <Card className="mb-4">
                     <Card.Header as="h5">{t('ammunition')}</Card.Header>
@@ -864,9 +860,9 @@ const ConfigPage: React.FC = () => {
                     </Card.Body>
                   </Card>
                 </Form>
-              </Tab.Pane>
-              
-              <Tab.Pane eventKey="calc">
+            )}
+            
+            {activeTab === "calc" && (
                 <Form>
                   <Card className="mb-4">
                     <Card.Header as="h5">{t('calculationOptions')}</Card.Header>
@@ -898,9 +894,9 @@ const ConfigPage: React.FC = () => {
                     </Card.Body>
                   </Card>
                 </Form>
-              </Tab.Pane>
-              
-              <Tab.Pane eventKey="display">
+            )}
+            
+            {activeTab === "display" && (
                 <Form>
                   <Card className="mb-4">
                     <Card.Header as="h5" className="d-flex align-items-center justify-content-between">
@@ -912,10 +908,8 @@ const ConfigPage: React.FC = () => {
                     </Card.Body>
                   </Card>
                 </Form>
-              </Tab.Pane>
-            </Tab.Content>
-            
-          </Tab.Container>
+            )}
+          </Box>
         </Card.Body>
         <Card.Footer className="text-muted">
           <small>
