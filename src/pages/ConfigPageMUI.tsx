@@ -88,17 +88,11 @@ const ConfigPageMUI: React.FC = () => {
   const [calcOptions, setCalcOptions] = useState({
     calculateSpinDrift: preferences?.calculateSpinDrift || false,
     calculateCoriolisEffect: preferences?.calculateCoriolisEffect || false,
-    calculateAeroJump: preferences?.calculateAeroJump || false,
-    rangeCardStart: preferences?.rangeCardStart || { value: 100, unit: 'YARDS' as Unit },
-    rangeCardStep: preferences?.rangeCardStep || { value: 100, unit: 'YARDS' as Unit }
+    calculateAeroJump: preferences?.calculateAeroJump || false
   });
   
   // Error state - we'll use this for API error handling
   const [error, setError] = useState<string>('');
-  // Function to handle API errors
-  const handleApiError = useCallback((errorMessage: string) => {
-    setError(errorMessage);
-  }, []);
 
   // URL-based tab state management
   const [searchParams, setSearchParams] = useSearchParams();

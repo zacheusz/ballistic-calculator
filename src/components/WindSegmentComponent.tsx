@@ -77,7 +77,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].maxRange.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInput component
+                // @ts-ignore - ref is handled by the MeasurementInputMUI component
                 ref: getWindSegmentRef(index, 'maxRange')
               }}
               disabled={loading}
@@ -99,7 +99,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].speed.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInput component
+                // @ts-ignore - ref is handled by the MeasurementInputMUI component
                 ref: getWindSegmentRef(index, 'speed')
               }}
               disabled={loading}
@@ -122,7 +122,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].direction.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInput component
+                // @ts-ignore - ref is handled by the MeasurementInputMUI component
                 ref: getWindSegmentRef(index, 'direction'),
                 min: 0
               }}
@@ -145,7 +145,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].verticalComponent.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInput component
+                // @ts-ignore - ref is handled by the MeasurementInputMUI component
                 ref: getWindSegmentRef(index, 'verticalComponent')
               }}
               disabled={loading}

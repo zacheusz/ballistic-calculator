@@ -7,15 +7,11 @@ import {
   CardContent,
   Box
 } from '@mui/material';
-import MeasurementInputMUI from '../../components/MeasurementInputMUI';
-import { Measurement } from '../../types/ballistics';
 
 interface CalculationOptions {
   calculateSpinDrift: boolean;
   calculateCoriolisEffect: boolean;
   calculateAeroJump: boolean;
-  rangeCardStart: Measurement;
-  rangeCardStep: Measurement;
 }
 
 interface CalculationOptionsTabProps {
@@ -33,9 +29,7 @@ const CalculationOptionsTab: React.FC<CalculationOptionsTabProps> = ({
     onOptionsChange(field, event.target.checked);
   };
 
-  const handleMeasurementChange = (field: string) => (measurement: Measurement) => {
-    onOptionsChange(field, measurement);
-  };
+  // We no longer need handleMeasurementChange since rangeCardStart and rangeCardStep are handled elsewhere
 
   return (
     <form>
@@ -81,41 +75,7 @@ const CalculationOptionsTab: React.FC<CalculationOptionsTabProps> = ({
             />
           </Box>
 
-          <Box sx={{ mb: 3 }}>
-            <CardHeader title={t('rangeCard')} sx={{ p: 0, mb: 2 }} />
-            
-            <Box sx={{ mb: 2 }}>
-              <MeasurementInputMUI
-                value={options.rangeCardStart || { value: 100, unit: 'YARDS' }}
-                onChange={handleMeasurementChange('rangeCardStart')}
-                unitOptions={[
-                  { value: 'YARDS', label: t('yards') },
-                  { value: 'METERS', label: t('meters') },
-                  { value: 'FEET', label: t('feet') }
-                ]}
-                label={t('rangeCardStart')}
-                inputProps={{
-                  step: "10"
-                }}
-              />
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <MeasurementInputMUI
-                value={options.rangeCardStep || { value: 100, unit: 'YARDS' }}
-                onChange={handleMeasurementChange('rangeCardStep')}
-                unitOptions={[
-                  { value: 'YARDS', label: t('yards') },
-                  { value: 'METERS', label: t('meters') },
-                  { value: 'FEET', label: t('feet') }
-                ]}
-                label={t('rangeCardStep')}
-                inputProps={{
-                  step: "10"
-                }}
-              />
-            </Box>
-          </Box>
+          {/* Range card settings are handled by ModeComponent.jsx */}
         </CardContent>
       </Card>
     </form>

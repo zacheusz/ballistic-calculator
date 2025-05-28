@@ -14,8 +14,7 @@ import { SnackbarProvider } from 'notistack';
 import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
-import ConfigPage from './pages/ConfigPage.tsx';
-import MuiTestPage from './pages/MuiTestPage';
+import ConfigPageMUI from './pages/ConfigPageMUI';
 import ZustandTest from './zustandIntegrationTest';
 
 // Toast container that uses the current theme
@@ -58,8 +57,7 @@ function ThemedApp() {
                   <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/calculator" element={<CalculatorPage />} />
-                    <Route path="/config" element={<ConfigPage />} />
-                    <Route path="/mui-test" element={<MuiTestPage />} />
+                    <Route path="/config" element={<ConfigPageMUI />} />
                     <Route path="/zustand-test" element={<ZustandTest />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
