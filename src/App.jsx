@@ -12,7 +12,7 @@ import MuiThemeProvider from './context/MuiThemeProvider';
 import { BallisticsStoreProvider } from './context/BallisticsStoreProvider';
 import { SnackbarProvider } from 'notistack';
 import NavigationMUI from './components/NavigationMUI';
-import HomePage from './pages/HomePage';
+import HomePageMUI from './pages/HomePageMUI';
 import CalculatorPage from './pages/CalculatorPage';
 import ConfigPageMUI from './pages/ConfigPageMUI';
 import ZustandTest from './zustandIntegrationTest';
@@ -55,7 +55,7 @@ function ThemedApp() {
                 <NavigationMUI />
                 <main>
                   <Routes>
-                    <Route path="/" element={<HomePage />} />
+                    <Route path="/" element={<HomePageMUI />} />
                     <Route path="/calculator" element={<CalculatorPage />} />
                     <Route path="/config" element={<ConfigPageMUI />} />
                     <Route path="/zustand-test" element={<ZustandTest />} />

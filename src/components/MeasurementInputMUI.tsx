@@ -87,7 +87,7 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
   };
 
   // Handle unit change with conversion
-  const handleUnitChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleUnitChange = (event: React.ChangeEvent<HTMLInputElement> | { target: { value: unknown } }) => {
     const newUnit = event.target.value as Unit;
     const oldUnit = localMeasurement.unit;
     
@@ -162,7 +162,7 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
                 <FormControl size="small" fullWidth>
                   <StyledSelect
                     value={localMeasurement.unit}
-                    onChange={handleUnitChange as any}
+                    onChange={handleUnitChange}
                     displayEmpty
                     inputRef={valueInputRef}
                   >
@@ -196,7 +196,7 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
                 <FormControl size="small" fullWidth>
                   <StyledSelect
                     value={localMeasurement.unit}
-                    onChange={handleUnitChange as any}
+                    onChange={handleUnitChange}
                     displayEmpty
                   >
                     {unitOptions.map(option => (
