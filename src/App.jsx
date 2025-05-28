@@ -11,7 +11,7 @@ import { useAppConfigStore } from './stores/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
 import { BallisticsStoreProvider } from './context/BallisticsStoreProvider';
 import { SnackbarProvider } from 'notistack';
-import Navigation from './components/Navigation';
+import NavigationMUI from './components/NavigationMUI';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
 import ConfigPageMUI from './pages/ConfigPageMUI';
@@ -43,7 +43,7 @@ function ThemedApp() {
   // Force remount of the entire MUI theme tree when theme changes
   return (
     <MuiThemeProvider key={`mui-theme-${theme}`}>
-      <LocalizationProvider dateAdapter={AdapterDayjs} key={`localization-${theme}`}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <SnackbarProvider 
           maxSnack={3} 
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
@@ -52,7 +52,7 @@ function ThemedApp() {
           <BallisticsStoreProvider>
             <AppProvider>
               <Router>
-                <Navigation />
+                <NavigationMUI />
                 <main>
                   <Routes>
                     <Route path="/" element={<HomePage />} />
