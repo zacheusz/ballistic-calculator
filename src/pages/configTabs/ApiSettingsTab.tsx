@@ -5,10 +5,10 @@ import {
   InputLabel, 
   Select, 
   MenuItem, 
-  Grid, 
   Typography, 
   Alert,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Box
 } from '@mui/material';
 
 interface ApiSettingsTabProps {
@@ -29,50 +29,55 @@ const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({
   t
 }) => {
   return (
-    <form>
+    <Box component="form" noValidate autoComplete="off">
       {error && <Alert severity="error" sx={{ mb: 2 }}>{t(error)}</Alert>}
       
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={8}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <TextField
-              id="api-key"
-              fullWidth
-              label={t('snipeBallisticsApiKey')}
-              value={apiKey}
-              onChange={(e) => onApiKeyChange(e.target.value)}
-              required
-              size="small"
-              margin="dense"
-            />
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+        {/* API Key Section */}
+        <Box sx={{ flex: { md: '0 0 66.666%' }, width: '100%' }}>
+          <TextField
+            id="api-key"
+            label={t('snipeBallisticsApiKey')}
+            value={apiKey}
+            onChange={(e) => onApiKeyChange(e.target.value)}
+            required
+            size="small"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+          />
+          <Box sx={{ px: 1, mt: 0.5 }}>
             <Typography variant="caption" color="text.secondary">
-              {t('apiKeyRequired')} 
-              {t('apiKeyStored')}
+              {t('apiKeyCaption')}
             </Typography>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
+          </Box>
+        </Box>
+        
+        {/* Environment Section */}
+        <Box sx={{ flex: { md: '0 0 33.333%' }, width: '100%' }}>
+          <FormControl fullWidth variant="outlined" margin="normal" size="small">
             <InputLabel id="environment-label">{t('environment')}</InputLabel>
             <Select
               labelId="environment-label"
+              id="environment"
               value={environment}
               onChange={(e: SelectChangeEvent) => onEnvironmentChange(e.target.value)}
-              fullWidth
-              size="small"
+              label={t('environment')}
             >
               <MenuItem value="dev">{t('development')}</MenuItem>
               <MenuItem value="test">{t('test')}</MenuItem>
               <MenuItem value="stage">{t('staging')}</MenuItem>
               <MenuItem value="prod">{t('production')}</MenuItem>
             </Select>
-            <Typography variant="caption" color="text.secondary">
-              {t('selectApiEnv')}
-            </Typography>
           </FormControl>
-        </Grid>
-      </Grid>
-    </form>
+          <Box sx={{ px: 1, mt: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">
+              {t('environmentCaption')}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
