@@ -35,11 +35,10 @@ const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
           <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel htmlFor="api-key">{t('apiKey')}</InputLabel>
             <TextField
               id="api-key"
               fullWidth
-              placeholder={t('enterApiKey')}
+              label={t('snipeBallisticsApiKey')}
               value={apiKey}
               onChange={(e) => onApiKeyChange(e.target.value)}
               required

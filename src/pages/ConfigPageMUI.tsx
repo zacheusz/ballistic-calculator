@@ -10,7 +10,7 @@ import {
   Tabs, 
   Tab
 } from '@mui/material';
-import { useAppConfigStore } from '../stores/useAppConfigStore';
+import { useAppConfigStore, ApiStage } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +62,7 @@ const ConfigPageMUI: React.FC = () => {
   
   // Local state for each tab
   const [inputApiKey, setInputApiKey] = useState(apiKey || '');
-  const [selectedEnvironment, setSelectedEnvironment] = useState(apiStage || 'prod');
+  const [selectedEnvironment, setSelectedEnvironment] = useState<ApiStage>(apiStage || 'prod');
   
   // Local state for unit preferences
   const [unitPrefs, setUnitPrefs] = useState<UnitPreference[]>(
@@ -123,9 +123,10 @@ const ConfigPageMUI: React.FC = () => {
   
   // Environment change handler
   const handleEnvironmentChange = useCallback((value: string) => {
-    setSelectedEnvironment(value);
     if (value === 'test' || value === 'dev' || value === 'stage' || value === 'prod') {
-      setApiStage(value as 'test' | 'dev' | 'stage' | 'prod');
+      const apiStageValue = value as ApiStage;
+      setSelectedEnvironment(apiStageValue);
+      setApiStage(apiStageValue);
     }
   }, [setApiStage]);
   

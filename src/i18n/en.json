@@ -75,6 +75,7 @@
   "ammunition": "Ammunition",
   "calculationOptions": "Calculation Options",
   "apiKey": "API Key",
+  "snipeBallisticsApiKey": "Snipe Ballistics API Key",
   "enterApiKey": "Enter your Snipe Ballistics API key",
   "apiKeyRequired": "Your API key is required to access the Snipe Ballistics API.",
   "apiKeyStored": "It will be stored securely in your browser's local storage.",
