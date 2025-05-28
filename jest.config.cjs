@@ -5,7 +5,7 @@ module.exports = {
   roots: ['<rootDir>/src'],
   setupFilesAfterEnv: [
     '<rootDir>/src/setupTests.ts',
-    '<rootDir>/src/test/setupViteEnv.js'
+    '<rootDir>/src/test/setupViteEnv.ts'
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   testMatch: ['**/*.test.(ts|tsx)'],
