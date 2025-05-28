@@ -14,7 +14,7 @@ import { useAppConfigStore, ApiStage } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import '../i18n';
+import '../i18n/i18nInit.ts';
 
 // Import tab components
 import {

@@ -3,7 +3,14 @@ import { initReactI18next } from 'react-i18next';
 import en from './en.json';
 import pl from './pl.json';
 
-const resources = {
+// Define the resources type
+interface Resources {
+  [key: string]: {
+    translation: typeof en;
+  };
+}
+
+const resources: Resources = {
   en: { translation: en },
   pl: { translation: pl },
 };
