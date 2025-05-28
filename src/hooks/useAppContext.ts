@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import AppContext from '../context/AppContext';
+import AppContext from '../context/AppContext.tsx';
 
 // Define types for the AppContext value
 export interface AppContextValue {
@@ -34,7 +34,14 @@ export interface AppContextValue {
 /**
  * Custom hook to access the AppContext
  * @returns {AppContextValue} The AppContext value
+ * @throws {Error} If used outside of AppProvider
  */
-export const useAppContext = (): AppContextValue => useContext(AppContext);
+export const useAppContext = (): AppContextValue => {
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error('useAppContext must be used within an AppProvider');
+  }
+  return context;
+};
 
 export default useAppContext;

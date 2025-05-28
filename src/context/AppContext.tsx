@@ -1,45 +1,77 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
-import configService from '../services/configService.ts';
+import configService from '../services/configService';
+// Using any type for storageService since it's a JavaScript file without type definitions
 import storageService, { STORAGE_KEYS } from '../services/storageService';
-import { useAppConfigStore } from '../stores/useAppConfigStore';
+import { useAppConfigStore, ApiStage } from '../stores/useAppConfigStore';
+// Import types but use 'any' for compatibility with the JavaScript API
 
-const AppContext = createContext();
+// Define the context value type
+export interface AppContextValue {
+  apiKey: string;
+  environment: string;
+  unitPreferences: Record<string, string>;
+  firearmProfile: any; // Replace with specific type if available
+  ammo: any; // Replace with specific type if available
+  calculationOptions: any;
+  displayPreferences: {
+    theme?: string;
+    [key: string]: any;
+  };
+  isConfigured: boolean;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  updateApiKey: (key: string) => void;
+  updateEnvironment: (env: string) => void;
+  updateUnitPreferences: (prefs: Record<string, string>) => void;
+  updateFirearmProfile: (profile: any) => void;
+  updateAmmo: (ammo: any) => void;
+  updateCalculationOptions: (options: any) => void;
+  updateDisplayPreferences: (prefs: any) => void;
+}
+
+// Define the provider props type
+export interface AppProviderProps {
+  children: React.ReactNode;
+}
+
+// Create the context with an initial undefined value
+const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 // Get default values from configuration service
 const defaultFirearmProfile = configService.getDefaultFirearmProfile();
-
 const defaultAmmo = configService.getDefaultAmmo();
-
 const defaultCalculationOptions = configService.getDefaultCalculationOptions();
 
 // Display preferences no longer include theme as it's managed by Zustand
 const defaultDisplayPreferences = {};
 
-export const AppProvider = ({ children }) => {
+export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Get API key and stage from Zustand store
   const zustandApiKey = useAppConfigStore(state => state.apiKey);
   const zustandApiStage = useAppConfigStore(state => state.apiStage);
   
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState<string>('');
   // Initialize with empty string, will be set from localStorage or API service in useEffect
-  const [environment, setEnvironment] = useState('');
-  const [unitPreferences, setUnitPreferences] = useState(api.getDefaultUnitPreferences());
+  const [environment, setEnvironment] = useState<string>('');
+  // Use any type here to match what the API actually returns
+  // Using 'as any' to bypass TypeScript error since getDefaultUnitPreferences exists in the JS implementation
+  const [unitPreferences, setUnitPreferences] = useState<any>((api as any).getDefaultUnitPreferences());
   // Using _ prefix to indicate these state setters are intentionally unused but kept for future use
   const [firearmProfile, setFirearmProfile] = useState(defaultFirearmProfile);
   const [ammo, setAmmo] = useState(defaultAmmo);
   const [calculationOptions, setCalculationOptions] = useState(defaultCalculationOptions);
   const [displayPreferences, setDisplayPreferences] = useState(defaultDisplayPreferences);
-  const [isConfigured, setIsConfigured] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isConfigured, setIsConfigured] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // Define update functions before they are used in useEffect
-  const updateFirearmProfile = useCallback((newFirearmProfile) => {
+  const updateFirearmProfile = useCallback((newFirearmProfile: any) => {
     setFirearmProfile(newFirearmProfile);
     storageService.saveToStorage(STORAGE_KEYS.FIREARM_PROFILE, newFirearmProfile);
   }, []);
   
-  const updateAmmo = useCallback((newAmmo) => {
+  const updateAmmo = useCallback((newAmmo: any) => {
     setAmmo(newAmmo);
     storageService.saveToStorage(STORAGE_KEYS.AMMO, newAmmo);
   }, []);
@@ -93,7 +125,7 @@ export const AppProvider = ({ children }) => {
     }
   }, [zustandApiKey, zustandApiStage]);
 
-  const updateApiKey = (newApiKey) => {
+  const updateApiKey = (newApiKey: string): void => {
     setApiKey(newApiKey);
     storageService.saveToStorage(STORAGE_KEYS.API_KEY, newApiKey);
     setIsConfigured(true);
@@ -101,15 +133,15 @@ export const AppProvider = ({ children }) => {
     // No need to update Zustand store here as it's handled in ConfigPage
   };
   
-  const updateEnvironment = (newEnvironment) => {
+  const updateEnvironment = (newEnvironment: string): void => {
     setEnvironment(newEnvironment);
     // No longer storing in localStorage as we're using Zustand store as the single source of truth
     api.setEnvironment(newEnvironment);
     // We should also update the Zustand store to keep it in sync
-    useAppConfigStore.getState().setApiStage(newEnvironment);
+    useAppConfigStore.getState().setApiStage(newEnvironment as ApiStage);
   };
   
-  const updateUnitPreferences = (newUnitPreferences) => {
+  const updateUnitPreferences = (newUnitPreferences: any): void => {
     setUnitPreferences(newUnitPreferences);
     storageService.saveToStorage(STORAGE_KEYS.UNIT_PREFERENCES, newUnitPreferences);
     api.setUnitPreferences(newUnitPreferences);
@@ -117,7 +149,7 @@ export const AppProvider = ({ children }) => {
   
   // These functions are already defined above
   
-  const updateCalculationOptions = (newCalculationOptions) => {
+  const updateCalculationOptions = (newCalculationOptions: any): void => {
     console.log('Updating calculation options:', newCalculationOptions);
     
     // Create a clean copy of the options to ensure we're not carrying any unexpected properties
@@ -145,33 +177,34 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const updateDisplayPreferences = (newPreferences) => {
+  const updateDisplayPreferences = (newPreferences: any): void => {
     setDisplayPreferences(newPreferences);
     // Theme is now managed by Zustand store
   };
 
+  // Create the context value with proper type assertion to satisfy TypeScript
+  const contextValue: AppContextValue = {
+    apiKey,
+    environment,
+    unitPreferences,
+    firearmProfile,
+    ammo,
+    calculationOptions: calculationOptions as any,
+    displayPreferences,
+    isConfigured,
+    loading,
+    setLoading,
+    updateApiKey,
+    updateEnvironment,
+    updateUnitPreferences,
+    updateFirearmProfile,
+    updateAmmo,
+    updateCalculationOptions,
+    updateDisplayPreferences,
+  };
+
   return (
-    <AppContext.Provider
-      value={{
-        apiKey,
-        environment,
-        unitPreferences,
-        firearmProfile,
-        ammo,
-        calculationOptions,
-        displayPreferences,
-        isConfigured,
-        loading,
-        setLoading,
-        updateApiKey,
-        updateEnvironment,
-        updateUnitPreferences,
-        updateFirearmProfile,
-        updateAmmo,
-        updateCalculationOptions,
-        updateDisplayPreferences,
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

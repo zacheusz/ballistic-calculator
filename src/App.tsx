@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-import { AppProvider } from './context/AppContext';
+import { AppProvider } from './context/AppContext.tsx';
 import { useAppConfigStore } from './stores/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
 import { BallisticsStoreProvider } from './context/BallisticsStoreProvider';
