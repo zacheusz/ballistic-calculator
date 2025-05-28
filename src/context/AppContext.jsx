@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
-import configService from '../services/configService';
+import configService from '../services/configService.ts';
 import storageService, { STORAGE_KEYS } from '../services/storageService';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 

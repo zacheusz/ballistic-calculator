@@ -17,9 +17,10 @@ import { Formik, Form as FormikForm } from 'formik';
 import * as Yup from 'yup';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
-// Import services with type assertions for JavaScript modules
+// Import services with proper TypeScript typing
 import apiModule from '../services/api';
 import configServiceModule from '../services/configService';
+// Now both modules have proper TypeScript definitions
 
 // Import components with type assertions for JSX components
 // These are still in JSX format and will be converted to TSX in future improvements

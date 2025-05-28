@@ -1,5 +1,5 @@
 import axios from 'axios';
-import configService from './configService';
+import configService from './configService.ts';
 
 class BallisticsApi {
   constructor() {
@@ -78,32 +78,44 @@ class BallisticsApi {
   }
   
   getUnitPreferencesForApi() {
-    // First, try to use the user's saved unit preferences
+    // First, check if we have valid unit preferences in localStorage
+    // This is where the Zustand store persists its state
+    try {
+      // Get the Zustand store state from localStorage
+      const storedState = JSON.parse(localStorage.getItem('ballistics-store-v2') || '{}');
+      
+      // Check if we have valid unit preferences in the stored state
+      if (storedState.state && 
+          storedState.state.preferences && 
+          storedState.state.preferences.unitPreferences && 
+          storedState.state.preferences.unitPreferences.unitMappings && 
+          Array.isArray(storedState.state.preferences.unitPreferences.unitMappings) && 
+          storedState.state.preferences.unitPreferences.unitMappings.length > 0) {
+        
+        console.log('Using unit preferences from Zustand store (via localStorage):', 
+                   storedState.state.preferences.unitPreferences);
+        
+        // Update our instance variable to keep it in sync
+        this.unitPreferences = storedState.state.preferences.unitPreferences;
+        return storedState.state.preferences.unitPreferences;
+      }
+    } catch (error) {
+      console.error('Error accessing Zustand store state from localStorage:', error);
+      // Continue to fallback mechanisms if there's an error
+    }
+    
+    // If we have valid instance preferences, use those as a fallback
     if (this.unitPreferences && this.unitPreferences.unitMappings && 
         Array.isArray(this.unitPreferences.unitMappings) && 
         this.unitPreferences.unitMappings.length > 0) {
-      console.log('Using saved unit preferences:', this.unitPreferences);
+      console.log('Using instance unit preferences as fallback:', this.unitPreferences);
       return this.unitPreferences;
     }
     
-    // If the saved preferences aren't in the correct format, convert them
-    if (this.unitPreferences && typeof this.unitPreferences === 'object' && 
-        Object.keys(this.unitPreferences).length > 0) {
-      console.log('Converting unit preferences format:', this.unitPreferences);
-      
-      const unitMappings = Object.entries(this.unitPreferences).map(([unitTypeClassName, unitName]) => ({
-        unitTypeClassName,
-        unitName
-      }));
-      
-      return {
-        unitMappings
-      };
-    }
-    
-    // Fall back to default preferences if no saved preferences exist
+    // Fall back to default preferences from configService
+    // The configService loads defaults from default.json
     const defaultPreferences = configService.getDefaultUnitPreferences();
-    console.log('Using default unit preferences:', defaultPreferences);
+    console.log('Using default unit preferences from configService:', defaultPreferences);
     
     if (defaultPreferences && defaultPreferences.unitMappings && 
         Array.isArray(defaultPreferences.unitMappings) && 
@@ -111,21 +123,9 @@ class BallisticsApi {
       return defaultPreferences;
     }
     
-    // Last resort: create a default structure based on the OpenAPI spec
-    return {
-      unitMappings: [
-        { unitTypeClassName: "Range", unitName: "YARDS" },
-        { unitTypeClassName: "ScopeAdjustment", unitName: "MOA" },
-        { unitTypeClassName: "Temperature", unitName: "FAHRENHEIT" },
-        { unitTypeClassName: "BulletVelocity", unitName: "FEET_PER_SECOND" },
-        { unitTypeClassName: "WindSpeed", unitName: "MILES_PER_HOUR" },
-        { unitTypeClassName: "WindDirection", unitName: "CLOCK" },
-        { unitTypeClassName: "AtmosphericPressure", unitName: "INCHES_MERCURY" },
-        { unitTypeClassName: "BulletWeight", unitName: "GRAINS" },
-        { unitTypeClassName: "BulletEnergy", unitName: "FOOT_POUNDS" },
-        { unitTypeClassName: "TimeOfFlight", unitName: "SECONDS" }
-      ]
-    };
+    // If all else fails, log an error and return an empty structure
+    console.error('Failed to get unit preferences from any source');
+    return { unitMappings: [] };
   }
 
   async computeBallisticSolution(config) {
