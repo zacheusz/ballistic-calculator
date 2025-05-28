@@ -387,11 +387,16 @@ const handleShotChange = (field: string, value: any): void => {
         }
         // Use the field part as a key with proper type checking
         const segmentField = fieldParts[2] as WindSegmentField;
-        const measurementField = fieldParts[3] as 'value' | 'unit';
+        const measurementField = fieldParts[3] as keyof Measurement;
         if (newShot.windSegments[index] && newShot.windSegments[index][segmentField]) {
-          const measurement = newShot.windSegments[index][segmentField] as Measurement;
+          const measurement = newShot.windSegments[index][segmentField];
           if (measurement) {
-            measurement[measurementField] = value;
+            // Type-safe approach: check which field we're updating and cast appropriately
+            if (measurementField === 'value') {
+              measurement.value = typeof value === 'number' ? value : parseFloat(value);
+            } else if (measurementField === 'unit') {
+              measurement.unit = value as Unit;
+            }
           }
         }
       }
