@@ -38,4 +38,7 @@ export interface AppProviderProps {
 // Declare the context
 declare const AppContext: React.Context<AppContextValue>;
 
+// Export the AppProvider component
+export const AppProvider: React.FC<AppProviderProps>;
+
 export default AppContext;
