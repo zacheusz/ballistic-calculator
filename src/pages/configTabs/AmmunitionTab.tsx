@@ -19,7 +19,7 @@ interface AmmunitionTabProps {
   ammunition: Ammo;
   onAmmoChange: (field: string, value: any) => void;
   onAmmoMeasurementChange: (field: string, measurement: Measurement) => void;
-  t: (key: string) => string; // Translation function
+  t: (key: string, options?: Record<string, any>) => string; // Translation function with interpolation support
 }
 
 const AmmunitionTab: React.FC<AmmunitionTabProps> = ({
