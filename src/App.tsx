@@ -14,7 +14,6 @@ import NavigationMUI from './components/NavigationMUI';
 import HomePageMUI from './pages/HomePageMUI';
 import CalculatorPage from './pages/CalculatorPage';
 import ConfigPageMUI from './pages/ConfigPageMUI';
-import ZustandTest from './zustandIntegrationTest';
 
 // Toast container that uses the current theme
 const ThemedToastContainer: React.FC = () => {
@@ -54,7 +53,6 @@ const ThemedApp: React.FC = () => {
                     <Route path="/" element={<HomePageMUI />} />
                     <Route path="/calculator" element={<CalculatorPage />} />
                     <Route path="/config" element={<ConfigPageMUI />} />
-                    <Route path="/zustand-test" element={<ZustandTest />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </main>
