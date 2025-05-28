@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import configService from './configService';
-import { UnitPreferences } from '../types/ballistics';
+import { UnitPreferences, BallisticsRequest } from '../types/ballistics';
 
 // Define interfaces for the class properties
 interface BallisticsApiConfig {
@@ -11,14 +11,48 @@ interface BallisticsApiConfig {
   client: AxiosInstance;
 }
 
-// Define interface for the compute ballistic solution request
-interface ComputeBallisticSolutionConfig {
-  [key: string]: any; // This can be more specific based on your API requirements
+// Define interface for system info response based on OpenAPI spec
+interface SystemInfoResponse {
+  location?: string;
+  environment?: string;
+  javaVersion?: string;
+  awsRegion?: string;
+  functionName?: string;
+  functionVersion?: string;
+  build?: {
+    version?: string;
+    timestamp?: string;
+    javaVersion?: string;
+    git?: {
+      branch?: string;
+      commitId?: string;
+      commitTime?: string;
+    };
+  };
 }
 
-// Define interface for system info response
-interface SystemInfoResponse {
-  [key: string]: any; // This can be more specific based on your API response
+// Define interface for ballistic solution response based on OpenAPI spec
+interface SolutionCardResponse {
+  solutions: Array<{
+    range: { value: number; unit: string };
+    horizontalAdjustment: { value: number; unit: string };
+    verticalAdjustment: { value: number; unit: string };
+    time: number;
+    energy: { value: number; unit: string };
+    velocity: { value: number; unit: string };
+    mach: number;
+    drop: { value: number; unit: string };
+    coroDrift: { value: number; unit: string };
+    lead: { value: number; unit: string };
+    spinDrift: { value: number; unit: string };
+    wind: { value: number; unit: string };
+    aeroJump: { value: number; unit: string };
+  }>;
+}
+
+// Define interface for error response
+interface ErrorResponse {
+  error: string;
 }
 
 // Define interface for Zustand store state structure
@@ -163,9 +197,9 @@ class BallisticsApi implements BallisticsApiConfig {
     return { unitMappings: [] };
   }
 
-  async computeBallisticSolution(config: ComputeBallisticSolutionConfig): Promise<any> {
+  async computeBallisticSolution(config: BallisticsRequest): Promise<SolutionCardResponse> {
     try {
-      const response = await this.client.post('/compute', config, {
+      const response: AxiosResponse<SolutionCardResponse> = await this.client.post('/compute', config, {
         headers: {
           'x-api-key': this.apiKey,
         },
@@ -173,13 +207,19 @@ class BallisticsApi implements BallisticsApiConfig {
       return response.data;
     } catch (error) {
       console.error('Error computing ballistic solution:', error);
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ErrorResponse>;
+        if (axiosError.response?.data) {
+          throw new Error(axiosError.response.data.error || 'API Error');
+        }
+      }
       throw error;
     }
   }
 
   async getSystemInfo(): Promise<SystemInfoResponse> {
     try {
-      const response = await this.client.get('/info', {
+      const response: AxiosResponse<SystemInfoResponse> = await this.client.get('/info', {
         headers: {
           'x-api-key': this.apiKey,
         },
@@ -187,6 +227,12 @@ class BallisticsApi implements BallisticsApiConfig {
       return response.data;
     } catch (error) {
       console.error('Error getting system info:', error);
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ErrorResponse>;
+        if (axiosError.response?.data) {
+          throw new Error(axiosError.response.data.error || 'API Error');
+        }
+      }
       throw error;
     }
   }
