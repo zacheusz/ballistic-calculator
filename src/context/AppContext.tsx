@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api.ts';
 import configService from '../services/configService';
-// Using any type for storageService since it's a JavaScript file without type definitions
+
 import storageService, { STORAGE_KEYS } from '../services/storageService';
 import { useAppConfigStore, ApiStage } from '../stores/useAppConfigStore';
 // Import types but use 'any' for compatibility with the JavaScript API
