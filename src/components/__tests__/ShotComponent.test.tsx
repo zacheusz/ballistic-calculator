@@ -1,18 +1,16 @@
-/* eslint-env jest */
-/* global jest, describe, test, expect, beforeEach */
-
-import React from 'react';
+import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ShotComponent from '../ShotComponent';
+import { Shot, WindSegment, Measurement } from '../../types/ballistics';
 
 // Mock i18n
 jest.mock('react-i18next', () => ({
   ...jest.requireActual('react-i18next'),
   useTranslation: () => {
     return {
-      t: (str) => str,
+      t: (str: string) => str,
       i18n: {
-        changeLanguage: () => new Promise(() => {}),
+        changeLanguage: () => new Promise<void>(() => {}),
       },
     };
   },
@@ -20,13 +18,43 @@ jest.mock('react-i18next', () => ({
 
 // Mock the WindSegmentComponent
 jest.mock('../WindSegmentComponent', () => {
-  return function MockWindSegmentComponent({ windSegments }) {
+  return function MockWindSegmentComponent({ windSegments }: { windSegments: WindSegment[] }): React.ReactElement {
     return <div data-testid="mock-wind-segment">Wind Segments: {windSegments.length}</div>;
   };
 });
 
 describe('ShotComponent', () => {
-  const defaultProps = {
+  interface ShotComponentProps {
+    values: {
+      shot: Shot;
+    };
+    handleBlur: (e: React.FocusEvent<any>) => void;
+    handleShotChange: (field: string, value: Measurement) => void;
+    setFieldValue: (field: string, value: any) => void;
+    loading: boolean;
+    errors: {
+      shot?: {
+        range?: {
+          value?: string;
+        };
+      };
+    };
+    touched: {
+      shot?: {
+        range?: {
+          value?: boolean;
+        };
+      };
+    };
+    calculationOptions: {
+      calculateCoriolisEffect: boolean;
+    };
+    rangeInputRef: React.RefObject<HTMLInputElement>;
+    elevationAngleInputRef: React.RefObject<HTMLInputElement>;
+    getWindSegmentRef: (index: number, field: string) => React.RefObject<HTMLInputElement>;
+  }
+
+  const defaultProps: ShotComponentProps = {
     values: {
       shot: {
         range: { value: 100, unit: 'YARDS' },
@@ -41,7 +69,7 @@ describe('ShotComponent', () => {
             verticalComponent: { value: 0, unit: 'MILES_PER_HOUR' }
           }
         ]
-      }
+      } as Shot
     },
     handleBlur: jest.fn(),
     handleShotChange: jest.fn(),
@@ -52,8 +80,8 @@ describe('ShotComponent', () => {
     calculationOptions: {
       calculateCoriolisEffect: false
     },
-    rangeInputRef: { current: null },
-    elevationAngleInputRef: { current: null },
+    rangeInputRef: { current: null } as unknown as React.RefObject<HTMLInputElement>,
+    elevationAngleInputRef: { current: null } as unknown as React.RefObject<HTMLInputElement>,
     getWindSegmentRef: jest.fn()
   };
 
@@ -175,8 +203,8 @@ describe('ShotComponent', () => {
   test('disables all inputs when loading is true', () => {
     render(<ShotComponent {...defaultProps} loading={true} />);
     
-    // Check that all inputs are disabled
-    const inputs = screen.getAllByRole('textbox');
+    // Check that all inputs are disabled - use spinbutton role for number inputs
+    const inputs = screen.getAllByRole('spinbutton');
     inputs.forEach(input => {
       expect(input).toBeDisabled();
     });

@@ -1,25 +1,34 @@
-/* eslint-env jest */
-/* global jest, describe, test, expect, beforeEach */
-
-import React from 'react';
+import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ModeComponent from '../ModeComponent';
+import { Unit } from '../../types/ballistics';
 
 // Mock i18n
 jest.mock('react-i18next', () => ({
   ...jest.requireActual('react-i18next'),
   useTranslation: () => {
     return {
-      t: (str) => str,
+      t: (str: string) => str,
       i18n: {
-        changeLanguage: () => new Promise(() => {}),
+        changeLanguage: () => new Promise<void>(() => {}),
       },
     };
   },
 }));
 
 describe('ModeComponent', () => {
-  const defaultProps = {
+  interface ModeComponentProps {
+    mode: 'HUD' | 'RANGE_CARD';
+    onModeChange: (mode: string) => void;
+    rangeCardStart: number;
+    onRangeCardStartChange: (value: number) => void;
+    rangeCardStep: number;
+    onRangeCardStepChange: (value: number) => void;
+    unit: Unit;
+    onUnitChange: (unit: Unit) => void;
+  }
+
+  const defaultProps: ModeComponentProps = {
     mode: 'HUD',
     onModeChange: jest.fn(),
     rangeCardStart: 100,
@@ -72,57 +81,66 @@ describe('ModeComponent', () => {
     expect(defaultProps.onModeChange).toHaveBeenCalledWith('RANGE_CARD');
   });
 
-  test('calls onRangeCardStartChange when range card start value is changed', () => {
+  test('calls onRangeCardStartChange when range card start value is changed', async () => {
     render(<ModeComponent {...defaultProps} mode="RANGE_CARD" />);
     
-    // Find the input field for range card start
-    const inputs = screen.getAllByRole('textbox');
+    // Find the input field for range card start by looking for number inputs instead of textbox
+    const inputs = screen.getAllByRole('spinbutton');
+    expect(inputs.length).toBeGreaterThan(0);
     const rangeCardStartInput = inputs[0]; // First input should be range card start
     
     // Change the value
     fireEvent.change(rangeCardStartInput, { target: { value: '200' } });
     
+    // Wait for any debounce or timeout
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
     // Check that onRangeCardStartChange was called with the correct value
-    // Note: There might be a debounce or timeout in the component
-    setTimeout(() => {
-      expect(defaultProps.onRangeCardStartChange).toHaveBeenCalledWith(200);
-    }, 10);
+    expect(defaultProps.onRangeCardStartChange).toHaveBeenCalledWith(200);
   });
 
-  test('calls onRangeCardStepChange when range card step value is changed', () => {
+  test('calls onRangeCardStepChange when range card step value is changed', async () => {
     render(<ModeComponent {...defaultProps} mode="RANGE_CARD" />);
     
-    // Find the input field for range card step
-    const inputs = screen.getAllByRole('textbox');
+    // Find the input field for range card step by looking for number inputs instead of textbox
+    const inputs = screen.getAllByRole('spinbutton');
+    expect(inputs.length).toBeGreaterThan(1);
     const rangeCardStepInput = inputs[1]; // Second input should be range card step
     
     // Change the value
     fireEvent.change(rangeCardStepInput, { target: { value: '100' } });
     
+    // Wait for any debounce or timeout
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
     // Check that onRangeCardStepChange was called with the correct value
-    // Note: There might be a debounce or timeout in the component
-    setTimeout(() => {
-      expect(defaultProps.onRangeCardStepChange).toHaveBeenCalledWith(100);
-    }, 10);
+    expect(defaultProps.onRangeCardStepChange).toHaveBeenCalledWith(100);
   });
 
-  test('calls onUnitChange when unit is changed', () => {
+  test('calls onUnitChange when unit is changed', async () => {
     render(<ModeComponent {...defaultProps} mode="RANGE_CARD" />);
     
-    // Find the select for the unit
-    const unitSelects = screen.getAllByRole('button');
-    const unitSelect = unitSelects.find(select => select.textContent.includes('unitYards'));
+    // Find all comboboxes which are the unit selectors in MUI
+    const comboboxes = screen.getAllByRole('combobox');
+    expect(comboboxes.length).toBeGreaterThan(0);
+    
+    // Get the first combobox which should be the unit selector
+    const unitSelect = comboboxes[0];
     
     // Open the select dropdown
     fireEvent.mouseDown(unitSelect);
+    
+    // Wait for dropdown to open
+    await new Promise(resolve => setTimeout(resolve, 10));
     
     // Select a different unit
     const option = screen.getByText('unitMeters');
     fireEvent.click(option);
     
+    // Wait for any debounce or timeout
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
     // Check that onUnitChange was called with the correct value
-    setTimeout(() => {
-      expect(defaultProps.onUnitChange).toHaveBeenCalledWith('METERS');
-    }, 10);
+    expect(defaultProps.onUnitChange).toHaveBeenCalledWith('METERS');
   });
 });
