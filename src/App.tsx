@@ -1,7 +1,6 @@
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -18,7 +17,7 @@ import ConfigPageMUI from './pages/ConfigPageMUI';
 import ZustandTest from './zustandIntegrationTest';
 
 // Toast container that uses the current theme
-function ThemedToastContainer() {
+const ThemedToastContainer: React.FC = () => {
   const { theme } = useAppConfigStore();
   return (
     <ToastContainer 
@@ -29,15 +28,12 @@ function ThemedToastContainer() {
 }
 
 // Wrapper component that uses theme from Zustand store
-function ThemedApp() {
+const ThemedApp: React.FC = () => {
   const { theme } = useAppConfigStore();
   
-  // Synchronize theme with Bootstrap data-bs-theme attributes
+  // Log theme changes for debugging
   useEffect(() => {
-    // Apply theme to both HTML and body elements for Bootstrap components
-    document.documentElement.setAttribute('data-bs-theme', theme);
-    document.body.setAttribute('data-bs-theme', theme);
-    console.log('Theme synchronized with Bootstrap:', theme);
+    console.log('Theme changed to:', theme);
   }, [theme]);
   
   // Force remount of the entire MUI theme tree when theme changes
@@ -72,7 +68,7 @@ function ThemedApp() {
   );
 }
 
-function App() {
+const App: React.FC = () => {
   return <ThemedApp />;
 }
 

@@ -1,16 +1,39 @@
 import React, { useMemo, useCallback } from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
+import { Measurement } from '../types/ballistics';
+
+interface BallisticSolution {
+  range?: Measurement;
+  horizontalAdjustment?: Measurement;
+  verticalAdjustment?: Measurement;
+  drop?: Measurement;
+  wind?: Measurement;
+  velocity?: Measurement;
+  energy?: Measurement;
+  time?: number;
+  mach?: number;
+  spinDrift?: Measurement;
+  coroDrift?: Measurement;
+  lead?: Measurement;
+  aeroJump?: Measurement;
+  [key: string]: any;
+}
+
+interface BallisticsResultsGridProps {
+  results: BallisticSolution[];
+  unitPreferences?: Record<string, string>;
+}
 
 /**
  * Component for displaying ballistics calculation results using MUI X Data Grid
  * Provides sorting, filtering, and export capabilities
  */
-const BallisticsResultsGrid = ({ results, unitPreferences }) => {
+const BallisticsResultsGrid: React.FC<BallisticsResultsGridProps> = ({ results, unitPreferences = {} }) => {
   const { theme } = useAppConfigStore();
 
   // Helper to extract unit from object fields, fallback to unitPreferences
-  const extractUnitOrPref = useCallback((field, prefKey) => {
+  const extractUnitOrPref = useCallback((field: any, prefKey?: string): string => {
     if (field && typeof field === 'object' && 'unit' in field && field.unit) return getUnitLabel(field.unit);
     if (unitPreferences && prefKey && unitPreferences[prefKey]) return getUnitLabel(unitPreferences[prefKey]);
     return '';
@@ -41,7 +64,7 @@ const BallisticsResultsGrid = ({ results, unitPreferences }) => {
   }, [results, extractUnitOrPref]);
 
   // Helper to extract .value from object fields or return primitive if number
-  const extractValue = (field) => {
+  const extractValue = (field: any): number | undefined => {
     if (field && typeof field === 'object' && 'value' in field) return field.value;
     return field;
   };
@@ -68,13 +91,13 @@ const BallisticsResultsGrid = ({ results, unitPreferences }) => {
   }, [results]);
 
   // Helper function to format numbers with 2 decimal places
-  function formatNumber(value) {
+  function formatNumber(value: number | undefined): number | null {
     if (value === undefined || value === null) return null;
     return Number(parseFloat(value).toFixed(2));
   }
 
   // Helper function to get readable unit labels
-  function getUnitLabel(unit) {
+  function getUnitLabel(unit: string): string {
     const unitMap = {
       // RangeMeasurement
       'YARDS': 'yd',
