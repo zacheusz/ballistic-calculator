@@ -42,11 +42,7 @@ const ConfigPageMUI: React.FC = () => {
     apiKey, 
     setApiKey, 
     apiStage, 
-    setApiStage,
-    theme,
-    setTheme,
-    language,
-    setLanguage
+    setApiStage
   } = useAppConfigStore();
   
   // Get ballistics state from store
@@ -290,10 +286,6 @@ const ConfigPageMUI: React.FC = () => {
             {/* Display Options Tab */}
             {activeTab === "display" && (
               <DisplayOptionsTab
-                theme={theme}
-                language={language}
-                onThemeChange={setTheme}
-                onLanguageChange={setLanguage}
                 t={t}
               />
             )}

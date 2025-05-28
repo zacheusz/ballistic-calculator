@@ -7,9 +7,10 @@ import {
 } from '@mui/material';
 import ThemeSelectorMUI from '../../components/ThemeSelectorMUI';
 import LanguageSelectorMUI from '../../components/LanguageSelectorMUI';
+import { TFunction } from 'i18next';
 
 interface DisplayOptionsTabProps {
-  t: (key: string) => string; // Translation function
+  t: TFunction<"translation", undefined> | ((key: string) => string);
 }
 
 const DisplayOptionsTab: React.FC<DisplayOptionsTabProps> = ({
