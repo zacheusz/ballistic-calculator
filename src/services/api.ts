@@ -1,7 +1,42 @@
-import axios from 'axios';
-import configService from './configService.ts';
+import axios, { AxiosInstance } from 'axios';
+import configService from './configService';
+import { UnitPreferences } from '../types/ballistics';
 
-class BallisticsApi {
+// Define interfaces for the class properties
+interface BallisticsApiConfig {
+  apiBaseUrl: string;
+  apiKey: string;
+  environment: string;
+  unitPreferences: UnitPreferences;
+  client: AxiosInstance;
+}
+
+// Define interface for the compute ballistic solution request
+interface ComputeBallisticSolutionConfig {
+  [key: string]: any; // This can be more specific based on your API requirements
+}
+
+// Define interface for system info response
+interface SystemInfoResponse {
+  [key: string]: any; // This can be more specific based on your API response
+}
+
+// Define interface for Zustand store state structure
+interface BallisitcsStoreState {
+  state: {
+    preferences: {
+      unitPreferences: UnitPreferences;
+    };
+  };
+}
+
+class BallisticsApi implements BallisticsApiConfig {
+  apiBaseUrl: string;
+  apiKey: string;
+  environment: string;
+  unitPreferences: UnitPreferences;
+  client!: AxiosInstance; // Using definite assignment assertion
+
   constructor() {
     // Debug log environment variables
     console.log('Environment variables:', {
@@ -34,11 +69,11 @@ class BallisticsApi {
     this.updateClient();
   }
   
-  getDefaultUnitPreferences() {
+  getDefaultUnitPreferences(): UnitPreferences {
     return configService.getDefaultUnitPreferences();
   }
   
-  updateClient() {
+  updateClient(): void {
     const BASE_URL = `${this.apiBaseUrl}/${this.environment}`;
     console.log(`Initializing API client with base URL: ${BASE_URL}`);
     this.client = axios.create({
@@ -49,40 +84,40 @@ class BallisticsApi {
     });
   }
 
-  setApiKey(apiKey) {
+  setApiKey(apiKey: string): void {
     this.apiKey = apiKey;
     localStorage.setItem('snipe_ballistics_api_key', apiKey);
   }
 
-  getApiKey() {
+  getApiKey(): string {
     return this.apiKey;
   }
   
-  setEnvironment(environment) {
+  setEnvironment(environment: string): void {
     this.environment = environment;
     // No longer storing in localStorage as we're using Zustand store as the single source of truth
     this.updateClient();
   }
   
-  getEnvironment() {
+  getEnvironment(): string {
     return this.environment;
   }
   
-  setUnitPreferences(unitPreferences) {
+  setUnitPreferences(unitPreferences: UnitPreferences): void {
     this.unitPreferences = unitPreferences;
     localStorage.setItem('snipe_ballistics_unit_preferences', JSON.stringify(unitPreferences));
   }
   
-  getUnitPreferences() {
+  getUnitPreferences(): UnitPreferences {
     return this.unitPreferences;
   }
   
-  getUnitPreferencesForApi() {
+  getUnitPreferencesForApi(): UnitPreferences {
     // First, check if we have valid unit preferences in localStorage
     // This is where the Zustand store persists its state
     try {
       // Get the Zustand store state from localStorage
-      const storedState = JSON.parse(localStorage.getItem('ballistics-store-v2') || '{}');
+      const storedState = JSON.parse(localStorage.getItem('ballistics-store-v2') || '{}') as BallisitcsStoreState;
       
       // Check if we have valid unit preferences in the stored state
       if (storedState.state && 
@@ -128,7 +163,7 @@ class BallisticsApi {
     return { unitMappings: [] };
   }
 
-  async computeBallisticSolution(config) {
+  async computeBallisticSolution(config: ComputeBallisticSolutionConfig): Promise<any> {
     try {
       const response = await this.client.post('/compute', config, {
         headers: {
@@ -142,7 +177,7 @@ class BallisticsApi {
     }
   }
 
-  async getSystemInfo() {
+  async getSystemInfo(): Promise<SystemInfoResponse> {
     try {
       const response = await this.client.get('/info', {
         headers: {

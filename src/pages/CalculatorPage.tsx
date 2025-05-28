@@ -18,7 +18,7 @@ import * as Yup from 'yup';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useBallistics } from '../hooks/useBallistics';
 // Import services with proper TypeScript typing
-import apiModule from '../services/api';
+import apiModule from '../services/api.ts';
 import configServiceModule from '../services/configService';
 // Now both modules have proper TypeScript definitions
 
@@ -388,7 +388,12 @@ const handleShotChange = (field: string, value: any): void => {
         // Use the field part as a key with proper type checking
         const segmentField = fieldParts[2] as WindSegmentField;
         const measurementField = fieldParts[3] as 'value' | 'unit';
-        (newShot.windSegments[index][segmentField] as Measurement)[measurementField] = value;
+        if (newShot.windSegments[index] && newShot.windSegments[index][segmentField]) {
+          const measurement = newShot.windSegments[index][segmentField] as Measurement;
+          if (measurement) {
+            measurement[measurementField] = value;
+          }
+        }
       }
       
       return newShot;
