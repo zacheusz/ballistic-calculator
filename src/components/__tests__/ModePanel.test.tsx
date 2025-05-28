@@ -1,15 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import ModePanel from '../ModePanel';
+import i18n from '../../i18n/i18nForTests';
+import { Unit } from '../../types/ballistics';
 
 describe('ModePanel', () => {
   const defaultProps = {
-    mode: 'HUD',
+    mode: 'HUD' as 'HUD' | 'RANGE_CARD',
     onModeChange: jest.fn(),
     rangeCardStart: 100,
     onRangeCardStartChange: jest.fn(),
     rangeCardStep: 50,
     onRangeCardStepChange: jest.fn(),
-    unit: 'YARDS',
+    unit: 'YARDS' as Unit,
     onUnitChange: jest.fn()
   };
 
@@ -21,33 +23,33 @@ describe('ModePanel', () => {
     render(<ModePanel {...defaultProps} />);
     
     // Check that the component renders with the correct title
-    expect(screen.getByText('Mode')).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('calcMode'))).toBeInTheDocument();
     
     // Check that HUD radio button is selected
-    const hudRadio = screen.getByLabelText('HUD');
+    const hudRadio = screen.getByLabelText(i18n.t('calcHudMode'));
     expect(hudRadio).toBeInTheDocument();
     expect(hudRadio).toBeChecked();
     
     // Check that Range Card radio button is not selected
-    const rangeCardRadio = screen.getByLabelText('Range Card');
+    const rangeCardRadio = screen.getByLabelText(i18n.t('calcRangeCardMode'));
     expect(rangeCardRadio).toBeInTheDocument();
     expect(rangeCardRadio).not.toBeChecked();
     
     // Range card settings should not be visible in HUD mode
-    expect(screen.queryByText('Range Card Start')).not.toBeInTheDocument();
-    expect(screen.queryByText('Range Card Step')).not.toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('calcRangeCardStart'))).not.toBeInTheDocument();
+    expect(screen.queryByText(i18n.t('calcRangeCardStep'))).not.toBeInTheDocument();
   });
 
   test('renders with Range Card mode selected and shows additional settings', () => {
     render(<ModePanel {...defaultProps} mode="RANGE_CARD" />);
     
     // Check that Range Card radio button is selected
-    const rangeCardRadio = screen.getByLabelText('Range Card');
+    const rangeCardRadio = screen.getByLabelText(i18n.t('calcRangeCardMode'));
     expect(rangeCardRadio).toBeChecked();
     
     // Range card settings should be visible
-    expect(screen.getByText('Range Card Start')).toBeInTheDocument();
-    expect(screen.getByText('Range Card Step')).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('calcRangeCardStart'))).toBeInTheDocument();
+    expect(screen.getByText(i18n.t('calcRangeCardStep'))).toBeInTheDocument();
     
     // Check that the input fields have the correct values
     const startInput = screen.getByDisplayValue('100');
@@ -57,7 +59,7 @@ describe('ModePanel', () => {
     expect(stepInput).toBeInTheDocument();
     
     // Check that unit selects are present
-    const unitSelects = screen.getAllByText('Yards');
+    const unitSelects = screen.getAllByText(i18n.t('yards'));
     expect(unitSelects.length).toBe(2);
   });
 
@@ -65,7 +67,7 @@ describe('ModePanel', () => {
     render(<ModePanel {...defaultProps} />);
     
     // Click on Range Card radio button
-    const rangeCardRadio = screen.getByLabelText('Range Card');
+    const rangeCardRadio = screen.getByLabelText(i18n.t('calcRangeCardMode'));
     fireEvent.click(rangeCardRadio);
     
     // Check that onModeChange was called with the correct value
@@ -98,11 +100,11 @@ describe('ModePanel', () => {
     render(<ModePanel {...defaultProps} mode="RANGE_CARD" />);
     
     // Find the unit select and change its value
-    const unitSelects = screen.getAllByText('Yards');
+    const unitSelects = screen.getAllByText(i18n.t('yards'));
     fireEvent.mouseDown(unitSelects[0]);
     
     // Select Meters option
-    const metersOption = screen.getByText('Meters');
+    const metersOption = screen.getByText(i18n.t('meters'));
     fireEvent.click(metersOption);
     
     // Check that onUnitChange was called with the correct value
