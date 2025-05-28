@@ -1,3 +1,6 @@
+/* eslint-env jest */
+/* global jest, describe, test, expect, beforeEach */
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ShotComponent from '../ShotComponent';
