@@ -167,5 +167,6 @@
   "muiComponents": "MUI Components",
   "currentValues": "Current Values",
   "distance": "Distance",
-  "velocity": "Velocity"
+  "velocity": "Velocity",
+  "settingsAutoSaved": "Settings are automatically saved"
 }

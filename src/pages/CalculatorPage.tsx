@@ -509,6 +509,9 @@ const handleShotChange = (field: string, value: any): void => {
                     </>
                   ) : t('calcCalculateBallistics')}
                 </Button>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+                  {t('settingsAutoSaved')}
+                </Typography>
               </Box>
             </Box>
           </FormikForm>
