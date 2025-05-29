@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import configService from './configService';
 import { UnitPreferences, BallisticsRequest } from '../types/ballistics';
+import { SolutionCardResponse, ErrorResponse, SystemInfoResponse } from '../types/apiTypes';
 
 // Define interfaces for the class properties
 interface BallisticsApiConfig {
@@ -11,49 +12,7 @@ interface BallisticsApiConfig {
   client: AxiosInstance;
 }
 
-// Define interface for system info response based on OpenAPI spec
-interface SystemInfoResponse {
-  location?: string;
-  environment?: string;
-  javaVersion?: string;
-  awsRegion?: string;
-  functionName?: string;
-  functionVersion?: string;
-  build?: {
-    version?: string;
-    timestamp?: string;
-    javaVersion?: string;
-    git?: {
-      branch?: string;
-      commitId?: string;
-      commitTime?: string;
-    };
-  };
-}
-
-// Define interface for ballistic solution response based on OpenAPI spec
-interface SolutionCardResponse {
-  solutions: Array<{
-    range: { value: number; unit: string };
-    horizontalAdjustment: { value: number; unit: string };
-    verticalAdjustment: { value: number; unit: string };
-    time: number;
-    energy: { value: number; unit: string };
-    velocity: { value: number; unit: string };
-    mach: number;
-    drop: { value: number; unit: string };
-    coroDrift: { value: number; unit: string };
-    lead: { value: number; unit: string };
-    spinDrift: { value: number; unit: string };
-    wind: { value: number; unit: string };
-    aeroJump: { value: number; unit: string };
-  }>;
-}
-
-// Define interface for error response
-interface ErrorResponse {
-  error: string;
-}
+// Interface definitions moved to src/types/apiTypes.ts
 
 // Define interface for Zustand store state structure
 interface BallisitcsStoreState {
