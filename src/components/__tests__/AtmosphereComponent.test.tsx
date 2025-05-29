@@ -138,12 +138,12 @@ describe('AtmosphereComponent', () => {
     fireEvent.mouseDown(pressureTypeSelect);
     
     // Select a different pressure type
-    const option = screen.getByText('calcBarometricPressure');
+    const option = screen.getByText('calcAbsolutePressure');
     fireEvent.click(option);
     
     // Check that handleChange and handleAtmosphereSimpleChange were called with the correct values
     expect(defaultProps.handleChange).toHaveBeenCalled();
-    expect(defaultProps.handleAtmosphereSimpleChange).toHaveBeenCalledWith('pressureType', 'BAROMETRIC');
+    expect(defaultProps.handleAtmosphereSimpleChange).toHaveBeenCalledWith('pressureType', 'ABSOLUTE');
   });
 
   test('calls handleAtmosphereSimpleChange when humidity is changed', () => {

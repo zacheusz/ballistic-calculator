@@ -109,7 +109,7 @@ const AtmosphereComponent = ({
             fullWidth
           >
             <MenuItem value="STATION">{t('calcStationPressure')}</MenuItem>
-            <MenuItem value="BAROMETRIC">{t('calcBarometricPressure')}</MenuItem>
+            <MenuItem value="ABSOLUTE">{t('calcAbsolutePressure')}</MenuItem>
           </Select>
         </StyledFormControl>
 

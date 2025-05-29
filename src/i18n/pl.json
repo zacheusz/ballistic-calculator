@@ -36,7 +36,7 @@
   "unitHpa": "hPa",
   "calcPressureType": "Typ ciśnienia",
   "calcStationPressure": "Ciśnienie stacji",
-  "calcBarometricPressure": "Ciśnienie barometryczne",
+  "calcAbsolutePressure": "Ciśnienie absolutne",
   "calcHumidity": "Wilgotność (%)",
   "calcAltitude": "Wysokość n.p.m.",
   "unitFeet": "Stopy",
