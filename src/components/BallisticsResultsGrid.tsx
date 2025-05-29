@@ -28,24 +28,24 @@ const BallisticsResultsGrid: React.FC<BallisticsResultsGridProps> = ({ results, 
   // Define columns based on the available data and actual units from the first row, fallback to preferences
   const columns = useMemo(() => {
     const first = (results && results.length > 0) ? results[0] : {};
-    function headerWithUnit(label, field, prefKey) {
+    function headerWithUnit(label: string, field: any, prefKey: string): string {
       const unit = extractUnitOrPref(field, prefKey);
       return unit ? `${label} (${unit})` : label;
     }
     return [
-      { field: 'range', headerName: headerWithUnit('Range', first.range, 'Range'), width: 120, type: 'number' },
-      { field: 'horizontalAdjustment', headerName: headerWithUnit('Windage Adj', first.horizontalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' },
-      { field: 'verticalAdjustment', headerName: headerWithUnit('Elevation', first.verticalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' },
-      { field: 'time', headerName: headerWithUnit('Time', undefined, 'TimeOfFlight'), width: 100, type: 'number' },
-      { field: 'energy', headerName: headerWithUnit('Energy', first.energy, 'BulletEnergy'), width: 120, type: 'number' },
-      { field: 'velocity', headerName: headerWithUnit('Velocity', first.velocity, 'BulletVelocity'), width: 120, type: 'number' },
-      { field: 'mach', headerName: 'Mach', width: 100, type: 'number' },
-      { field: 'drop', headerName: headerWithUnit('Drop', first.drop, 'ScopeAdjustment'), width: 120, type: 'number' },
-      { field: 'coroDrift', headerName: headerWithUnit('Coriolis', first.coroDrift, 'ScopeAdjustment'), width: 120, type: 'number' },
-      { field: 'lead', headerName: headerWithUnit('Lead', first.lead, 'ScopeAdjustment'), width: 100, type: 'number' },
-      { field: 'spinDrift', headerName: headerWithUnit('Spin Drift', first.spinDrift, 'ScopeAdjustment'), width: 120, type: 'number' },
-      { field: 'wind', headerName: headerWithUnit('Wind Drift', first.wind, 'ScopeAdjustment'), width: 120, type: 'number' },
-      { field: 'aeroJump', headerName: headerWithUnit('Aero Jump', first.aeroJump, 'ScopeAdjustment'), width: 120, type: 'number' },
+      { field: 'range', headerName: headerWithUnit('Range', first.range, 'Range'), width: 120, type: 'number' as const },
+      { field: 'horizontalAdjustment', headerName: headerWithUnit('Windage Adj', first.horizontalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'verticalAdjustment', headerName: headerWithUnit('Elevation', first.verticalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'time', headerName: headerWithUnit('Time', undefined, 'TimeOfFlight'), width: 100, type: 'number' as const },
+      { field: 'energy', headerName: headerWithUnit('Energy', first.energy, 'BulletEnergy'), width: 120, type: 'number' as const },
+      { field: 'velocity', headerName: headerWithUnit('Velocity', first.velocity, 'BulletVelocity'), width: 120, type: 'number' as const },
+      { field: 'mach', headerName: 'Mach', width: 100, type: 'number' as const },
+      { field: 'drop', headerName: headerWithUnit('Drop', first.drop, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'coroDrift', headerName: headerWithUnit('Coriolis', first.coroDrift, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'lead', headerName: headerWithUnit('Lead', first.lead, 'ScopeAdjustment'), width: 100, type: 'number' as const },
+      { field: 'spinDrift', headerName: headerWithUnit('Spin Drift', first.spinDrift, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'wind', headerName: headerWithUnit('Wind Drift', first.wind, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'aeroJump', headerName: headerWithUnit('Aero Jump', first.aeroJump, 'ScopeAdjustment'), width: 120, type: 'number' as const },
     ];
   }, [results, extractUnitOrPref]);
 
@@ -79,12 +79,12 @@ const BallisticsResultsGrid: React.FC<BallisticsResultsGridProps> = ({ results, 
   // Helper function to format numbers with 2 decimal places
   function formatNumber(value: number | undefined): number | null {
     if (value === undefined || value === null) return null;
-    return Number(parseFloat(value).toFixed(2));
+    return Number(value.toFixed(2));
   }
 
   // Helper function to get readable unit labels
   function getUnitLabel(unit: string): string {
-    const unitMap = {
+    const unitMap: { [key: string]: string } = {
       // RangeMeasurement
       'YARDS': 'yd',
       'METERS': 'm',
