@@ -62,8 +62,8 @@ export const CONVERSION_FACTORS = {
  */
 export const convertUnit = (
   value: number,
-  fromUnit: string,
-  toUnit: string
+  fromUnit: Unit,
+  toUnit: Unit
 ): number => {
   if (fromUnit === toUnit) return value;
 
@@ -160,9 +160,9 @@ export const convertUnit = (
  * @param toUnit The target unit
  * @returns A new measurement object with the converted value and unit
  */
-export const convertMeasurement = <T extends { value: number; unit: string }>(
+export const convertMeasurement = <T extends { value: number; unit: Unit }>(
   measurement: T,
-  toUnit: string
+  toUnit: Unit
 ): T => {
   if (!measurement) return measurement;
   
@@ -192,7 +192,7 @@ export const formatNumber = (value: number, decimals = 4): string => {
  */
 export const formatMeasurement = (
   value: number,
-  unit: string,
+  unit: Unit,
   decimals = 2
 ): string => {
   return `${formatNumber(value, decimals)} ${unit}`;
@@ -205,7 +205,7 @@ export const formatMeasurement = (
  * @returns Formatted string with unit
  */
 export const formatMeasurementObject = (
-  measurement: { value: number; unit: string },
+  measurement: { value: number; unit: Unit },
   decimals = 2
 ): string => {
   if (!measurement) return '';
