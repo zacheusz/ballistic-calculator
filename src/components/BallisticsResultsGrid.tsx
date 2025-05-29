@@ -1,24 +1,10 @@
 import React, { useMemo, useCallback } from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
-import { Measurement } from '../types/ballistics';
+import { Solution } from '../types/apiTypes';
 
-interface BallisticSolution {
-  range?: Measurement;
-  horizontalAdjustment?: Measurement;
-  verticalAdjustment?: Measurement;
-  drop?: Measurement;
-  wind?: Measurement;
-  velocity?: Measurement;
-  energy?: Measurement;
-  time?: number;
-  mach?: number;
-  spinDrift?: Measurement;
-  coroDrift?: Measurement;
-  lead?: Measurement;
-  aeroJump?: Measurement;
-  [key: string]: any;
-}
+// Using the Solution interface from apiTypes.ts with optional properties and index signature
+type BallisticSolution = Partial<Solution> & { [key: string]: any };
 
 interface BallisticsResultsGridProps {
   results: BallisticSolution[];

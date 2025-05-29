@@ -1,52 +1,44 @@
-import { Measurement } from './ballistics';
+import { 
+  RangeMeasurement,
+  ScopeAdjustmentMeasurement,
+  BulletEnergyMeasurement,
+  BulletVelocityMeasurement
+} from './ballistics';
 
 /**
  * Interface for a single ballistic solution based on OpenAPI spec
  * 
  * @remarks
  * This interface represents the ballistic solution data for a specific range.
- * All measurement values should use the appropriate unit types as defined in the API spec.
- * 
- * @todo In future development, consider using the specialized measurement types:
- * - range: RangeMeasurement
- * - horizontalAdjustment: ScopeAdjustmentMeasurement
- * - verticalAdjustment: ScopeAdjustmentMeasurement
- * - energy: BulletEnergyMeasurement
- * - velocity: BulletVelocityMeasurement
- * - drop: ScopeAdjustmentMeasurement
- * - coroDrift: ScopeAdjustmentMeasurement
- * - lead: ScopeAdjustmentMeasurement
- * - spinDrift: ScopeAdjustmentMeasurement
- * - wind: ScopeAdjustmentMeasurement
- * - aeroJump: ScopeAdjustmentMeasurement
+ * All measurement values use the specialized measurement types as defined in the API spec.
  */
 export interface Solution {
   /** Horizontal distance from muzzle */
-  range: Measurement;
+  range: RangeMeasurement;
   /** Scope/sight adjustment to counteract wind, Coriolis, spin drift */
-  horizontalAdjustment: Measurement;
+  horizontalAdjustment: ScopeAdjustmentMeasurement;
   /** Scope/sight adjustment to counteract drop and other vertical deviations */
-  verticalAdjustment: Measurement;
+  verticalAdjustment: ScopeAdjustmentMeasurement;
   /** Time of flight in seconds from muzzle to current range */
   time: number;
   /** Bullet's kinetic energy */
-  energy: Measurement;
+  energy: BulletEnergyMeasurement;
   /** Total bullet velocity */
-  velocity: Measurement;
+  velocity: BulletVelocityMeasurement;
   /** Ratio of bullet velocity to speed of sound */
   mach: number;
   /** Vertical displacement of the bullet relative to the sight line */
-  drop: Measurement;
+  drop: ScopeAdjustmentMeasurement;
   /** Lateral deflection due to Earth's rotation */
-  coroDrift: Measurement;
+  coroDrift: ScopeAdjustmentMeasurement;
   /** Horizontal adjustment needed for moving targets */
-  lead: Measurement;
+  lead: ScopeAdjustmentMeasurement;
   /** Lateral deflection due to bullet rotation */
-  spinDrift: Measurement;
+  spinDrift: ScopeAdjustmentMeasurement;
   /** Lateral deflection due to wind */
-  wind: Measurement;
+  wind: ScopeAdjustmentMeasurement;
   /** Vertical deflection caused by crosswind acting on a spinning bullet */
-  aeroJump: Measurement;
+  aeroJump: ScopeAdjustmentMeasurement;
 }
 
 /**
