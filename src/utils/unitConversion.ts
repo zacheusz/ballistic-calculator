@@ -90,6 +90,28 @@ export const convertUnit = (
     const fahrenheit = (value * 9/5) + 32;
     return fahrenheit + 459.67;
   }
+  if (fromUnit === 'KELVIN' && toUnit === 'CELSIUS') {
+    return value - 273.15;
+  }
+  if (fromUnit === 'CELSIUS' && toUnit === 'KELVIN') {
+    return value + 273.15;
+  }
+  if (fromUnit === 'FAHRENHEIT' && toUnit === 'KELVIN') {
+    return (value - 32) * 5/9 + 273.15;
+  }
+  if (fromUnit === 'KELVIN' && toUnit === 'FAHRENHEIT') {
+    return (value - 273.15) * 9/5 + 32;
+  }
+  if (fromUnit === 'KELVIN' && toUnit === 'RANKINE') {
+    // First convert Kelvin to Fahrenheit, then Fahrenheit to Rankine
+    const fahrenheit = (value - 273.15) * 9/5 + 32;
+    return fahrenheit + 459.67;
+  }
+  if (fromUnit === 'RANKINE' && toUnit === 'KELVIN') {
+    // First convert Rankine to Fahrenheit, then Fahrenheit to Kelvin
+    const fahrenheit = value - 459.67;
+    return (fahrenheit - 32) * 5/9 + 273.15;
+  }
 
   // Special case: CLOCK <-> IPHY (via degrees)
   // 1 o'clock = 30°, 2 o'clock = 60°, ..., 12 o'clock = 0° (or 360°)

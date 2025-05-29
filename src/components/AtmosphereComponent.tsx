@@ -64,7 +64,8 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
             unitOptions={[
               { value: 'FAHRENHEIT', label: t('unitFahrenheit') },
               { value: 'CELSIUS', label: t('unitCelsius') },
-              { value: 'RANKINE', label: t('unitRankine') }
+              { value: 'RANKINE', label: t('unitRankine') },
+              { value: 'KELVIN', label: t('unitKelvin') }
             ]}
             label={undefined}
             inputProps={{

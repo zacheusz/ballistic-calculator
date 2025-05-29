@@ -20,6 +20,7 @@ export type Unit =
   | 'FAHRENHEIT'
   | 'CELSIUS'
   | 'RANKINE'
+  | 'KELVIN'
   | 'GRAINS'
   | 'GRAMS'
   | 'INCHES_MERCURY'
