@@ -59,7 +59,7 @@
   "preferences": {
     "calculateSpinDrift": true,
     "calculateCoriolisEffect": true,
-    "calculateAeroJump": false,
+    "calculateAeroJump": true,
     "rangeCardStart": { "value": 100, "unit": "YARDS" },
     "rangeCardStep": { "value": 100, "unit": "YARDS" },
     "unitPreferences": {

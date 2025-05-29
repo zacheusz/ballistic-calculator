@@ -149,7 +149,7 @@
   "zeroRange": "Dystans zerowania",
   "calculateSpinDrift": "Oblicz dryf obrotowy (spin drift)",
   "calculateCoriolisEffect": "Oblicz efekt Coriolisa",
-  "calculateAeroJump": "Oblicz skok aerodynamiczny (aero jump) - w trakcie implementacji",
+  "calculateAeroJump": "Oblicz skok aerodynamiczny (aero jump)",
   "shotAzimuth": "Azymut strzału",
   "shooterLatitude": "Szerokość geograficzna strzelca",
   "showTrajectoryGraph": "Pokaż wykres trajektorii",
