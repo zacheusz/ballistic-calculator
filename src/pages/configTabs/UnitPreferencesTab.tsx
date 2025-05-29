@@ -43,11 +43,6 @@ const UnitPreferencesTab: React.FC<UnitPreferencesTabProps> = ({
           { value: 'YARDS', label: 'Yards' },
           { value: 'METERS', label: 'Meters' },
           { value: 'FEET', label: 'Feet' }
-        ]},
-        { id: 'Length', label: 'Length', options: [
-          { value: 'INCHES', label: 'Inches' },
-          { value: 'CENTIMETERS', label: 'Centimeters' },
-          { value: 'MILLIMETERS', label: 'Millimeters' }
         ]}
       ]
     },
