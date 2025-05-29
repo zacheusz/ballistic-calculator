@@ -23,6 +23,9 @@ export interface MeasurementInputProps {
   
   /** Additional props to pass to the input element */
   inputProps?: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
+  
+  /** Optional ref for the input element */
+  inputRef?: React.RefObject<HTMLInputElement>;
 }
 
 /**

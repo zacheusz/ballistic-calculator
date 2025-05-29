@@ -80,17 +80,15 @@ export const convertUnit = (
   if (fromUnit === 'FAHRENHEIT' && toUnit === 'RANKINE') {
     return value + 459.67;
   }
-  if (fromUnit === 'KELVIN' && toUnit === 'CELSIUS') {
-    return value - 273.15;
+  if (fromUnit === 'RANKINE' && toUnit === 'CELSIUS') {
+    // First convert Rankine to Fahrenheit, then Fahrenheit to Celsius
+    const fahrenheit = value - 459.67;
+    return (fahrenheit - 32) * 5/9;
   }
-  if (fromUnit === 'CELSIUS' && toUnit === 'KELVIN') {
-    return value + 273.15;
-  }
-  if (fromUnit === 'FAHRENHEIT' && toUnit === 'KELVIN') {
-    return (value - 32) * 5/9 + 273.15;
-  }
-  if (fromUnit === 'KELVIN' && toUnit === 'FAHRENHEIT') {
-    return (value - 273.15) * 9/5 + 32;
+  if (fromUnit === 'CELSIUS' && toUnit === 'RANKINE') {
+    // First convert Celsius to Fahrenheit, then Fahrenheit to Rankine
+    const fahrenheit = (value * 9/5) + 32;
+    return fahrenheit + 459.67;
   }
 
   // Special case: CLOCK <-> IPHY (via degrees)

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -9,13 +8,26 @@ import {
   Select,
   MenuItem,
   TextField,
-  Box,
-  Typography,
   styled
 } from '@mui/material';
 import MeasurementInput from './MeasurementInput';
+import { Atmosphere, TemperatureMeasurement, AtmosphericPressureMeasurement, AltitudeMeasurement } from '../types/ballistics';
 
-const AtmosphereComponent = ({ 
+interface AtmosphereComponentProps {
+  values: {
+    atmosphere: Atmosphere;
+  };
+  handleBlur: (e: React.FocusEvent<any>) => void;
+  handleChange: (e: React.ChangeEvent<any> | { target: { name: string; value: any } }) => void;
+  handleAtmosphereChange: (field: string, value: TemperatureMeasurement | AtmosphericPressureMeasurement | AltitudeMeasurement) => void;
+  handleAtmosphereSimpleChange: (field: string, value: any) => void;
+  loading: boolean;
+  temperatureInputRef: React.RefObject<HTMLInputElement>;
+  pressureInputRef: React.RefObject<HTMLInputElement>;
+  altitudeInputRef: React.RefObject<HTMLInputElement>;
+}
+
+const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({ 
   values, 
   handleBlur, 
   handleChange, 
@@ -52,14 +64,14 @@ const AtmosphereComponent = ({
             unitOptions={[
               { value: 'FAHRENHEIT', label: t('unitFahrenheit') },
               { value: 'CELSIUS', label: t('unitCelsius') },
-              { value: 'KELVIN', label: t('unitKelvin') }
+              { value: 'RANKINE', label: t('unitRankine') }
             ]}
-            label={null}
+            label={undefined}
             inputProps={{
               name: 'atmosphere.temperature.value',
-              onBlur: handleBlur,
-              ref: temperatureInputRef
+              onBlur: handleBlur
             }}
+            inputRef={temperatureInputRef}
             disabled={loading}
           />
         </StyledFormControl>
@@ -77,13 +89,13 @@ const AtmosphereComponent = ({
               { value: 'INCHES_MERCURY', label: t('unitInHg') },
               { value: 'HECTOPASCALS', label: t('unitHPa') }
             ]}
-            label={null}
+            label={undefined}
             inputProps={{
               name: 'atmosphere.pressure.value',
               onBlur: handleBlur,
-              ref: pressureInputRef,
               step: '0.01'
             }}
+            inputRef={pressureInputRef}
             disabled={loading}
           />
         </StyledFormControl>
@@ -145,12 +157,12 @@ const AtmosphereComponent = ({
               { value: 'METERS', label: t('unitMeters') },
               { value: 'YARDS', label: t('unitYards') }
             ]}
-            label={null}
+            label={undefined}
             inputProps={{
               name: 'atmosphere.altitude.value',
-              onBlur: handleBlur,
-              ref: altitudeInputRef
+              onBlur: handleBlur
             }}
+            inputRef={altitudeInputRef}
             disabled={loading}
           />
         </StyledFormControl>

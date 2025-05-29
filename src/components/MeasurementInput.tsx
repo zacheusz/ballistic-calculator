@@ -45,6 +45,7 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
   label,
   disabled,
   inputProps = {},
+  inputRef,
 }) => {
   const { t } = useTranslation(); // Used for translations
   const valueInputRef = useRef<HTMLInputElement>(null);
@@ -188,7 +189,7 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
                   max: inputProps.max as number | undefined,
                   step: inputProps.step ? inputProps.step.toString() : 'any',
                   ...inputProps,
-                  ref: valueInputRef,
+                  ref: inputRef || valueInputRef,
                 }}
                 fullWidth
               />
