@@ -12,7 +12,7 @@ import {
   Typography,
   SelectChangeEvent
 } from '@mui/material';
-import MeasurementInputMUI from '../../components/MeasurementInputMUI';
+import MeasurementInput from '../../components/MeasurementInput';
 import { Ammo, Measurement } from '../../types/ballistics';
 
 interface AmmunitionTabProps {
@@ -98,7 +98,7 @@ const AmmunitionTab: React.FC<AmmunitionTabProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {t('bulletDiameter')}
             </Typography>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={ammunition.diameter || { value: 0, unit: 'INCHES' }}
               onChange={(newMeasurement) => onAmmoMeasurementChange('diameter', newMeasurement)}
               unitOptions={[
@@ -117,7 +117,7 @@ const AmmunitionTab: React.FC<AmmunitionTabProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {t('bulletLength')}
             </Typography>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={ammunition.length || { value: 1.305, unit: 'INCHES' }}
               onChange={(newMeasurement) => onAmmoMeasurementChange('length', newMeasurement)}
               unitOptions={[
@@ -139,7 +139,7 @@ const AmmunitionTab: React.FC<AmmunitionTabProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {t('bulletWeight')}
             </Typography>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={ammunition.mass || { value: 0, unit: 'GRAINS' }}
               onChange={(newMeasurement) => onAmmoMeasurementChange('mass', newMeasurement)}
               unitOptions={[
@@ -157,7 +157,7 @@ const AmmunitionTab: React.FC<AmmunitionTabProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {t('muzzleVelocity')}
             </Typography>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={ammunition.muzzleVelocity || { value: 0, unit: 'FEET_PER_SECOND' }}
               onChange={(newMeasurement) => onAmmoMeasurementChange('muzzleVelocity', newMeasurement)}
               unitOptions={[
@@ -175,7 +175,7 @@ const AmmunitionTab: React.FC<AmmunitionTabProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {t('zeroRange')}
             </Typography>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={ammunition.zeroRange || { value: 100, unit: 'YARDS' }}
               onChange={(newMeasurement) => onAmmoMeasurementChange('zeroRange', newMeasurement)}
               unitOptions={[

@@ -12,7 +12,7 @@ import {
   Typography,
   SelectChangeEvent
 } from '@mui/material';
-import MeasurementInputMUI from '../../components/MeasurementInputMUI';
+import MeasurementInput from '../../components/MeasurementInput';
 import { FirearmProfile, Measurement } from '../../types/ballistics';
 
 interface FirearmProfileTabProps {
@@ -52,7 +52,7 @@ const FirearmProfileTab: React.FC<FirearmProfileTabProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {t('sightHeight')}
             </Typography>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={firearm.sightHeight || { value: 0, unit: 'INCHES' }}
               onChange={(newMeasurement) => onFirearmMeasurementChange('sightHeight', newMeasurement)}
               unitOptions={[
@@ -71,7 +71,7 @@ const FirearmProfileTab: React.FC<FirearmProfileTabProps> = ({
             <Typography variant="subtitle1" gutterBottom>
               {t('barrelTwist')}
             </Typography>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={firearm.barrelTwist || { value: 0, unit: 'INCHES' }}
               onChange={(newMeasurement) => onFirearmMeasurementChange('barrelTwist', newMeasurement)}
               unitOptions={[

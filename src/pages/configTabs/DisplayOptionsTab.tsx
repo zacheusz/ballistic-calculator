@@ -5,8 +5,8 @@ import {
   CardContent,
   Box
 } from '@mui/material';
-import ThemeSelectorMUI from '../../components/ThemeSelectorMUI';
-import LanguageSelectorMUI from '../../components/LanguageSelectorMUI';
+import ThemeSelector from '../../components/ThemeSelector';
+import LanguageSelector from '../../components/LanguageSelector';
 import { TFunction } from 'i18next';
 
 interface DisplayOptionsTabProps {
@@ -21,11 +21,11 @@ const DisplayOptionsTab: React.FC<DisplayOptionsTabProps> = ({
       <Card sx={{ mb: 4 }}>
         <CardHeader 
           title={t('displayOptions')} 
-          action={<LanguageSelectorMUI />}
+          action={<LanguageSelector />}
         />
         <CardContent>
           <Box sx={{ mb: 2 }}>
-            <ThemeSelectorMUI />
+            <ThemeSelector />
           </Box>
         </CardContent>
       </Card>

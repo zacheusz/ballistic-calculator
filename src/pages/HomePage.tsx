@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
  * HomePage component using Material UI
  * Displays the main landing page with options to configure and use the calculator
  */
-const HomePageMUI: React.FC = () => {
+const HomePage: React.FC = () => {
   // Get API key from AppConfigStore to determine if configured
   const { apiKey } = useAppConfigStore();
   const isConfigured = Boolean(apiKey);
@@ -148,4 +148,4 @@ const HomePageMUI: React.FC = () => {
   );
 };
 
-export default HomePageMUI;
+export default HomePage;

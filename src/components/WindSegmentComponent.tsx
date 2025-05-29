@@ -8,7 +8,7 @@ import {
   FormLabel,
   styled
 } from '@mui/material';
-import MeasurementInputMUI from './MeasurementInputMUI';
+import MeasurementInput from './MeasurementInput';
 import { WindSegment } from '../types/ballistics';
 
 interface WindSegmentComponentProps {
@@ -64,7 +64,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
           <Typography variant="subtitle2" sx={{ mb: 2 }}>{t('calcWindSegment')} {index + 1}</Typography>
           <StyledFormControl fullWidth>
             <StyledFormLabel>{t('calcMaxRange')}</StyledFormLabel>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={segment.maxRange}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.maxRange`, newMeasurement)}
               unitOptions={[
@@ -77,7 +77,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].maxRange.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInputMUI component
+                // @ts-ignore - ref is handled by the MeasurementInput component
                 ref: getWindSegmentRef(index, 'maxRange')
               }}
               disabled={loading}
@@ -86,7 +86,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
 
           <StyledFormControl fullWidth>
             <StyledFormLabel>{t('calcWindSpeed')}</StyledFormLabel>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={segment.speed}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.speed`, newMeasurement)}
               unitOptions={[
@@ -99,7 +99,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].speed.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInputMUI component
+                // @ts-ignore - ref is handled by the MeasurementInput component
                 ref: getWindSegmentRef(index, 'speed')
               }}
               disabled={loading}
@@ -108,7 +108,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
 
           <StyledFormControl fullWidth>
             <StyledFormLabel>{t('calcWindDirection')}</StyledFormLabel>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={segment.direction}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.direction`, newMeasurement)}
               unitOptions={[
@@ -122,7 +122,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].direction.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInputMUI component
+                // @ts-ignore - ref is handled by the MeasurementInput component
                 ref: getWindSegmentRef(index, 'direction'),
                 min: 0
               }}
@@ -132,7 +132,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
 
           <StyledFormControl fullWidth>
             <StyledFormLabel>{t('calcVerticalComponent')}</StyledFormLabel>
-            <MeasurementInputMUI
+            <MeasurementInput
               value={segment.verticalComponent || { value: 0, unit: segment.speed.unit }}
               onChange={(newMeasurement) => handleShotChange(`windSegments.${index}.verticalComponent`, newMeasurement)}
               unitOptions={[
@@ -145,7 +145,7 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
                 name: `shot.windSegments[${index}].verticalComponent.value`,
                 onBlur: handleBlur,
                 // Using any to bypass the type checking for ref
-                // @ts-ignore - ref is handled by the MeasurementInputMUI component
+                // @ts-ignore - ref is handled by the MeasurementInput component
                 ref: getWindSegmentRef(index, 'verticalComponent')
               }}
               disabled={loading}

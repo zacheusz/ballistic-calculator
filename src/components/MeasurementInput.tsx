@@ -38,7 +38,7 @@ const StyledSelect = styled(Select)(() => ({
 
 // Using shared MeasurementInputProps interface from componentTypes.ts
 
-const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
+const MeasurementInput: React.FC<MeasurementInputProps> = ({
   value,
   onChange,
   unitOptions,
@@ -217,4 +217,4 @@ const MeasurementInputMUI: React.FC<MeasurementInputProps> = ({
   );
 };
 
-export default MeasurementInputMUI;
+export default MeasurementInput;

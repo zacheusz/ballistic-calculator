@@ -69,7 +69,7 @@ const StyledNavLink = ({ to, children, end = false }: { to: string; children: Re
   );
 };
 
-const NavigationMUI = () => {
+const Navigation = () => {
   // Get API key from AppConfigStore to determine if configured
   const { apiKey, apiStage } = useAppConfigStore();
   const isConfigured = Boolean(apiKey);
@@ -246,4 +246,4 @@ const NavigationMUI = () => {
   );
 };
 
-export default NavigationMUI;
+export default Navigation;

@@ -12,10 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 
 /**
- * LanguageSelectorMUI: allows user to switch between English and Polish
+ * LanguageSelector: allows user to switch between English and Polish
  * Material UI version
  */
-const LanguageSelectorMUI: React.FC = () => {
+const LanguageSelector: React.FC = () => {
   const { i18n, t } = useTranslation();
   const { language, setLanguage } = useAppConfigStore();
   const currentLang = language || i18n.language || 'en';
@@ -49,4 +49,4 @@ const LanguageSelectorMUI: React.FC = () => {
   );
 };
 
-export default LanguageSelectorMUI;
+export default LanguageSelector;

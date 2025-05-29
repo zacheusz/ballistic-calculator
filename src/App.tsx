@@ -10,10 +10,10 @@ import { useAppConfigStore } from './stores/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
 import { BallisticsStoreProvider } from './context/BallisticsStoreProvider';
 import { SnackbarProvider } from 'notistack';
-import NavigationMUI from './components/NavigationMUI';
-import HomePageMUI from './pages/HomePageMUI';
+import Navigation from './components/Navigation';
+import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
-import ConfigPageMUI from './pages/ConfigPageMUI';
+import ConfigPage from './pages/ConfigPage';
 
 // Toast container that uses the current theme
 const ThemedToastContainer: React.FC = () => {
@@ -47,12 +47,12 @@ const ThemedApp: React.FC = () => {
           <BallisticsStoreProvider>
             <AppProvider>
               <Router>
-                <NavigationMUI />
+                <Navigation />
                 <main>
                   <Routes>
-                    <Route path="/" element={<HomePageMUI />} />
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/calculator" element={<CalculatorPage />} />
-                    <Route path="/config" element={<ConfigPageMUI />} />
+                    <Route path="/config" element={<ConfigPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </main>

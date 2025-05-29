@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import MeasurementInputMUI from '../MeasurementInputMUI';
+import MeasurementInput from '../MeasurementInput';
 
 // Mock i18n
 jest.mock('react-i18next', () => ({
@@ -31,7 +31,7 @@ jest.mock('../ClockTimePicker.tsx', () => {
   };
 });
 
-describe('MeasurementInputMUI', () => {
+describe('MeasurementInput', () => {
   const unitOptions = [
     { value: 'YARDS' as const, label: 'Yards' },
     { value: 'METERS' as const, label: 'Meters' },
@@ -42,7 +42,7 @@ describe('MeasurementInputMUI', () => {
   test('renders with initial value and unit', () => {
     const handleChange = jest.fn();
     render(
-      <MeasurementInputMUI
+      <MeasurementInput
         value={{ value: 100, unit: 'YARDS' as const }}
         onChange={handleChange}
         unitOptions={unitOptions}
@@ -58,7 +58,7 @@ describe('MeasurementInputMUI', () => {
   test('handles value change', async () => {
     const handleChange = jest.fn();
     render(
-      <MeasurementInputMUI
+      <MeasurementInput
         value={{ value: 100, unit: 'YARDS' as const }}
         onChange={handleChange}
         unitOptions={unitOptions}
@@ -77,7 +77,7 @@ describe('MeasurementInputMUI', () => {
   test('handles unit change with conversion', async () => {
     const handleChange = jest.fn();
     render(
-      <MeasurementInputMUI
+      <MeasurementInput
         value={{ value: 100, unit: 'YARDS' as const }}
         onChange={handleChange}
         unitOptions={unitOptions}
@@ -106,7 +106,7 @@ describe('MeasurementInputMUI', () => {
   test('renders ClockTimePicker when unit is CLOCK', () => {
     const handleChange = jest.fn();
     render(
-      <MeasurementInputMUI
+      <MeasurementInput
         value={{ value: 3, unit: 'CLOCK' as const }}
         onChange={handleChange}
         unitOptions={unitOptions}

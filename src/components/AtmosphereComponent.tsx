@@ -13,7 +13,7 @@ import {
   Typography,
   styled
 } from '@mui/material';
-import MeasurementInputMUI from './MeasurementInputMUI';
+import MeasurementInput from './MeasurementInput';
 
 const AtmosphereComponent = ({ 
   values, 
@@ -44,7 +44,7 @@ const AtmosphereComponent = ({
       <CardContent>
         <StyledFormControl fullWidth>
           <StyledFormLabel>{t('calcTemperature')}</StyledFormLabel>
-          <MeasurementInputMUI
+          <MeasurementInput
             value={values.atmosphere.temperature}
             onChange={(newMeasurement) => {
               handleAtmosphereChange('temperature', newMeasurement);
@@ -66,7 +66,7 @@ const AtmosphereComponent = ({
 
         <StyledFormControl fullWidth>
           <StyledFormLabel>{t('calcPressure')}</StyledFormLabel>
-          <MeasurementInputMUI
+          <MeasurementInput
             value={values.atmosphere.pressure}
             onChange={(newMeasurement) => {
               handleAtmosphereChange('pressure', newMeasurement);
@@ -135,7 +135,7 @@ const AtmosphereComponent = ({
 
         <StyledFormControl fullWidth>
           <StyledFormLabel>{t('calcAltitude')}</StyledFormLabel>
-          <MeasurementInputMUI
+          <MeasurementInput
             value={values.atmosphere.altitude}
             onChange={(newMeasurement) => {
               handleAtmosphereChange('altitude', newMeasurement);

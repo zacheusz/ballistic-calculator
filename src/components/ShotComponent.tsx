@@ -11,7 +11,7 @@ import {
   Typography,
   styled
 } from '@mui/material';
-import MeasurementInputMUI from './MeasurementInputMUI';
+import MeasurementInput from './MeasurementInput';
 import WindSegmentComponent from './WindSegmentComponent';
 
 const ShotComponent = ({
@@ -45,7 +45,7 @@ const ShotComponent = ({
       <CardContent>
         <StyledFormControl fullWidth error={touched.shot?.range?.value && Boolean(errors.shot?.range?.value)}>
           <StyledFormLabel>{t('calcRange')}</StyledFormLabel>
-          <MeasurementInputMUI
+          <MeasurementInput
             label={null}
             value={values.shot.range}
             unitOptions={[
@@ -71,7 +71,7 @@ const ShotComponent = ({
 
         <StyledFormControl fullWidth>
           <StyledFormLabel>{t('calcElevationAngle')}</StyledFormLabel>
-          <MeasurementInputMUI
+          <MeasurementInput
             value={values.shot.elevationAngle}
             onChange={(newMeasurement) => {
               handleShotChange('elevationAngle', newMeasurement);
@@ -96,7 +96,7 @@ const ShotComponent = ({
           <>
             <StyledFormControl fullWidth>
               <StyledFormLabel>{t('shotAzimuth')}</StyledFormLabel>
-              <MeasurementInputMUI
+              <MeasurementInput
                 value={values.shot.azimuth}
                 onChange={(newMeasurement) => {
                   handleShotChange('azimuth', newMeasurement);
@@ -115,7 +115,7 @@ const ShotComponent = ({
 
             <StyledFormControl fullWidth>
               <StyledFormLabel>{t('shooterLatitude')}</StyledFormLabel>
-              <MeasurementInputMUI
+              <MeasurementInput
                 value={values.shot.latitude}
                 onChange={(newMeasurement) => {
                   handleShotChange('latitude', newMeasurement);

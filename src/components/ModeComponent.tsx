@@ -12,7 +12,7 @@ import {
   Grid,
   styled
 } from '@mui/material';
-import MeasurementInputMUI from './MeasurementInputMUI';
+import MeasurementInput from './MeasurementInput';
 
 const ModeComponent = ({
   mode,
@@ -85,7 +85,7 @@ const ModeComponent = ({
                   <StyledFormLabel>{t('calcRangeCardStart')}</StyledFormLabel>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 8 }}>
-                  <MeasurementInputMUI
+                  <MeasurementInput
                     value={{ value: Number(rangeCardStart) || 0, unit: startUnit }}
                     onChange={(newMeasurement) => {
                       onRangeCardStartChange(newMeasurement.value);
@@ -116,7 +116,7 @@ const ModeComponent = ({
                   <StyledFormLabel>{t('calcRangeCardStep')}</StyledFormLabel>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 8 }}>
-                  <MeasurementInputMUI
+                  <MeasurementInput
                     value={{ value: Number(rangeCardStep) || 0, unit: stepUnit }}
                     onChange={(newMeasurement) => {
                       onRangeCardStepChange(newMeasurement.value);

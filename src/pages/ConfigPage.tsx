@@ -34,7 +34,7 @@ import {
   UnitPreference
 } from '../types/ballistics';
 
-const ConfigPageMUI: React.FC = () => {
+const ConfigPage: React.FC = () => {
   const { t } = useTranslation();
   
   // Get app config state from store
@@ -301,4 +301,4 @@ const ConfigPageMUI: React.FC = () => {
   );
 };
 
-export default ConfigPageMUI;
+export default ConfigPage;

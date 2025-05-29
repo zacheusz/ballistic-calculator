@@ -16,7 +16,7 @@ import { useAppConfigStore, Theme } from '../stores/useAppConfigStore';
  * Uses the Zustand store exclusively to manage theme state
  * Material UI version
  */
-const ThemeSelectorMUI: React.FC = () => {
+const ThemeSelector: React.FC = () => {
   const { t } = useTranslation();
   const { theme, setTheme } = useAppConfigStore();
 
@@ -48,4 +48,4 @@ const ThemeSelectorMUI: React.FC = () => {
   );
 };
 
-export default ThemeSelectorMUI;
+export default ThemeSelector;
