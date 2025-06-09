@@ -150,6 +150,8 @@
   "calculateSpinDrift": "Calculate Spin Drift",
   "calculateCoriolisEffect": "Calculate Coriolis Effect",
   "calculateAeroJump": "Calculate Aerodynamic Jump",
+  "interpolateRange": "Interpolate Range",
+  "experimental": "Experimental",
   "shotAzimuth": "Shot Azimuth",
   "shooterLatitude": "Shooter Position Latitude",
   "showTrajectoryGraph": "Show Trajectory Graph",

@@ -150,6 +150,8 @@
   "calculateSpinDrift": "Oblicz dryf obrotowy (spin drift)",
   "calculateCoriolisEffect": "Oblicz efekt Coriolisa",
   "calculateAeroJump": "Oblicz skok aerodynamiczny (aero jump)",
+  "interpolateRange": "Interpoluj zasięg",
+  "experimental": "Eksperymentalne",
   "shotAzimuth": "Azymut strzału",
   "shooterLatitude": "Szerokość geograficzna strzelca",
   "showTrajectoryGraph": "Pokaż wykres trajektorii",

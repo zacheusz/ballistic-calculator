@@ -12,6 +12,7 @@ interface CalculationOptions {
   calculateSpinDrift: boolean;
   calculateCoriolisEffect: boolean;
   calculateAeroJump: boolean;
+  interpolateRange?: boolean;
 }
 
 interface CalculationOptionsTabProps {
@@ -62,7 +63,7 @@ const CalculationOptionsTab: React.FC<CalculationOptionsTabProps> = ({
             />
           </Box>
           
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 2 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -72,6 +73,19 @@ const CalculationOptionsTab: React.FC<CalculationOptionsTabProps> = ({
                 />
               }
               label={t('calculateAeroJump')}
+            />
+          </Box>
+          
+          <Box sx={{ mb: 3 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={options.interpolateRange || false}
+                  onChange={handleSwitchChange('interpolateRange')}
+                  color="primary"
+                />
+              }
+              label={`${t('interpolateRange')} (${t('experimental')})`}
             />
           </Box>
 
