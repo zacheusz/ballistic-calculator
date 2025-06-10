@@ -17,7 +17,6 @@ interface ShotComponentProps {
   values: { shot: Shot };
   handleBlur: (e: React.FocusEvent<any>) => void;
   handleShotChange: (field: string, value: RangeMeasurement | AngleMeasurement | WindSegment[] | any) => void;
-  setFieldValue: (field: string, value: any) => void;
   loading: boolean;
   errors: any;
   touched: any;
@@ -33,7 +32,6 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
   values,
   handleBlur,
   handleShotChange,
-  setFieldValue,
   loading,
   errors,
   touched,
@@ -71,7 +69,6 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
             ]}
             onChange={(value) => {
               handleShotChange('range', value);
-              setFieldValue('shot.range', value);
             }}
             disabled={loading}
             inputRef={rangeInputRef}

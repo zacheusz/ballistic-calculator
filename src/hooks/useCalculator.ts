@@ -19,6 +19,24 @@ export interface RangeCardSettings {
 
 import { Unit } from '../types/ballistics';
 
+// Define validation error type
+export interface ValidationErrors {
+  shot?: {
+    range?: {
+      value?: string;
+    };
+  };
+}
+
+// Define touched fields type
+export interface TouchedFields {
+  shot?: {
+    range?: {
+      value?: boolean;
+    };
+  };
+}
+
 /**
  * Custom hook for calculator page state management
  * Focuses only on calculator-specific UI state and operations
@@ -48,6 +66,10 @@ export const useCalculator = () => {
     step: 100,
     unit: shot.range.unit as Unit
   });
+  
+  // Form validation state
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState<TouchedFields>({});
 
   // Handler for calculation mode changes
   const handleModeChange = useCallback((newMode: CalculationMode) => {
@@ -59,8 +81,51 @@ export const useCalculator = () => {
     setRangeCardSettings(prev => ({ ...prev, [field]: value }));
   }, []);
 
+  // Validate form fields
+  const validateForm = useCallback(() => {
+    const newErrors: ValidationErrors = {};
+    
+    // Validate shot range value
+    if (!shot.range.value) {
+      newErrors.shot = {
+        range: {
+          value: 'Range is required'
+        }
+      };
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [shot.range.value]);
+
+  // Handle field blur
+  const handleBlur = useCallback((e: React.FocusEvent<any>) => {
+    const { name } = e.target;
+    
+    // Update touched state based on field name
+    if (name === 'shot.range.value') {
+      setTouched(prev => ({
+        ...prev,
+        shot: {
+          ...prev.shot,
+          range: {
+            ...prev.shot?.range,
+            value: true
+          }
+        }
+      }));
+    }
+    
+    // Validate on blur
+    validateForm();
+  }, [validateForm]);
+
   // Calculate ballistics
   const calculateBallistics = useCallback(async () => {
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
     try {
       setLoading(true);
       setError('');
@@ -144,6 +209,10 @@ export const useCalculator = () => {
     mode,
     rangeCardSettings,
     
+    // Form validation state
+    errors,
+    touched,
+    
     // Actions
     updateAtmosphere,
     updateShot,
@@ -153,7 +222,9 @@ export const useCalculator = () => {
     handleModeChange,
     handleRangeCardSettingChange,
     calculateBallistics,
-    resetResults
+    resetResults,
+    handleBlur,
+    validateForm
   };
 };
 

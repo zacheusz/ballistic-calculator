@@ -30,7 +30,6 @@ describe('ShotComponent', () => {
     };
     handleBlur: (e: React.FocusEvent<any>) => void;
     handleShotChange: (field: string, value: Measurement) => void;
-    setFieldValue: (field: string, value: any) => void;
     loading: boolean;
     errors: {
       shot?: {
@@ -52,6 +51,8 @@ describe('ShotComponent', () => {
     rangeInputRef: React.RefObject<HTMLInputElement>;
     elevationAngleInputRef: React.RefObject<HTMLInputElement>;
     getWindSegmentRef: (index: number, field: string) => React.RefObject<HTMLInputElement>;
+    addWindSegment: (segment: WindSegment) => void;
+    removeWindSegment: (index: number) => void;
   }
 
   const defaultProps: ShotComponentProps = {
@@ -73,7 +74,6 @@ describe('ShotComponent', () => {
     },
     handleBlur: jest.fn(),
     handleShotChange: jest.fn(),
-    setFieldValue: jest.fn(),
     loading: false,
     errors: {},
     touched: {},
@@ -82,7 +82,9 @@ describe('ShotComponent', () => {
     },
     rangeInputRef: { current: null } as unknown as React.RefObject<HTMLInputElement>,
     elevationAngleInputRef: { current: null } as unknown as React.RefObject<HTMLInputElement>,
-    getWindSegmentRef: jest.fn()
+    getWindSegmentRef: jest.fn(),
+    addWindSegment: jest.fn(),
+    removeWindSegment: jest.fn()
   };
 
   beforeEach(() => {
@@ -108,7 +110,7 @@ describe('ShotComponent', () => {
     expect(screen.getByText('Wind Segments: 1')).toBeInTheDocument();
   });
 
-  test('calls setFieldValue and handleShotChange when range value is changed', async () => {
+  test('calls handleShotChange when range value is changed', async () => {
     render(<ShotComponent {...defaultProps} />);
     
     // Find the input field for range
@@ -120,14 +122,7 @@ describe('ShotComponent', () => {
     // Wait for any debounce or timeout
     await new Promise(resolve => setTimeout(resolve, 10));
     
-    // Check that setFieldValue and handleShotChange were called with the correct values
-    expect(defaultProps.setFieldValue).toHaveBeenCalledWith(
-      'shot.range', 
-      expect.objectContaining({ 
-        value: 200, 
-        unit: 'YARDS' 
-      })
-    );
+    // Check that handleShotChange was called with the correct values
     expect(defaultProps.handleShotChange).toHaveBeenCalledWith(
       'range', 
       expect.objectContaining({ 

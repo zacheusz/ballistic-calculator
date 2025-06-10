@@ -13,8 +13,6 @@ import {
   Alert, 
   AlertTitle 
 } from '@mui/material';
-import { Formik, Form as FormikForm } from 'formik';
-import * as Yup from 'yup';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useCalculator } from '../hooks/useCalculator';
 
@@ -26,14 +24,7 @@ import AtmosphereComponent from '../components/AtmosphereComponent';
 import ShotComponent from '../components/ShotComponent';
 import ModeComponent from '../components/ModeComponent';
 
-// Define validation schema
-const validationSchema = Yup.object({
-  shot: Yup.object({
-    range: Yup.object({
-      value: Yup.number().required('Range is required'),
-    }),
-  }),
-});
+
 
 const CalculatorPage: React.FC = () => {
   const { t } = useTranslation();
@@ -76,6 +67,10 @@ const CalculatorPage: React.FC = () => {
     mode,
     rangeCardSettings,
     
+    // Form validation state
+    errors,
+    touched,
+    
     // Actions
     updateAtmosphere,
     updateShot,
@@ -84,6 +79,7 @@ const CalculatorPage: React.FC = () => {
     handleModeChange,
     handleRangeCardSettingChange,
     calculateBallistics,
+    handleBlur,
   } = useCalculator();
   
   // Extract calculation options from preferences
@@ -111,16 +107,10 @@ const CalculatorPage: React.FC = () => {
         </Alert>
       )}
       
-      <Formik
-        initialValues={{ atmosphere, shot }}
-        validationSchema={validationSchema}
-        enableReinitialize
-        onSubmit={() => {
-          calculateBallistics();
-        }}
-      >
-        {({ errors, touched, handleBlur, handleSubmit, setFieldValue }) => (
-          <FormikForm onSubmit={handleSubmit}>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        calculateBallistics();
+      }}>
             {/* Top section with two columns */}
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mb: 4 }}>
               {/* Left column for Atmosphere and Mode components */}
@@ -157,7 +147,6 @@ const CalculatorPage: React.FC = () => {
                   values={{ shot }}
                   handleBlur={handleBlur}
                   handleShotChange={handleShotChange}
-                  setFieldValue={setFieldValue}
                   loading={loading}
                   errors={errors}
                   touched={touched}
@@ -220,9 +209,7 @@ const CalculatorPage: React.FC = () => {
                 </Card>
               </Box>
             )}
-          </FormikForm>
-        )}
-      </Formik>
+      </form>
     </Container>
   );
 };
