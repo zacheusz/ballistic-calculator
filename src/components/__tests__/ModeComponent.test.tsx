@@ -2,6 +2,7 @@ import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ModeComponent from '../ModeComponent';
 import { Unit } from '../../types/ballistics';
+import { CalculationMode, RangeCardSettings } from '../../hooks/useCalculator';
 
 // Mock i18n
 jest.mock('react-i18next', () => ({
@@ -18,25 +19,23 @@ jest.mock('react-i18next', () => ({
 
 describe('ModeComponent', () => {
   interface ModeComponentProps {
-    mode: 'HUD' | 'RANGE_CARD';
-    onModeChange: (mode: string) => void;
-    rangeCardStart: number;
-    onRangeCardStartChange: (value: number) => void;
-    rangeCardStep: number;
-    onRangeCardStepChange: (value: number) => void;
-    unit: Unit;
-    onUnitChange: (unit: Unit) => void;
+    mode: CalculationMode;
+    rangeCardSettings: RangeCardSettings;
+    handleModeChange: (mode: CalculationMode) => void;
+    handleRangeCardSettingChange: (field: keyof RangeCardSettings, value: any) => void;
+    loading: boolean;
   }
 
   const defaultProps: ModeComponentProps = {
     mode: 'HUD',
-    onModeChange: jest.fn(),
-    rangeCardStart: 100,
-    onRangeCardStartChange: jest.fn(),
-    rangeCardStep: 50,
-    onRangeCardStepChange: jest.fn(),
-    unit: 'YARDS',
-    onUnitChange: jest.fn()
+    rangeCardSettings: {
+      start: 100,
+      step: 50,
+      unit: 'YARDS' as Unit
+    },
+    handleModeChange: jest.fn(),
+    handleRangeCardSettingChange: jest.fn(),
+    loading: false
   };
 
   beforeEach(() => {
@@ -70,18 +69,18 @@ describe('ModeComponent', () => {
     expect(screen.getByText('calcRangeCardStep')).toBeInTheDocument();
   });
 
-  test('calls onModeChange when mode is changed', () => {
+  test('calls handleModeChange when mode is changed', () => {
     render(<ModeComponent {...defaultProps} />);
     
     // Click on the RANGE_CARD radio button
     const rangeCardRadio = screen.getByLabelText('calcRangeCardMode');
     fireEvent.click(rangeCardRadio);
     
-    // Check that onModeChange was called with the correct value
-    expect(defaultProps.onModeChange).toHaveBeenCalledWith('RANGE_CARD');
+    // Check that handleModeChange was called with the correct value
+    expect(defaultProps.handleModeChange).toHaveBeenCalledWith('RANGE_CARD');
   });
 
-  test('calls onRangeCardStartChange when range card start value is changed', async () => {
+  test('calls handleRangeCardSettingChange when range card start value is changed', async () => {
     render(<ModeComponent {...defaultProps} mode="RANGE_CARD" />);
     
     // Find the input field for range card start by looking for number inputs instead of textbox
@@ -95,11 +94,11 @@ describe('ModeComponent', () => {
     // Wait for any debounce or timeout
     await new Promise(resolve => setTimeout(resolve, 10));
     
-    // Check that onRangeCardStartChange was called with the correct value
-    expect(defaultProps.onRangeCardStartChange).toHaveBeenCalledWith(200);
+    // Check that handleRangeCardSettingChange was called with the correct value
+    expect(defaultProps.handleRangeCardSettingChange).toHaveBeenCalledWith('start', 200);
   });
 
-  test('calls onRangeCardStepChange when range card step value is changed', async () => {
+  test('calls handleRangeCardSettingChange when range card step value is changed', async () => {
     render(<ModeComponent {...defaultProps} mode="RANGE_CARD" />);
     
     // Find the input field for range card step by looking for number inputs instead of textbox
@@ -113,11 +112,11 @@ describe('ModeComponent', () => {
     // Wait for any debounce or timeout
     await new Promise(resolve => setTimeout(resolve, 10));
     
-    // Check that onRangeCardStepChange was called with the correct value
-    expect(defaultProps.onRangeCardStepChange).toHaveBeenCalledWith(100);
+    // Check that handleRangeCardSettingChange was called with the correct value
+    expect(defaultProps.handleRangeCardSettingChange).toHaveBeenCalledWith('step', 100);
   });
 
-  test('calls onUnitChange when unit is changed', async () => {
+  test('calls handleRangeCardSettingChange when unit is changed', async () => {
     render(<ModeComponent {...defaultProps} mode="RANGE_CARD" />);
     
     // Find all comboboxes which are the unit selectors in MUI
@@ -140,7 +139,7 @@ describe('ModeComponent', () => {
     // Wait for any debounce or timeout
     await new Promise(resolve => setTimeout(resolve, 10));
     
-    // Check that onUnitChange was called with the correct value
-    expect(defaultProps.onUnitChange).toHaveBeenCalledWith('METERS');
+    // Check that handleRangeCardSettingChange was called with the correct value
+    expect(defaultProps.handleRangeCardSettingChange).toHaveBeenCalledWith('unit', 'METERS');
   });
 });

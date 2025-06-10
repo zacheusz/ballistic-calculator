@@ -44,7 +44,9 @@ describe('WindSegmentComponent', () => {
       shot: {
         windSegments: defaultWindSegments
       }
-    }
+    },
+    addWindSegment: jest.fn(),
+    removeWindSegment: jest.fn()
   };
 
   beforeEach(() => {

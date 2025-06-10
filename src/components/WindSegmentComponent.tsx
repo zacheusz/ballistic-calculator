@@ -18,6 +18,8 @@ interface WindSegmentComponentProps {
   getWindSegmentRef: (index: number, field: string) => React.RefObject<HTMLInputElement>;
   loading: boolean;
   values: any; // Needed for access to values.shot.windSegments in the parent component
+  addWindSegment: (segment: WindSegment) => void;
+  removeWindSegment: (index: number) => void;
 }
 
 const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
@@ -25,25 +27,23 @@ const WindSegmentComponent: React.FC<WindSegmentComponentProps> = ({
   handleShotChange,
   handleBlur,
   getWindSegmentRef,
-  loading
+  loading,
+  addWindSegment,
+  removeWindSegment
 }) => {
   const { t } = useTranslation();
 
   const handleAddWindSegment = () => {
-    const newWindSegments = [...windSegments];
-    newWindSegments.push({
+    addWindSegment({
       maxRange: { value: 1000, unit: 'YARDS' },
       speed: { value: 0, unit: 'MILES_PER_HOUR' },
       direction: { value: 3, unit: 'CLOCK' },
       verticalComponent: { value: 0, unit: 'MILES_PER_HOUR' }
     });
-    handleShotChange('windSegments', newWindSegments);
   };
 
   const handleRemoveWindSegment = (index: number) => {
-    const newWindSegments = [...windSegments];
-    newWindSegments.splice(index, 1);
-    handleShotChange('windSegments', newWindSegments);
+    removeWindSegment(index);
   };
 
   // Styled components for consistent styling

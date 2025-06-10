@@ -7,14 +7,29 @@ import {
   FormControl,
   FormLabel,
   FormHelperText,
-  Box,
-  Typography,
   styled
 } from '@mui/material';
 import MeasurementInput from './MeasurementInput';
 import WindSegmentComponent from './WindSegmentComponent';
+import { Shot, RangeMeasurement, AngleMeasurement, WindSegment } from '../types/ballistics';
 
-const ShotComponent = ({
+interface ShotComponentProps {
+  values: { shot: Shot };
+  handleBlur: (e: React.FocusEvent<any>) => void;
+  handleShotChange: (field: string, value: RangeMeasurement | AngleMeasurement | WindSegment[] | any) => void;
+  setFieldValue: (field: string, value: any) => void;
+  loading: boolean;
+  errors: any;
+  touched: any;
+  calculationOptions?: Record<string, any>;
+  rangeInputRef: React.RefObject<any>;
+  elevationAngleInputRef: React.RefObject<any>;
+  getWindSegmentRef: (index: number, field: string) => React.RefObject<any>;
+  addWindSegment: (segment: WindSegment) => void;
+  removeWindSegment: (index: number) => void;
+}
+
+const ShotComponent: React.FC<ShotComponentProps> = ({
   values,
   handleBlur,
   handleShotChange,
@@ -25,7 +40,9 @@ const ShotComponent = ({
   calculationOptions,
   rangeInputRef,
   elevationAngleInputRef,
-  getWindSegmentRef
+  getWindSegmentRef,
+  addWindSegment,
+  removeWindSegment
 }) => {
   const { t } = useTranslation();
 
@@ -46,23 +63,22 @@ const ShotComponent = ({
         <StyledFormControl fullWidth error={touched.shot?.range?.value && Boolean(errors.shot?.range?.value)}>
           <StyledFormLabel>{t('calcRange')}</StyledFormLabel>
           <MeasurementInput
-            label={null}
+            label=""
             value={values.shot.range}
             unitOptions={[
               { value: 'YARDS', label: t('unitYards') },
               { value: 'METERS', label: t('unitMeters') },
-              { value: 'FEET', label: t('unitFeet') }
             ]}
-            onChange={(newValue) => {
-              setFieldValue('shot.range', newValue);
-              handleShotChange('range', newValue);
-            }}
-            inputProps={{
-              name: 'shot.range.value',
-              onBlur: handleBlur,
-              ref: rangeInputRef
+            onChange={(value) => {
+              handleShotChange('range', value);
+              setFieldValue('shot.range', value);
             }}
             disabled={loading}
+            inputRef={rangeInputRef}
+            inputProps={{
+              name: 'shot.range.value',
+              onBlur: handleBlur
+            }}
           />
           {touched.shot?.range?.value && errors.shot?.range?.value && (
             <FormHelperText error>{errors.shot?.range?.value}</FormHelperText>
@@ -81,13 +97,13 @@ const ShotComponent = ({
               { value: 'MILS', label: t('unitMils') },
               { value: 'MOA', label: t('unitMoa') }
             ]}
-            label={null}
+            label=""
+            disabled={loading}
+            inputRef={elevationAngleInputRef}
             inputProps={{
               name: 'shot.elevationAngle.value',
-              onBlur: handleBlur,
-              ref: elevationAngleInputRef
+              onBlur: handleBlur
             }}
-            disabled={loading}
           />
         </StyledFormControl>
 
@@ -104,12 +120,12 @@ const ShotComponent = ({
                 unitOptions={[
                   { value: 'DEGREES', label: t('unitDegrees') }
                 ]}
-                label={null}
+                label=""
+                disabled={loading}
                 inputProps={{
                   name: 'shot.azimuth.value',
                   onBlur: handleBlur
                 }}
-                disabled={loading}
               />
             </StyledFormControl>
 
@@ -123,12 +139,12 @@ const ShotComponent = ({
                 unitOptions={[
                   { value: 'DEGREES', label: t('unitDegrees') }
                 ]}
-                label={null}
+                label=""
+                disabled={loading}
                 inputProps={{
                   name: 'shot.latitude.value',
                   onBlur: handleBlur
                 }}
-                disabled={loading}
               />
             </StyledFormControl>
           </>
@@ -141,6 +157,8 @@ const ShotComponent = ({
           getWindSegmentRef={getWindSegmentRef}
           loading={loading}
           values={values}
+          addWindSegment={addWindSegment}
+          removeWindSegment={removeWindSegment}
         />
       </CardContent>
     </Card>
