@@ -409,7 +409,7 @@ export interface Preferences {
   /** Unit preferences for display and calculations */
   unitPreferences: UnitPreferences;
   /** Interpolate solutions for exact shot range */
-  interpolateRange?: boolean;
+  interpolateRange: boolean;
 }
 
 export interface BallisticsRequest {

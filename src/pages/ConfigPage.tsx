@@ -82,11 +82,17 @@ const ConfigPage: React.FC = () => {
   
   // Local state for calculation options
   const [calcOptions, setCalcOptions] = useState({
-    calculateSpinDrift: preferences?.calculateSpinDrift || false,
-    calculateCoriolisEffect: preferences?.calculateCoriolisEffect || false,
-    calculateAeroJump: preferences?.calculateAeroJump || false,
-    interpolateRange: preferences?.interpolateRange || false
+    calculateSpinDrift: preferences?.calculateSpinDrift ?? false,
+    calculateCoriolisEffect: preferences?.calculateCoriolisEffect ?? false,
+    calculateAeroJump: preferences?.calculateAeroJump ?? false,
+    interpolateRange: preferences?.interpolateRange ?? false
   });
+  
+  // Log the initial preferences from Zustand store
+  useEffect(() => {
+    console.log('Initial preferences from Zustand store:', preferences);
+    console.log('Initial interpolateRange value:', preferences?.interpolateRange);
+  }, []);
   
   // Error state - we'll use this for API error handling
   const [error, setError] = useState<string>('');
@@ -202,13 +208,18 @@ const ConfigPage: React.FC = () => {
   
   // Calculation options changes handler
   const handleCalcOptionsChange = useCallback((field: string, value: any) => {
+    console.log(`Updating calculation option ${field} to:`, value);
     const updatedOptions = { ...calcOptions, [field]: value };
     setCalcOptions(updatedOptions);
     
     // Update preferences in the ballistics store
+    console.log(`Updating Zustand store with ${field}:`, value);
     updatePreferences({
       [field]: value
     });
+    
+    // Log the updated state
+    console.log('Updated calculation options state:', updatedOptions);
   }, [calcOptions, updatePreferences]);
 
   return (

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getApiStage } from '../utils/environment';
+import defaultConfig from '../config/default_config.json';
 
 export type Theme = 'light' | 'dark';
 export type ApiStage = 'test' | 'dev' | 'stage' | 'prod';
@@ -19,10 +19,10 @@ interface AppConfigState {
 export const useAppConfigStore = create<AppConfigState>()(
   persist(
     (set) => ({
-      theme: 'dark',
-      language: 'en',
-      apiStage: getApiStage() as ApiStage,
-      apiKey: '',
+      theme: defaultConfig.theme as Theme,
+      language: defaultConfig.language,
+      apiStage: defaultConfig.apiStage as ApiStage,
+      apiKey: defaultConfig.apiKey,
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
       setApiStage: (apiStage) => set({ apiStage }),

@@ -5,6 +5,7 @@ interface Preferences {
   calculateSpinDrift: boolean;
   calculateCoriolisEffect: boolean;
   calculateAeroJump: boolean;
+  interpolateRange: boolean;
   rangeCardStart: Measurement;
   rangeCardStep: Measurement;
   unitPreferences: UnitPreferences;
@@ -63,18 +64,22 @@ class ConfigService {
 
   /**
    * Get the default calculation options
-   * @returns {Object} The default calculation options
+   * @returns {Preferences} The default calculation options
    */
-  getDefaultCalculationOptions(): {
-    calculateSpinDrift: boolean;
-    calculateCoriolisEffect: boolean;
-    calculateAeroJump: boolean;
-  } {
-    return { 
+  getDefaultCalculationOptions(): Preferences {
+    
+    const preferences: Preferences = { 
       calculateSpinDrift: this.config.preferences.calculateSpinDrift,
       calculateCoriolisEffect: this.config.preferences.calculateCoriolisEffect,
-      calculateAeroJump: this.config.preferences.calculateAeroJump
+      calculateAeroJump: this.config.preferences.calculateAeroJump,
+      interpolateRange: this.config.preferences.interpolateRange,
+      rangeCardStart: this.config.preferences.rangeCardStart,
+      rangeCardStep: this.config.preferences.rangeCardStep,
+      unitPreferences: this.config.preferences.unitPreferences
     };
+    
+    console.log('ConfigService: Full default preferences:', preferences);
+    return preferences;
   }
 
   /**

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { BallisticsState, FirearmProfile, Ammo, Atmosphere, Shot, Preferences, WindSegment } from '../types/ballistics';
+import { persist } from 'zustand/middleware';
+import { BallisticsState } from '../types/ballistics';
 import { getDefaultConfig, toApiRequest, mergeWithDefaults } from '../utils/ballisticsUtils';
 
 const STORAGE_KEY = 'ballistics-store-v2';

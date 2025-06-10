@@ -72,6 +72,7 @@ export const defaultPreferences: Preferences = {
   calculateSpinDrift: true,
   calculateCoriolisEffect: true,
   calculateAeroJump: false,
+  interpolateRange: false,
   rangeCardStart: createMeasurement(100, 'YARDS'),
   rangeCardStep: createMeasurement(100, 'YARDS'),
   unitPreferences: {
@@ -135,8 +136,10 @@ export const mergeWithDefaults = <T extends object>(
     const k = key as keyof T;
     const value = updates[k];
     
-    if (value !== undefined && value !== null) {
-      if (typeof value === 'object' && !Array.isArray(value)) {
+    // Important: We need to check for undefined only, not for null or false
+    // as false is a valid value for boolean preferences
+    if (value !== undefined) {
+      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
         // @ts-ignore - TypeScript can't infer the type here
         result[k] = mergeWithDefaults(result[k] || {}, value);
       } else {

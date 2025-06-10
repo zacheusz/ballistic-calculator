@@ -5,10 +5,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-import { AppProvider } from './context/AppContext.tsx';
+
 import { useAppConfigStore } from './stores/useAppConfigStore';
 import MuiThemeProvider from './context/MuiThemeProvider';
 import { BallisticsStoreProvider } from './context/BallisticsStoreProvider';
+import { useApiSync } from './hooks/useApiSync';
 import { SnackbarProvider } from 'notistack';
 import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
@@ -28,7 +29,10 @@ const ThemedToastContainer: React.FC = () => {
 
 // Wrapper component that uses theme from Zustand store
 const ThemedApp: React.FC = () => {
-  const { theme } = useAppConfigStore();
+  const theme = useAppConfigStore(state => state.theme);
+  
+  // Use the API sync hook to keep API service in sync with Zustand store
+  useApiSync();
   
   // Log theme changes for debugging
   useEffect(() => {
@@ -45,20 +49,18 @@ const ThemedApp: React.FC = () => {
           autoHideDuration={3000}
         >
           <BallisticsStoreProvider>
-            <AppProvider>
-              <Router>
-                <Navigation />
-                <main>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/calculator" element={<CalculatorPage />} />
-                    <Route path="/config" element={<ConfigPage />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </main>
-                <ThemedToastContainer />
-              </Router>
-            </AppProvider>
+            <Router>
+              <Navigation />
+              <main>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/calculator" element={<CalculatorPage />} />
+                  <Route path="/config" element={<ConfigPage />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+              <ThemedToastContainer />
+            </Router>
           </BallisticsStoreProvider>
         </SnackbarProvider>
       </LocalizationProvider>
