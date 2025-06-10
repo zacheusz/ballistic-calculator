@@ -1,15 +1,7 @@
 import defaultConfig from '../config/default.json';
-import { FirearmProfile, Ammo, Atmosphere, Shot, UnitPreferences, Measurement } from '../types/ballistics';
+import { FirearmProfile, Ammo, Atmosphere, Shot, UnitPreferences, Preferences } from '../types/ballistics';
 
-interface Preferences {
-  calculateSpinDrift: boolean;
-  calculateCoriolisEffect: boolean;
-  calculateAeroJump: boolean;
-  interpolateRange: boolean;
-  rangeCardStart: Measurement;
-  rangeCardStep: Measurement;
-  unitPreferences: UnitPreferences;
-}
+// Using Preferences from ballistics.ts instead of defining it here
 
 interface Config {
   firearmProfile: FirearmProfile;
@@ -67,16 +59,7 @@ class ConfigService {
    * @returns {Preferences} The default calculation options
    */
   getDefaultCalculationOptions(): Preferences {
-    
-    const preferences: Preferences = { 
-      calculateSpinDrift: this.config.preferences.calculateSpinDrift,
-      calculateCoriolisEffect: this.config.preferences.calculateCoriolisEffect,
-      calculateAeroJump: this.config.preferences.calculateAeroJump,
-      interpolateRange: this.config.preferences.interpolateRange,
-      rangeCardStart: this.config.preferences.rangeCardStart,
-      rangeCardStep: this.config.preferences.rangeCardStep,
-      unitPreferences: this.config.preferences.unitPreferences
-    };
+    const preferences: Preferences = { ...this.config.preferences };
     
     console.log('ConfigService: Full default preferences:', preferences);
     return preferences;
