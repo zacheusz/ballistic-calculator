@@ -84,7 +84,8 @@ const ConfigPage: React.FC = () => {
   const [calcOptions, setCalcOptions] = useState({
     calculateSpinDrift: preferences?.calculateSpinDrift || false,
     calculateCoriolisEffect: preferences?.calculateCoriolisEffect || false,
-    calculateAeroJump: preferences?.calculateAeroJump || false
+    calculateAeroJump: preferences?.calculateAeroJump || false,
+    interpolateRange: preferences?.interpolateRange || false
   });
   
   // Error state - we'll use this for API error handling
