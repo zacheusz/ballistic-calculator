@@ -87,11 +87,36 @@ const CalculatorPage: React.FC = () => {
   
   // Create handlers for form components
   const handleAtmosphereChange = (field: string, value: any) => {
-    updateAtmosphere({ [field]: value });
+    // For simple values (non-measurement objects)
+    updateAtmosphere({ atmosphere: { ...atmosphere, [field]: value } });
   };
   
-  const handleShotChange = (field: string, value: any) => {
-    updateShot({ [field]: value });
+  // Specific handler for atmosphere measurement changes
+  const handleAtmosphereMeasurementChange = (field: string, measurement: any) => {
+    // For measurement objects (with value and unit)
+    // Use type-safe approach by updating only the specific field
+    if (field === 'temperature' || field === 'pressure' || field === 'altitude') {
+      updateAtmosphere({ atmosphere: { ...atmosphere, [field]: measurement } });
+    }
+  };
+  
+  // Specific handler for shot measurement changes
+  const handleShotMeasurementChange = (field: string, measurement: any) => {
+    // For measurement objects (with value and unit)
+    // Use type-safe approach by updating only the specific field
+    if (
+      field === 'range' || 
+      field === 'elevationAngle' || 
+      field === 'powderTemp' || 
+      field === 'targetSpeed' || 
+      field === 'targetAngle' || 
+      field === 'azimuth' || 
+      field === 'latitude'
+    ) {
+      updateShot({ shot: { ...shot, [field]: measurement } });
+    } else if (field === 'windSegments') {
+      updateShot({ shot: { ...shot, windSegments: measurement } });
+    }
   };
 
   return (
@@ -122,7 +147,7 @@ const CalculatorPage: React.FC = () => {
                     const { name, value } = target;
                     handleAtmosphereChange(name, value);
                   }}
-                  handleAtmosphereChange={handleAtmosphereChange}
+                  handleAtmosphereChange={handleAtmosphereMeasurementChange}
                   handleAtmosphereSimpleChange={(field, value) => {
                     handleAtmosphereChange(field, value);
                   }}
@@ -146,7 +171,7 @@ const CalculatorPage: React.FC = () => {
                 <ShotComponent
                   values={{ shot }}
                   handleBlur={handleBlur}
-                  handleShotChange={handleShotChange}
+                  handleShotChange={handleShotMeasurementChange}
                   loading={loading}
                   errors={errors}
                   touched={touched}

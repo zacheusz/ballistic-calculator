@@ -19,7 +19,7 @@ interface AtmosphereComponentProps {
   };
   handleBlur: (e: React.FocusEvent<any>) => void;
   handleChange: (e: React.ChangeEvent<any> | { target: { name: string; value: any } }) => void;
-  handleAtmosphereChange: (field: string, value: TemperatureMeasurement | AtmosphericPressureMeasurement | AltitudeMeasurement) => void;
+  handleAtmosphereChange: (field: string, value: TemperatureMeasurement | AtmosphericPressureMeasurement | AltitudeMeasurement | any) => void;
   handleAtmosphereSimpleChange: (field: string, value: any) => void;
   loading: boolean;
   temperatureInputRef: React.RefObject<HTMLInputElement>;

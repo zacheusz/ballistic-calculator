@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { 
   TextField, 
   Select, 
@@ -13,7 +13,7 @@ import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { convertUnit } from '../utils/unitConversion';
 import ClockTimePicker from './ClockTimePicker.tsx';
-import { Measurement, Unit } from '../types/ballistics';
+import { Unit } from '../types/ballistics';
 import { MeasurementInputProps } from '../types/componentTypes';
 
 // Styled components for consistent styling
@@ -49,7 +49,6 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
 }) => {
   const { t } = useTranslation(); // Used for translations
   const valueInputRef = useRef<HTMLInputElement>(null);
-  const [localMeasurement, setLocalMeasurement] = useState<Measurement>(value);
   // Access Material UI's snackbar system
   const { enqueueSnackbar } = useSnackbar();
 
@@ -64,70 +63,45 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
     return unitOptions.length > 0 ? unitOptions[0].value : unit;
   };
 
-  // Sync local state with props
-  useEffect(() => {
-    if (value.value !== localMeasurement.value || value.unit !== localMeasurement.unit) {
-      // Map the unit if needed
-      const mappedUnit = mapUnit(value.unit);
-      setLocalMeasurement({
-        ...value,
-        unit: mappedUnit
-      });
-    }
-  }, [value, unitOptions]);
+  // Ensure the unit is valid for the current options
+  const currentUnit = mapUnit(value.unit);
 
   // Handle value change (numeric or clock)
   const handleValueChange = (newValue: number) => {
-    const updated = { ...localMeasurement, value: newValue };
-    setLocalMeasurement(updated);
+    const updated = { ...value, value: newValue };
     
-    // Notify parent in the next tick to avoid React state update during render
-    setTimeout(() => {
-      onChange(updated);
-    }, 0);
+    // Notify parent immediately
+    onChange(updated);
   };
 
   // Handle unit change with conversion
   const handleUnitChange = (event: React.ChangeEvent<HTMLInputElement> | { target: { value: unknown } }) => {
     const newUnit = event.target.value as Unit;
-    const oldUnit = localMeasurement.unit;
+    const oldUnit = value.unit;
     
     // Only convert if units are different and we have a valid current value
-    if (newUnit !== oldUnit && localMeasurement.value !== undefined && !isNaN(localMeasurement.value)) {
+    if (newUnit !== oldUnit && value.value !== undefined && !isNaN(value.value)) {
       // Convert the value from old unit to new unit
-      const convertedValue = convertUnit(localMeasurement.value, oldUnit, newUnit);
+      const convertedValue = convertUnit(value.value, oldUnit, newUnit);
       
       // Round to 4 decimal places for better display
       const roundedValue = Math.round(convertedValue * 10000) / 10000;
       
-      // Update local state
-      const updated = { value: roundedValue, unit: newUnit };
-      setLocalMeasurement(updated);
-      
-      // Notify parent in the next tick to avoid React state update during render
-      setTimeout(() => {
-        onChange(updated);
-      }, 0);
+      // Notify parent immediately with converted value
+      onChange({ value: roundedValue, unit: newUnit });
       
       // Show the tooltip notification
-      // Show a Material UI snackbar notification for the unit conversion
       enqueueSnackbar(
         t('unitConversionDescription'), 
         { 
           variant: 'info',
           autoHideDuration: 3000,
-          preventDuplicate: true
+          anchorOrigin: { vertical: 'bottom', horizontal: 'center' }
         }
       );
     } else {
       // Just update the unit without conversion
-      const updated = { ...localMeasurement, unit: newUnit };
-      setLocalMeasurement(updated);
-      
-      // Notify parent in the next tick to avoid React state update during render
-      setTimeout(() => {
-        onChange(updated);
-      }, 0);
+      onChange({ ...value, unit: newUnit });
     }
   };
 
@@ -151,18 +125,18 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
           maxWidth: '100%', 
           overflow: 'hidden' 
         }}>
-          {localMeasurement.unit === 'CLOCK' ? (
+          {currentUnit === 'CLOCK' ? (
             <>
               <Box sx={{ flex: 1, mr: 1, minWidth: 0, maxWidth: '100%' }}>
                 <ClockTimePicker
-                  value={typeof localMeasurement.value === 'number' ? localMeasurement.value : 12}
+                  value={typeof value.value === 'number' ? value.value : 12}
                   onChange={handleValueChange}
                 />
               </Box>
               <Box sx={{ flexShrink: 0, minWidth: 0, maxWidth: '100%' }}>
                 <FormControl size="small" fullWidth>
                   <StyledSelect
-                    value={localMeasurement.unit}
+                    value={currentUnit}
                     onChange={handleUnitChange}
                     displayEmpty
                     inputRef={valueInputRef}
@@ -180,7 +154,7 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
             <>
               <StyledTextField
                 type="number"
-                value={localMeasurement.value.toString()}
+                value={value.value.toString()}
                 onChange={e => handleValueChange(Number(e.target.value))}
                 disabled={disabled}
                 size="small"
@@ -196,7 +170,7 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
               <Box sx={{ flexShrink: 0, minWidth: 0, maxWidth: '100%' }}>
                 <FormControl size="small" fullWidth>
                   <StyledSelect
-                    value={localMeasurement.unit}
+                    value={currentUnit}
                     onChange={handleUnitChange}
                     displayEmpty
                   >
