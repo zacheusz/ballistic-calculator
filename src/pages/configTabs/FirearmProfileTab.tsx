@@ -16,20 +16,20 @@ import MeasurementInput from '../../components/MeasurementInput';
 import { FirearmProfile, Measurement } from '../../types/ballistics';
 
 interface FirearmProfileTabProps {
-  firearm: FirearmProfile;
-  onFirearmChange: (field: string, value: any) => void;
-  onFirearmMeasurementChange: (field: string, measurement: Measurement) => void;
+  profile: FirearmProfile;
+  onFieldChange: (field: string, value: any) => void;
+  onMeasurementChange: (field: string, measurement: Measurement) => void;
   t: (key: string) => string; // Translation function
 }
 
 const FirearmProfileTab: React.FC<FirearmProfileTabProps> = ({
-  firearm,
-  onFirearmChange,
-  onFirearmMeasurementChange,
+  profile,
+  onFieldChange,
+  onMeasurementChange,
   t
 }) => {
   const handleDirectionChange = (event: SelectChangeEvent) => {
-    onFirearmChange('barrelTwistDirection', event.target.value);
+    onFieldChange('barrelTwistDirection', event.target.value);
   };
 
   return (
@@ -42,8 +42,8 @@ const FirearmProfileTab: React.FC<FirearmProfileTabProps> = ({
             <TextField
               id="firearm-name"
               fullWidth
-              value={firearm.name || ''}
-              onChange={(e) => onFirearmChange('name', e.target.value)}
+              value={profile?.name || ''}
+              onChange={(e) => onFieldChange('name', e.target.value)}
               size="small"
             />
           </FormControl>
@@ -53,8 +53,8 @@ const FirearmProfileTab: React.FC<FirearmProfileTabProps> = ({
               {t('sightHeight')}
             </Typography>
             <MeasurementInput
-              value={firearm.sightHeight || { value: 0, unit: 'INCHES' }}
-              onChange={(newMeasurement) => onFirearmMeasurementChange('sightHeight', newMeasurement)}
+              value={profile?.sightHeight || { value: 0, unit: 'INCHES' }}
+              onChange={(newMeasurement) => onMeasurementChange('sightHeight', newMeasurement)}
               unitOptions={[
                 { value: 'INCHES', label: t('inches') },
                 { value: 'CENTIMETERS', label: t('centimeters') },
@@ -72,8 +72,8 @@ const FirearmProfileTab: React.FC<FirearmProfileTabProps> = ({
               {t('barrelTwist')}
             </Typography>
             <MeasurementInput
-              value={firearm.barrelTwist || { value: 0, unit: 'INCHES' }}
-              onChange={(newMeasurement) => onFirearmMeasurementChange('barrelTwist', newMeasurement)}
+              value={profile?.barrelTwist || { value: 0, unit: 'INCHES' }}
+              onChange={(newMeasurement) => onMeasurementChange('barrelTwist', newMeasurement)}
               unitOptions={[
                 { value: 'INCHES', label: t('inches') },
                 { value: 'CENTIMETERS', label: t('centimeters') },
@@ -88,7 +88,7 @@ const FirearmProfileTab: React.FC<FirearmProfileTabProps> = ({
             <InputLabel id="barrel-twist-direction-label">{t('barrelTwistDirection')}</InputLabel>
             <Select
               labelId="barrel-twist-direction-label"
-              value={firearm.barrelTwistDirection || ''}
+              value={profile?.barrelTwistDirection || ''}
               onChange={handleDirectionChange}
               fullWidth
               size="small"
