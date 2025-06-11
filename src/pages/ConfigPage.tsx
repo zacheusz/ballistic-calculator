@@ -3,7 +3,6 @@ import {
   Card, 
   CardContent, 
   CardHeader, 
-  CardActions, 
   Container, 
   Typography, 
   Box, 
@@ -87,12 +86,6 @@ const ConfigPage: React.FC = () => {
     calculateAeroJump: preferences?.calculateAeroJump ?? false,
     interpolateRange: preferences?.interpolateRange ?? false
   });
-  
-  // Log the initial preferences from Zustand store
-  useEffect(() => {
-    console.log('Initial preferences from Zustand store:', preferences);
-    console.log('Initial interpolateRange value:', preferences?.interpolateRange);
-  }, []);
   
   // Error state - we'll use this for API error handling
   const [error, setError] = useState<string>('');
@@ -208,106 +201,100 @@ const ConfigPage: React.FC = () => {
   
   // Calculation options changes handler
   const handleCalcOptionsChange = useCallback((field: string, value: any) => {
-    console.log(`Updating calculation option ${field} to:`, value);
+    // Update local state
     const updatedOptions = { ...calcOptions, [field]: value };
     setCalcOptions(updatedOptions);
     
-    // Update preferences in the ballistics store
-    console.log(`Updating Zustand store with ${field}:`, value);
-    updatePreferences({
+    // Create a complete preferences object with the updated field
+    // We need to merge with existing preferences to ensure all fields are preserved
+    const updatedPreferences = {
+      ...preferences,
       [field]: value
-    });
+    };
     
-    // Log the updated state
-    console.log('Updated calculation options state:', updatedOptions);
-  }, [calcOptions, updatePreferences]);
-
+    updatePreferences(updatedPreferences);
+  }, [calcOptions, preferences, updatePreferences]);
+  
+  // Render the component
   return (
-    <Container sx={{ my: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Card>
-        <CardHeader title={t('settings')} />
+        <CardHeader title={t('configuration')} />
         <CardContent>
-          <Box sx={{ width: '100%' }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-              <Tabs 
-                value={activeTab} 
-                onChange={handleTabChange}
-                variant="scrollable"
-                scrollButtons="auto"
-                aria-label="settings tabs"
-              >
-                <Tab label={t('apiSettings')} value="api" />
-                <Tab label={t('unitPreferences')} value="units" />
-                <Tab label={t('firearmProfile')} value="firearm" />
-                <Tab label={t('ammunition')} value="ammo" />
-                <Tab label={t('calculationOptions')} value="calc" />
-                <Tab label={t('displayOptions')} value="display" />
-              </Tabs>
-            </Box>
-            
-            {/* API Settings Tab */}
-            {activeTab === "api" && (
-              <ApiSettingsTab
-                apiKey={inputApiKey}
-                environment={selectedEnvironment}
-                error={error}
-                onApiKeyChange={handleApiKeyChange}
-                onEnvironmentChange={handleEnvironmentChange}
-                t={t}
-              />
-            )}
-            
-            {/* Unit Preferences Tab */}
-            {activeTab === "units" && (
-              <UnitPreferencesTab
-                preferences={unitPrefsMap}
-                onUnitChange={handleUnitChange}
-                t={t}
-              />
-            )}
-            
-            {/* Firearm Profile Tab */}
-            {activeTab === "firearm" && (
-              <FirearmProfileTab
-                firearm={localFirearm}
-                onFirearmChange={handleFirearmChange}
-                onFirearmMeasurementChange={handleFirearmMeasurementChange}
-                t={t}
-              />
-            )}
-            
-            {/* Ammunition Tab */}
-            {activeTab === "ammo" && (
-              <AmmunitionTab
-                ammunition={localAmmo}
-                onAmmoChange={handleAmmoChange}
-                onAmmoMeasurementChange={handleAmmoMeasurementChange}
-                t={t}
-              />
-            )}
-            
-            {/* Calculation Options Tab */}
-            {activeTab === "calc" && (
-              <CalculationOptionsTab
-                options={calcOptions}
-                onOptionsChange={handleCalcOptionsChange}
-                t={t}
-              />
-            )}
-            
-            {/* Display Options Tab */}
-            {activeTab === "display" && (
-              <DisplayOptionsTab
-                t={t}
-              />
-            )}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange} 
+              aria-label="configuration tabs"
+              variant="scrollable"
+              scrollButtons="auto"
+            >
+              <Tab label={t('apiSettings')} value="api" />
+              <Tab label={t('unitPreferences')} value="units" />
+              <Tab label={t('firearmProfile')} value="firearm" />
+              <Tab label={t('ammunition')} value="ammo" />
+              <Tab label={t('calculationOptions')} value="calcOptions" />
+              <Tab label={t('displayOptions')} value="displayOptions" />
+            </Tabs>
           </Box>
+          
+          {activeTab === 'api' && (
+            <ApiSettingsTab
+              apiKey={inputApiKey}
+              onApiKeyChange={handleApiKeyChange}
+              environment={selectedEnvironment}
+              onEnvironmentChange={handleEnvironmentChange}
+              error=""
+              t={t}
+            />
+          )}
+          
+          {activeTab === 'units' && (
+            <UnitPreferencesTab
+              preferences={unitPrefsMap}
+              onUnitChange={handleUnitChange}
+              t={t}
+            />
+          )}
+          
+          {activeTab === 'firearm' && (
+            <FirearmProfileTab
+              profile={localFirearm}
+              onFieldChange={handleFirearmChange}
+              onMeasurementChange={handleFirearmMeasurementChange}
+              t={t}
+            />
+          )}
+          
+          {activeTab === 'ammo' && (
+            <AmmunitionTab
+              ammunition={localAmmo}
+              onFieldChange={handleAmmoChange}
+              onMeasurementChange={handleAmmoMeasurementChange}
+              t={t}
+            />
+          )}
+          
+          {activeTab === 'calcOptions' && (
+            <CalculationOptionsTab
+              options={calcOptions}
+              onOptionsChange={handleCalcOptionsChange}
+              t={t}
+            />
+          )}
+          
+          {activeTab === 'displayOptions' && (
+            <DisplayOptionsTab
+              t={t}
+            />
+          )}
+          
+          {error && (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
         </CardContent>
-        <CardActions>
-          <Typography variant="body2" color="text.secondary">
-            {t('settingsAutoSaved')}
-          </Typography>
-        </CardActions>
       </Card>
     </Container>
   );

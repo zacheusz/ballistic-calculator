@@ -3,7 +3,8 @@ import { persist } from 'zustand/middleware';
 import { BallisticsState } from '../types/ballistics';
 import { getDefaultConfig, toApiRequest, mergeWithDefaults } from '../utils/ballisticsUtils';
 
-const STORAGE_KEY = 'ballistics-store-v2';
+// Storage key for the ballistics store
+const STORAGE_KEY = 'ballistics-store-v3';
 
 const useBallisticsStore = create<BallisticsState>()(
   persist(
@@ -18,6 +19,7 @@ const useBallisticsStore = create<BallisticsState>()(
         shot: defaultConfig.shot,
         preferences: defaultConfig.preferences,
         zeroAtmosphere: defaultConfig.zeroAtmosphere,
+        // No version tracking needed
         
         // Actions
         updateFirearmProfile: (updates) =>
@@ -82,6 +84,7 @@ const useBallisticsStore = create<BallisticsState>()(
     },
     {
       name: STORAGE_KEY,
+      // No version tracking needed
       // Only persist specific parts of the state
       partialize: (state) => ({
         firearmProfile: state.firearmProfile,
@@ -90,54 +93,55 @@ const useBallisticsStore = create<BallisticsState>()(
         shot: state.shot,
         preferences: state.preferences,
         zeroAtmosphere: state.zeroAtmosphere,
+        // No version tracking needed
       }),
       // Merge persisted state with default state
       merge: (persistedState: any, currentState) => {
         if (!persistedState) return currentState;
         
-        // If we have a version mismatch, use default config
-        if (persistedState._version !== 2) {
-          console.log('Version mismatch detected, using default configuration');
-          return {
-            ...currentState,
-            ...getDefaultConfig(),
-            _version: 2
-          };
-        }
-        
         const defaultConfig = getDefaultConfig();
         
-        return {
+        // Extract the state to merge from the persisted state
+        // This handles both direct state objects and nested state.state objects
+        const stateToMerge = persistedState.state || persistedState;
+        
+        console.log('Merging persisted state:', stateToMerge);
+        
+        // Always merge with defaults regardless of version
+        const mergedState = {
           ...currentState,
           firearmProfile: mergeWithDefaults(
             defaultConfig.firearmProfile,
-            persistedState.firearmProfile || {}
+            stateToMerge.firearmProfile || {}
           ),
           ammo: mergeWithDefaults(
             defaultConfig.ammo,
-            persistedState.ammo || {}
+            stateToMerge.ammo || {}
           ),
           atmosphere: mergeWithDefaults(
             defaultConfig.atmosphere,
-            persistedState.atmosphere || {}
+            stateToMerge.atmosphere || {}
           ),
           shot: mergeWithDefaults(
             defaultConfig.shot,
-            persistedState.shot || {}
+            stateToMerge.shot || {}
           ),
           preferences: mergeWithDefaults(
             defaultConfig.preferences,
-            persistedState.preferences || {}
+            stateToMerge.preferences || {}
           ),
-          zeroAtmosphere: persistedState.zeroAtmosphere 
+          zeroAtmosphere: stateToMerge.zeroAtmosphere 
             ? mergeWithDefaults(
                 defaultConfig.zeroAtmosphere || defaultConfig.atmosphere,
-                persistedState.zeroAtmosphere
+                stateToMerge.zeroAtmosphere
               )
-            : undefined,
-          _version: 2
+            : defaultConfig.zeroAtmosphere
         };
+        
+        console.log('Merged state:', mergedState);
+        return mergedState;
       },
+
     }
   )
 );
