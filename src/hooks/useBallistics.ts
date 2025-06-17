@@ -1,20 +1,37 @@
 import { useCallback } from 'react';
 import useBallisticsStore from '../stores/useBallisticsStore';
 import { convertMeasurement, convertUnit } from '../utils/unitConversion';
-import { FirearmProfile, Ammo, Atmosphere, Shot, WindSegment } from '../types/ballistics';
+import { FirearmProfile, Ammo, Atmosphere, Shot, WindSegment, Unit } from '../types/ballistics';
 
 /**
  * Hook to access and update ballistics state with type safety
+ * Uses selective subscriptions to prevent unnecessary re-renders
  */
 export const useBallistics = () => {
-  // Get the entire store state
-  const state = useBallisticsStore();
+  // Subscribe to individual state slices instead of the entire state
+  const firearmProfile = useBallisticsStore(state => state.firearmProfile);
+  const ammo = useBallisticsStore(state => state.ammo);
+  const atmosphere = useBallisticsStore(state => state.atmosphere);
+  const shot = useBallisticsStore(state => state.shot);
+  const preferences = useBallisticsStore(state => state.preferences);
+  const zeroAtmosphere = useBallisticsStore(state => state.zeroAtmosphere);
   
+  // Subscribe to actions (these don't cause re-renders as they're stable references)
+  const updateFirearmProfile = useBallisticsStore(state => state.updateFirearmProfile);
+  const updateAmmo = useBallisticsStore(state => state.updateAmmo);
+  const updateAtmosphere = useBallisticsStore(state => state.updateAtmosphere);
+  const updateShot = useBallisticsStore(state => state.updateShot);
+  const updatePreferences = useBallisticsStore(state => state.updatePreferences);
+  const updateWindSegment = useBallisticsStore(state => state.updateWindSegment);
+  const resetToDefault = useBallisticsStore(state => state.resetToDefault);
+  const toApiRequest = useBallisticsStore(state => state.toApiRequest);
+
   // Helper function to create an updater that preserves unit information
   const createUpdater = <T extends Record<string, any>>(updater: (partial: Partial<T>) => void) => {
     return (updates: Partial<T> | ((current: T) => Partial<T>)) => {
       if (typeof updates === 'function') {
-        updater(updates(state as unknown as T));
+        const currentState = { firearmProfile, ammo, atmosphere, shot, preferences, zeroAtmosphere };
+        updater(updates(currentState as unknown as T));
       } else {
         updater(updates);
       }
@@ -22,54 +39,45 @@ export const useBallistics = () => {
   };
 
   // Create typed updaters for each part of the state
-  const updateFirearmProfile = createUpdater<{ firearmProfile: FirearmProfile }>(
-    (updates) => state.updateFirearmProfile(updates.firearmProfile!)
+  const updateFirearmProfileTyped = createUpdater<{ firearmProfile: FirearmProfile }>(
+    (updates) => updateFirearmProfile(updates.firearmProfile!)
   );
 
-  const updateAmmo = createUpdater<{ ammo: Ammo }>(
-    (updates) => state.updateAmmo(updates.ammo!)
+  const updateAmmoTyped = createUpdater<{ ammo: Ammo }>(
+    (updates) => updateAmmo(updates.ammo!)
   );
 
-  const updateAtmosphere = createUpdater<{ atmosphere: Atmosphere }>(
-    (updates) => state.updateAtmosphere(updates.atmosphere!)
+  const updateAtmosphereTyped = createUpdater<{ atmosphere: Atmosphere }>(
+    (updates) => updateAtmosphere(updates.atmosphere!)
   );
 
-  const updateShot = createUpdater<{ shot: Shot }>(
-    (updates) => state.updateShot(updates.shot!)
+  const updateShotTyped = createUpdater<{ shot: Shot }>(
+    (updates) => updateShot(updates.shot!)
   );
-
-  // Helper to update a specific wind segment
-  const updateWindSegment = useCallback((index: number, updates: Partial<WindSegment>) => {
-    const currentSegments = [...state.shot.windSegments];
-    if (index >= 0 && index < currentSegments.length) {
-      currentSegments[index] = { ...currentSegments[index], ...updates };
-      state.updateShot({ windSegments: currentSegments });
-    }
-  }, [state]);
 
   // Helper to add a new wind segment
   const addWindSegment = useCallback((segment: WindSegment) => {
-    const currentSegments = [...state.shot.windSegments, segment];
-    state.updateShot({ windSegments: currentSegments });
-  }, [state]);
+    const currentSegments = [...shot.windSegments, segment];
+    updateShot({ windSegments: currentSegments });
+  }, [shot.windSegments, updateShot]);
 
   // Helper to remove a wind segment by index
   const removeWindSegment = useCallback((index: number) => {
-    const currentSegments = [...state.shot.windSegments];
+    const currentSegments = [...shot.windSegments];
     if (index >= 0 && index < currentSegments.length) {
       currentSegments.splice(index, 1);
-      state.updateShot({ windSegments: currentSegments });
+      updateShot({ windSegments: currentSegments });
     }
-  }, [state]);
+  }, [shot.windSegments, updateShot]);
 
   // Helper to convert a measurement to a specific unit
-  const convertToUnit = useCallback((value: number, fromUnit: string, toUnit: string): number => {
+  const convertToUnit = useCallback((value: number, fromUnit: Unit, toUnit: Unit): number => {
     // Use the imported utility function from unitConversion
     return convertUnit(value, fromUnit, toUnit);
   }, []);
 
   // Helper to convert a measurement object to a specific unit
-  const convertMeasurementObj = useCallback((measurement: { value: number; unit: string }, toUnit: string) => {
+  const convertMeasurementObj = useCallback((measurement: { value: number; unit: Unit }, toUnit: Unit) => {
     if (!measurement) return { value: 0, unit: toUnit };
     // Use the imported utility function from unitConversion
     return convertMeasurement(measurement, toUnit);
@@ -77,27 +85,35 @@ export const useBallistics = () => {
 
   // Return everything needed by components
   return {
-    // State
-    ...state,
+    // State - individual slices
+    firearmProfile,
+    ammo,
+    atmosphere,
+    shot,
+    preferences,
+    zeroAtmosphere,
     
     // Updaters
-    updateFirearmProfile,
-    updateAmmo,
-    updateAtmosphere,
-    updateShot,
+    updateFirearmProfile: updateFirearmProfileTyped,
+    updateAmmo: updateAmmoTyped,
+    updateAtmosphere: updateAtmosphereTyped,
+    updateShot: updateShotTyped,
+    updatePreferences,
     updateWindSegment,
     addWindSegment,
     removeWindSegment,
+    resetToDefault,
+    toApiRequest,
     
     // Helpers
     convertToUnit,
     convertMeasurement: convertMeasurementObj,
     
     // Alias for compatibility
-    setFirearmProfile: updateFirearmProfile,
-    setAmmo: updateAmmo,
-    setAtmosphere: updateAtmosphere,
-    setShot: updateShot,
+    setFirearmProfile: updateFirearmProfileTyped,
+    setAmmo: updateAmmoTyped,
+    setAtmosphere: updateAtmosphereTyped,
+    setShot: updateShotTyped,
   };
 };
 
