@@ -158,8 +158,19 @@ class BallisticsApi implements BallisticsApiConfig {
     return { unitMappings: [] };
   }
 
-  async computeBallisticSolution(config: BallisticsRequest): Promise<SolutionCardResponse> {
+  async computeBallisticSolution(config: BallisticsRequest, enableRequestLogging?: boolean): Promise<SolutionCardResponse> {
     try {
+      // Configurable request logging for debugging and testing
+      const shouldLog = enableRequestLogging ?? import.meta.env.VITE_LOG_API_REQUESTS === 'true';
+      
+      if (shouldLog) {
+        console.log('=== API REQUEST PAYLOAD ===');
+        console.log('Full request config:', JSON.stringify(config, null, 2));
+        console.log('Atmosphere data:', JSON.stringify(config.atmosphere, null, 2));
+        console.log('Shot data:', JSON.stringify(config.shot, null, 2));
+        console.log('=== END REQUEST PAYLOAD ===');
+      }
+      
       const response: AxiosResponse<SolutionCardResponse> = await this.client.post('/compute', config, {
         headers: {
           'x-api-key': this.apiKey,

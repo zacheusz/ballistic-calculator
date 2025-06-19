@@ -121,7 +121,7 @@ export const useCalculator = () => {
   }, [validateForm]);
 
   // Calculate ballistics
-  const calculateBallistics = useCallback(async () => {
+  const calculateBallistics = useCallback(async (enableRequestLogging?: boolean) => {
     // Validate form before submission
     if (!validateForm()) {
       return;
@@ -161,34 +161,22 @@ export const useCalculator = () => {
         console.log('- Range card start:', JSON.stringify(requestData.preferences.rangeCardStart));
         console.log('- Range card step:', JSON.stringify(requestData.preferences.rangeCardStep));
       } else {
-        // HUD mode - we need to create a new object without range card settings
-        // The API expects Measurement objects with value and unit, but will ignore
-        // range card settings with zero values for HUD mode
-        requestData = {
-          ...baseRequestData,
-          preferences: {
-            ...baseRequestData.preferences,
-            // Use zero values which the API will ignore for HUD mode
-            rangeCardStart: { value: 0, unit: baseRequestData.shot.range.unit },
-            rangeCardStep: { value: 0, unit: baseRequestData.shot.range.unit }
-          }
-        };
+        // HUD mode - use base request data
+        requestData = baseRequestData;
         
         console.log('HUD mode request:');
         console.log('- Shot range:', JSON.stringify(requestData.shot.range));
-        console.log('- Range card start:', JSON.stringify(requestData.preferences.rangeCardStart));
-        console.log('- Range card step:', JSON.stringify(requestData.preferences.rangeCardStep));
       }
 
-      // Call API
-      const response = await apiModule.computeBallisticSolution(requestData);
+      // Call API with optional logging parameter
+      const response = await apiModule.computeBallisticSolution(requestData, enableRequestLogging);
       setResults(response);
     } catch (err: any) {
       setError(err.message || 'Failed to calculate ballistics');
     } finally {
       setLoading(false);
     }
-  }, [mode, rangeCardSettings, toApiRequest]);
+  }, [mode, rangeCardSettings, toApiRequest, validateForm]);
 
   // Reset results
   const resetResults = useCallback(() => {
