@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { useCalculator } from '../hooks/useCalculator';
+import useBallisticsStore from '../stores/useBallisticsStore';
 
 
 
@@ -72,8 +73,6 @@ const CalculatorPage: React.FC = () => {
     touched,
     
     // Actions
-    updateAtmosphere,
-    updateShot,
     addWindSegment,
     removeWindSegment,
     handleModeChange,
@@ -82,28 +81,33 @@ const CalculatorPage: React.FC = () => {
     handleBlur,
   } = useCalculator();
   
+  // Get direct store actions for efficient partial updates
+  const updateAtmosphere = useBallisticsStore((state) => state.updateAtmosphere);
+  const updateShot = useBallisticsStore((state) => state.updateShot);
+  
   // Extract calculation options from preferences
   const calculationOptions = preferences || {};
   
   // Create handlers for form components
   const handleAtmosphereChange = (field: string, value: any) => {
     // For simple values (non-measurement objects)
-    updateAtmosphere({ atmosphere: { ...atmosphere, [field]: value } });
+    // Use partial update - only update the specific field
+    updateAtmosphere({ [field]: value });
   };
   
   // Specific handler for atmosphere measurement changes
   const handleAtmosphereMeasurementChange = (field: string, measurement: any) => {
     // For measurement objects (with value and unit)
-    // Use type-safe approach by updating only the specific field
+    // Use partial update - only update the specific field
     if (field === 'temperature' || field === 'pressure' || field === 'altitude') {
-      updateAtmosphere({ atmosphere: { ...atmosphere, [field]: measurement } });
+      updateAtmosphere({ [field]: measurement });
     }
   };
   
   // Specific handler for shot measurement changes
   const handleShotMeasurementChange = (field: string, measurement: any) => {
     // For measurement objects (with value and unit)
-    // Use type-safe approach by updating only the specific field
+    // Use partial update - only update the specific field
     if (
       field === 'range' || 
       field === 'elevationAngle' || 
@@ -113,9 +117,9 @@ const CalculatorPage: React.FC = () => {
       field === 'azimuth' || 
       field === 'latitude'
     ) {
-      updateShot({ shot: { ...shot, [field]: measurement } });
+      updateShot({ [field]: measurement });
     } else if (field === 'windSegments') {
-      updateShot({ shot: { ...shot, windSegments: measurement } });
+      updateShot({ windSegments: measurement });
     }
   };
 
