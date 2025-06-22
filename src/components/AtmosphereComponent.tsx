@@ -1,3 +1,4 @@
+import React, { useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -40,6 +41,24 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  // Stable callbacks to preserve debouncing in MeasurementInput
+  const handleTemperatureChange = useCallback((newMeasurement: any) => {
+    handleAtmosphereChange('temperature', newMeasurement);
+  }, [handleAtmosphereChange]);
+
+  const handlePressureChange = useCallback((newMeasurement: any) => {
+    handleAtmosphereChange('pressure', newMeasurement);
+  }, [handleAtmosphereChange]);
+
+  const handleHumidityChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    handleAtmosphereSimpleChange('humidity', parseFloat(e.target.value));
+    handleChange(e);
+  }, [handleChange, handleAtmosphereSimpleChange]);
+
+  const handleAltitudeChange = useCallback((newMeasurement: any) => {
+    handleAtmosphereChange('altitude', newMeasurement);
+  }, [handleAtmosphereChange]);
+
   // Styled components for consistent styling
   const StyledFormControl = styled(FormControl)(({ theme }) => ({
     marginBottom: theme.spacing(3)
@@ -58,9 +77,7 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
           <StyledFormLabel>{t('calcTemperature')}</StyledFormLabel>
           <MeasurementInput
             value={values.atmosphere.temperature}
-            onChange={(newMeasurement) => {
-              handleAtmosphereChange('temperature', newMeasurement);
-            }}
+            onChange={handleTemperatureChange}
             unitOptions={[
               { value: 'FAHRENHEIT', label: t('unitFahrenheit') },
               { value: 'CELSIUS', label: t('unitCelsius') },
@@ -81,9 +98,7 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
           <StyledFormLabel>{t('calcPressure')}</StyledFormLabel>
           <MeasurementInput
             value={values.atmosphere.pressure}
-            onChange={(newMeasurement) => {
-              handleAtmosphereChange('pressure', newMeasurement);
-            }}
+            onChange={handlePressureChange}
             unitOptions={[
               // Use the exact unit names from the API for consistency
               // The API uses INCHES_MERCURY and HECTOPASCALS for atmospheric pressure
@@ -136,10 +151,7 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
             }}
             name="atmosphere.humidity"
             value={values.atmosphere.humidity}
-            onChange={(e) => {
-              handleChange(e);
-              handleAtmosphereSimpleChange('humidity', parseFloat(e.target.value));
-            }}
+            onChange={handleHumidityChange}
             onBlur={handleBlur}
             size="small"
             fullWidth
@@ -150,9 +162,7 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
           <StyledFormLabel>{t('calcAltitude')}</StyledFormLabel>
           <MeasurementInput
             value={values.atmosphere.altitude}
-            onChange={(newMeasurement) => {
-              handleAtmosphereChange('altitude', newMeasurement);
-            }}
+            onChange={handleAltitudeChange}
             unitOptions={[
               { value: 'FEET', label: t('unitFeet') },
               { value: 'METERS', label: t('unitMeters') },
@@ -172,4 +182,4 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
   );
 };
 
-export default AtmosphereComponent;
+export default memo(AtmosphereComponent);

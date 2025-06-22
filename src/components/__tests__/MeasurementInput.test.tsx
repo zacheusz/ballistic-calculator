@@ -62,14 +62,15 @@ describe('MeasurementInput', () => {
         value={{ value: 100, unit: 'YARDS' as const }}
         onChange={handleChange}
         unitOptions={unitOptions}
+        label="Distance"
       />
     );
 
     const input = screen.getByDisplayValue('100');
     fireEvent.change(input, { target: { value: '200' } });
     
-    // Wait for the setTimeout to execute
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for the debounce delay (300ms) to execute
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     expect(handleChange).toHaveBeenCalledWith({ value: 200, unit: 'YARDS' });
   });

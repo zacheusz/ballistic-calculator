@@ -7,21 +7,29 @@ interface MuiThemeProviderProps {
   children: ReactNode;
 }
 
+// Create stable theme objects outside component to prevent recreation
+const lightTheme = createTheme({
+  palette: {
+    mode: 'light',
+  },
+});
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+
 /**
  * MUI Theme Provider that syncs with our application theme
- * Using standard MUI theming approach
+ * Using stable theme objects to prevent unnecessary re-renders
  */
 const MuiThemeProvider: React.FC<MuiThemeProviderProps> = ({ children }) => {
   const { theme } = useAppConfigStore();
   
-  // Create a theme with MUI's standard approach
+  // Use stable theme objects instead of creating new ones
   const muiTheme = useMemo(() => {
-    return createTheme({
-      // Set the base palette mode to match our theme
-      palette: {
-        mode: theme, // Theme is already typed as 'light' | 'dark'
-      },
-    });
+    return theme === 'dark' ? darkTheme : lightTheme;
   }, [theme]);
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import api from '../services/api';
 
@@ -9,17 +9,43 @@ import api from '../services/api';
 export const useApiSync = () => {
   const apiKey = useAppConfigStore(state => state.apiKey);
   const apiStage = useAppConfigStore(state => state.apiStage);
+  
+  // Use refs to track previous values and prevent unnecessary updates
+  const prevApiKeyRef = useRef<string | null>(null);
+  const prevApiStageRef = useRef<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Sync API key and environment with Zustand store
+  // Delay initial sync to prevent unmount/remount during initial render
   useEffect(() => {
-    if (apiKey) {
-      api.setApiKey(apiKey);
-    }
+    const timer = setTimeout(() => {
+      setIsInitialized(true);
+      console.log('🚀 useApiSync: Initialization delay complete, ready to sync');
+    }, 150); // Delay slightly longer than ThemeContextProvider
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Sync API key with Zustand store only when it actually changes and after initialization
+  useEffect(() => {
+    if (!isInitialized) return;
     
-    if (apiStage) {
-      api.setEnvironment(apiStage);
+    if (apiKey && apiKey !== prevApiKeyRef.current) {
+      console.log('🔑 useApiSync: API key changed, updating...');
+      api.setApiKey(apiKey);
+      prevApiKeyRef.current = apiKey;
     }
-  }, [apiKey, apiStage]);
+  }, [apiKey, isInitialized]);
+
+  // Sync API environment with Zustand store only when it actually changes and after initialization
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    if (apiStage && apiStage !== prevApiStageRef.current) {
+      console.log('🌍 useApiSync: API stage changed, updating...', apiStage);
+      api.setEnvironment(apiStage);
+      prevApiStageRef.current = apiStage;
+    }
+  }, [apiStage, isInitialized]);
 
   return null;
 };

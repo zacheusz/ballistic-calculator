@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -44,6 +44,23 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  // Stable callbacks to preserve debouncing in MeasurementInput
+  const handleRangeChange = useCallback((value: RangeMeasurement) => {
+    handleShotChange('range', value);
+  }, [handleShotChange]);
+
+  const handleElevationAngleChange = useCallback((value: AngleMeasurement) => {
+    handleShotChange('elevationAngle', value);
+  }, [handleShotChange]);
+
+  const handleAzimuthChange = useCallback((value: AngleMeasurement) => {
+    handleShotChange('azimuth', value);
+  }, [handleShotChange]);
+
+  const handleLatitudeChange = useCallback((value: AngleMeasurement) => {
+    handleShotChange('latitude', value);
+  }, [handleShotChange]);
+
   // Styled components for consistent styling
   const StyledFormControl = styled(FormControl)(({ theme }) => ({
     marginBottom: theme.spacing(3)
@@ -67,9 +84,7 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
               { value: 'YARDS', label: t('unitYards') },
               { value: 'METERS', label: t('unitMeters') },
             ]}
-            onChange={(value) => {
-              handleShotChange('range', value);
-            }}
+            onChange={handleRangeChange}
             disabled={loading}
             inputRef={rangeInputRef}
             inputProps={{
@@ -86,9 +101,7 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
           <StyledFormLabel>{t('calcElevationAngle')}</StyledFormLabel>
           <MeasurementInput
             value={values.shot.elevationAngle}
-            onChange={(newMeasurement) => {
-              handleShotChange('elevationAngle', newMeasurement);
-            }}
+            onChange={handleElevationAngleChange}
             unitOptions={[
               { value: 'DEGREES', label: t('unitDegrees') },
               { value: 'MILS', label: t('unitMils') },
@@ -111,9 +124,7 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
               <StyledFormLabel>{t('shotAzimuth')}</StyledFormLabel>
               <MeasurementInput
                 value={values.shot.azimuth}
-                onChange={(newMeasurement) => {
-                  handleShotChange('azimuth', newMeasurement);
-                }}
+                onChange={handleAzimuthChange}
                 unitOptions={[
                   { value: 'DEGREES', label: t('unitDegrees') }
                 ]}
@@ -130,9 +141,7 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
               <StyledFormLabel>{t('shooterLatitude')}</StyledFormLabel>
               <MeasurementInput
                 value={values.shot.latitude}
-                onChange={(newMeasurement) => {
-                  handleShotChange('latitude', newMeasurement);
-                }}
+                onChange={handleLatitudeChange}
                 unitOptions={[
                   { value: 'DEGREES', label: t('unitDegrees') }
                 ]}
@@ -162,4 +171,4 @@ const ShotComponent: React.FC<ShotComponentProps> = ({
   );
 };
 
-export default ShotComponent;
+export default memo(ShotComponent);

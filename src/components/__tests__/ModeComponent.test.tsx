@@ -91,8 +91,8 @@ describe('ModeComponent', () => {
     // Change the value
     fireEvent.change(rangeCardStartInput, { target: { value: '200' } });
     
-    // Wait for any debounce or timeout
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for debounce delay (300ms + buffer)
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     // Check that handleRangeCardSettingChange was called with the correct value
     expect(defaultProps.handleRangeCardSettingChange).toHaveBeenCalledWith('start', 200);
@@ -101,16 +101,20 @@ describe('ModeComponent', () => {
   test('calls handleRangeCardSettingChange when range card step value is changed', async () => {
     render(<ModeComponent {...defaultProps} mode="RANGE_CARD" />);
     
-    // Find the input field for range card step by looking for number inputs instead of textbox
+    // Find all number inputs in the range card mode
     const inputs = screen.getAllByRole('spinbutton');
-    expect(inputs.length).toBeGreaterThan(1);
-    const rangeCardStepInput = inputs[1]; // Second input should be range card step
+    
+    // In RANGE_CARD mode, there should be at least 2 inputs: start and step
+    expect(inputs.length).toBeGreaterThanOrEqual(2);
+    
+    // The second input should be the range card step
+    const rangeCardStepInput = inputs[1];
     
     // Change the value
     fireEvent.change(rangeCardStepInput, { target: { value: '100' } });
     
-    // Wait for any debounce or timeout
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for debounce delay (300ms + buffer)
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     // Check that handleRangeCardSettingChange was called with the correct value
     expect(defaultProps.handleRangeCardSettingChange).toHaveBeenCalledWith('step', 100);

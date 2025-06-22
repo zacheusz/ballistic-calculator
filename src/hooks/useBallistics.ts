@@ -57,18 +57,21 @@ export const useBallistics = () => {
 
   // Helper to add a new wind segment
   const addWindSegment = useCallback((segment: WindSegment) => {
-    const currentSegments = [...shot.windSegments, segment];
-    updateShot({ windSegments: currentSegments });
-  }, [shot.windSegments, updateShot]);
+    // Get current wind segments and add the new one
+    const currentSegments = useBallisticsStore.getState().shot.windSegments;
+    updateShot({ windSegments: [...currentSegments, segment] });
+  }, [updateShot]);
 
   // Helper to remove a wind segment by index
   const removeWindSegment = useCallback((index: number) => {
-    const currentSegments = [...shot.windSegments];
+    // Get current wind segments and remove the specified one
+    const currentSegments = useBallisticsStore.getState().shot.windSegments;
     if (index >= 0 && index < currentSegments.length) {
-      currentSegments.splice(index, 1);
-      updateShot({ windSegments: currentSegments });
+      const newSegments = [...currentSegments];
+      newSegments.splice(index, 1);
+      updateShot({ windSegments: newSegments });
     }
-  }, [shot.windSegments, updateShot]);
+  }, [updateShot]);
 
   // Helper to convert a measurement to a specific unit
   const convertToUnit = useCallback((value: number, fromUnit: Unit, toUnit: Unit): number => {

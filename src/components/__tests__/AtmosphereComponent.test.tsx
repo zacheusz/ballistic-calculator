@@ -22,7 +22,7 @@ describe('AtmosphereComponent', () => {
       atmosphere: Atmosphere;
     };
     handleBlur: (e: React.FocusEvent<any>) => void;
-    handleChange: (e: React.ChangeEvent<any>) => void;
+    handleChange: (e: React.ChangeEvent<any> | { target: { name: string; value: any } }) => void;
     handleAtmosphereChange: (field: string, value: Measurement) => void;
     handleAtmosphereSimpleChange: (field: string, value: string | number) => void;
     loading: boolean;
@@ -89,8 +89,8 @@ describe('AtmosphereComponent', () => {
     // Change the value
     fireEvent.change(temperatureInput, { target: { value: '70' } });
     
-    // Wait for any debounce or timeout
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for the debounce delay (300ms) to execute
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     // Check that handleAtmosphereChange was called with the correct value
     expect(defaultProps.handleAtmosphereChange).toHaveBeenCalledWith(
@@ -111,8 +111,8 @@ describe('AtmosphereComponent', () => {
     // Change the value
     fireEvent.change(pressureInput, { target: { value: '30.5' } });
     
-    // Wait for any debounce or timeout
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for the debounce delay (300ms) to execute
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     // Check that handleAtmosphereChange was called with the correct value
     expect(defaultProps.handleAtmosphereChange).toHaveBeenCalledWith(
@@ -169,8 +169,8 @@ describe('AtmosphereComponent', () => {
     // Change the value
     fireEvent.change(altitudeInput, { target: { value: '1000' } });
     
-    // Wait for any debounce or timeout
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for the debounce delay (300ms) to execute
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     // Check that handleAtmosphereChange was called with the correct value
     expect(defaultProps.handleAtmosphereChange).toHaveBeenCalledWith(

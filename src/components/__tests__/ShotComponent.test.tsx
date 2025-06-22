@@ -119,8 +119,8 @@ describe('ShotComponent', () => {
     // Change the value
     fireEvent.change(rangeInput, { target: { value: '200' } });
     
-    // Wait for any debounce or timeout
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for the debounce delay (300ms) to execute
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     // Check that handleShotChange was called with the correct values
     expect(defaultProps.handleShotChange).toHaveBeenCalledWith(
@@ -141,8 +141,8 @@ describe('ShotComponent', () => {
     // Change the value
     fireEvent.change(elevationAngleInput, { target: { value: '10' } });
     
-    // Wait for any debounce or timeout
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for the debounce delay (300ms) to execute
+    await new Promise(resolve => setTimeout(resolve, 350));
     
     // Check that handleShotChange was called with the correct value
     expect(defaultProps.handleShotChange).toHaveBeenCalledWith(

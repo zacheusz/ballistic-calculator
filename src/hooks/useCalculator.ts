@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
-import { useBallistics } from './useBallistics';
+import { useState, useCallback, useEffect } from 'react';
+import useBallisticsStore from '../stores/useBallisticsStore';
 import apiModule from '../services/api';
 import { SolutionCardResponse, Solution } from '../types/apiTypes';
-import { BallisticsRequest } from '../types/ballistics';
+import { BallisticsRequest, WindSegment } from '../types/ballistics';
+import { Unit } from '../types/ballistics';
 
 // Re-export Solution type for convenience
 export type { Solution, SolutionCardResponse as BallisticsResults };
@@ -16,8 +17,6 @@ export interface RangeCardSettings {
   step: number;
   unit: Unit;
 }
-
-import { Unit } from '../types/ballistics';
 
 // Define validation error type
 export interface ValidationErrors {
@@ -43,30 +42,61 @@ export interface TouchedFields {
  * while leveraging the shared ballistics store for domain data
  */
 export const useCalculator = () => {
-  // Use our ballistics hook for domain state
-  const {
-    atmosphere,
-    shot,
-    preferences,
-    updateAtmosphere,
-    updateShot,
-    updateWindSegment,
-    addWindSegment,
-    removeWindSegment,
-    toApiRequest
-  } = useBallistics();
+  // Get store actions directly WITHOUT subscribing (using getState approach)
+  const store = useBallisticsStore.getState();
+  const updateAtmosphere = store.updateAtmosphere;
+  const updateShot = store.updateShot;
+  const updateWindSegment = store.updateWindSegment;
+
+  // Helper to add a new wind segment
+  const addWindSegment = useCallback((segment: WindSegment) => {
+    // Get current wind segments and add the new one
+    const currentSegments = useBallisticsStore.getState().shot.windSegments;
+    updateShot({ windSegments: [...currentSegments, segment] });
+  }, [updateShot]);
+
+  // Helper to remove a wind segment by index
+  const removeWindSegment = useCallback((index: number) => {
+    // Get current wind segments and remove the specified one
+    const currentSegments = useBallisticsStore.getState().shot.windSegments;
+    if (index >= 0 && index < currentSegments.length) {
+      const newSegments = [...currentSegments];
+      newSegments.splice(index, 1);
+      updateShot({ windSegments: newSegments });
+    }
+  }, [updateShot]);
+
+  // Get values without subscribing - use getState() snapshots
+  const getCurrentRangeValue = useCallback(() => {
+    return useBallisticsStore.getState().shot.range.value;
+  }, []);
+
+  const getCurrentShotRangeUnit = useCallback(() => {
+    return useBallisticsStore.getState().shot.range.unit;
+  }, []);
 
   // Calculator-specific UI state
   const [loading, setLoading] = useState<boolean>(false);
   const [results, setResults] = useState<SolutionCardResponse | null>(null);
   const [error, setError] = useState<string>('');
   const [mode, setMode] = useState<CalculationMode>('HUD');
+  
+  // Initialize rangeCardSettings with a stable default
   const [rangeCardSettings, setRangeCardSettings] = useState<RangeCardSettings>({
     start: 100,
     step: 100,
-    unit: shot.range.unit as Unit
+    unit: 'METERS' as Unit
   });
   
+  // Update rangeCardSettings unit when shot.range.unit changes
+  useEffect(() => {
+    const shotRangeUnit = getCurrentShotRangeUnit();
+    setRangeCardSettings(prev => ({
+      ...prev,
+      unit: shotRangeUnit as Unit
+    }));
+  }, []);
+
   // Form validation state
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<TouchedFields>({});
@@ -81,12 +111,13 @@ export const useCalculator = () => {
     setRangeCardSettings(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  // Validate form fields
+  // Validate form fields - use memoized rangeValue to stabilize dependencies
   const validateForm = useCallback(() => {
     const newErrors: ValidationErrors = {};
     
     // Validate shot range value
-    if (!shot.range.value) {
+    const rangeValue = getCurrentRangeValue();
+    if (!rangeValue) {
       newErrors.shot = {
         range: {
           value: 'Range is required'
@@ -96,7 +127,7 @@ export const useCalculator = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [shot.range.value]);
+  }, []);
 
   // Handle field blur
   const handleBlur = useCallback((e: React.FocusEvent<any>) => {
@@ -130,7 +161,8 @@ export const useCalculator = () => {
       setLoading(true);
       setError('');
 
-      // Get the base request data
+      // Get the base request data (get fresh reference each time)
+      const toApiRequest = useBallisticsStore.getState().toApiRequest;
       const baseRequestData = toApiRequest();
       
       console.log(`Current mode: ${mode}`);
@@ -176,7 +208,7 @@ export const useCalculator = () => {
     } finally {
       setLoading(false);
     }
-  }, [mode, rangeCardSettings, toApiRequest, validateForm]);
+  }, [mode, rangeCardSettings, validateForm]);
 
   // Reset results
   const resetResults = useCallback(() => {
@@ -185,11 +217,6 @@ export const useCalculator = () => {
   }, []);
 
   return {
-    // Ballistics state
-    atmosphere,
-    shot,
-    preferences,
-    
     // Calculator-specific state
     loading,
     results,

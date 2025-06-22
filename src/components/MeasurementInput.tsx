@@ -1,5 +1,4 @@
-
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect, useCallback, memo } from 'react';
 import { 
   TextField, 
   Select, 
@@ -52,6 +51,37 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
   // Access Material UI's snackbar system
   const { enqueueSnackbar } = useSnackbar();
 
+  // Local state for the input value to prevent focus loss
+  const [localValue, setLocalValue] = useState(value.value.toString());
+  const [localUnit, setLocalUnit] = useState(value.unit);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Update local state when prop value changes (from external source)
+  useEffect(() => {
+    setLocalValue(value.value.toString());
+    setLocalUnit(value.unit);
+  }, [value.value, value.unit]);
+
+  // Debounced update to parent component
+  const debouncedUpdate = useCallback((newValue: number, newUnit: Unit) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      onChange({ value: newValue, unit: newUnit });
+    }, 300); // 300ms debounce delay
+  }, [onChange]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
   // Check if the unit is valid for the current options
   const mapUnit = (unit: Unit): Unit => {
     // Check if the unit is already in the options
@@ -64,30 +94,49 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
   };
 
   // Ensure the unit is valid for the current options
-  const currentUnit = mapUnit(value.unit);
+  const currentUnit = mapUnit(localUnit);
 
-  // Handle value change (numeric or clock)
+  // Handle value change (numeric or clock) - now updates local state immediately
   const handleValueChange = (newValue: number) => {
-    const updated = { ...value, value: newValue };
+    const newValueStr = newValue.toString();
+    setLocalValue(newValueStr);
     
-    // Notify parent immediately
-    onChange(updated);
+    // Debounce the update to parent
+    debouncedUpdate(newValue, currentUnit);
+  };
+
+  // Handle input text change - updates local state immediately
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValueStr = event.target.value;
+    setLocalValue(newValueStr);
+    
+    // Parse and debounce the update to parent
+    const newValue = Number(newValueStr);
+    if (!isNaN(newValue)) {
+      debouncedUpdate(newValue, currentUnit);
+    }
   };
 
   // Handle unit change with conversion
   const handleUnitChange = (event: React.ChangeEvent<HTMLInputElement> | { target: { value: unknown } }) => {
     const newUnit = event.target.value as Unit;
-    const oldUnit = value.unit;
+    const oldUnit = currentUnit;
+    
+    setLocalUnit(newUnit);
     
     // Only convert if units are different and we have a valid current value
-    if (newUnit !== oldUnit && value.value !== undefined && !isNaN(value.value)) {
+    const currentValue = Number(localValue);
+    if (newUnit !== oldUnit && !isNaN(currentValue)) {
       // Convert the value from old unit to new unit
-      const convertedValue = convertUnit(value.value, oldUnit, newUnit);
+      const convertedValue = convertUnit(currentValue, oldUnit, newUnit);
       
       // Round to 4 decimal places for better display
       const roundedValue = Math.round(convertedValue * 10000) / 10000;
+      const roundedValueStr = roundedValue.toString();
       
-      // Notify parent immediately with converted value
+      setLocalValue(roundedValueStr);
+      
+      // Notify parent immediately with converted value (no debounce for unit changes)
       onChange({ value: roundedValue, unit: newUnit });
       
       // Show the tooltip notification
@@ -101,7 +150,7 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
       );
     } else {
       // Just update the unit without conversion
-      onChange({ ...value, unit: newUnit });
+      onChange({ value: Number(localValue) || 0, unit: newUnit });
     }
   };
 
@@ -154,8 +203,8 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
             <>
               <StyledTextField
                 type="number"
-                value={value.value.toString()}
-                onChange={e => handleValueChange(Number(e.target.value))}
+                value={localValue}
+                onChange={handleInputChange}
                 disabled={disabled}
                 size="small"
                 inputProps={{
@@ -186,10 +235,8 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
           )}
         </Box>
       </Box>
-
-      {/* Tooltip removed in favor of global notification system */}
     </Box>
   );
 };
 
-export default MeasurementInput;
+export default memo(MeasurementInput);

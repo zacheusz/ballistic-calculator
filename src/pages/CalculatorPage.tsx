@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { 
@@ -28,6 +28,8 @@ import ModeComponent from '../components/ModeComponent';
 
 
 const CalculatorPage: React.FC = () => {
+  console.log('🔄 CalculatorPage: Component render started');
+  
   const { t } = useTranslation();
   
   // Create refs for input fields to position tooltips - using any to avoid type errors with component props
@@ -54,14 +56,11 @@ const CalculatorPage: React.FC = () => {
   // Derive isConfigured from apiKey presence
   const isConfigured = !!apiKey;
   
-  // Use our calculator hook for state management
+  console.log('🔍 CalculatorPage: About to call useCalculator hook');
+  
+  // Use our calculator hook for calculator-specific state only (not ballistics data)
   const {
-    // Ballistics state
-    atmosphere,
-    shot,
-    preferences,
-    
-    // Calculator-specific state
+    // Calculator-specific state only
     loading,
     results,
     error,
@@ -73,6 +72,8 @@ const CalculatorPage: React.FC = () => {
     touched,
     
     // Actions
+    updateAtmosphere,
+    updateShot,
     addWindSegment,
     removeWindSegment,
     handleModeChange,
@@ -81,31 +82,51 @@ const CalculatorPage: React.FC = () => {
     handleBlur,
   } = useCalculator();
   
-  // Get direct store actions for efficient partial updates
-  const updateAtmosphere = useBallisticsStore((state) => state.updateAtmosphere);
-  const updateShot = useBallisticsStore((state) => state.updateShot);
+  console.log('✅ CalculatorPage: useCalculator hook completed');
+  
+  console.log('🔍 CalculatorPage: Got store actions');
+  
+  // Simplified logging to avoid TypeScript issues
+  console.log('📊 CalculatorPage: Component render - checking what triggers re-renders');
+  
+  // Get current state values only when needed for rendering (not subscribing to changes)
+  const currentState = useBallisticsStore.getState();
+  const atmosphere = currentState.atmosphere;
+  const shot = currentState.shot;
+  const preferences = currentState.preferences;
   
   // Extract calculation options from preferences
   const calculationOptions = preferences || {};
   
-  // Create handlers for form components
-  const handleAtmosphereChange = (field: string, value: any) => {
+  // Add effect to track component mounting/unmounting
+  useEffect(() => {
+    console.log('🟢 CalculatorPage: Component mounted');
+    return () => {
+      console.log('🔴 CalculatorPage: Component unmounted');
+    };
+  }, []);
+  
+  // Create stable handlers using useCallback to prevent unnecessary re-renders
+  const handleAtmosphereChange = useCallback((field: string, value: any) => {
+    console.log(`🌡️ CalculatorPage: handleAtmosphereChange called - field: ${field}, value:`, value);
     // For simple values (non-measurement objects)
     // Use partial update - only update the specific field
     updateAtmosphere({ [field]: value });
-  };
+  }, [updateAtmosphere]);
   
   // Specific handler for atmosphere measurement changes
-  const handleAtmosphereMeasurementChange = (field: string, measurement: any) => {
+  const handleAtmosphereMeasurementChange = useCallback((field: string, measurement: any) => {
+    console.log(`🌡️ CalculatorPage: handleAtmosphereMeasurementChange called - field: ${field}, measurement:`, measurement);
     // For measurement objects (with value and unit)
     // Use partial update - only update the specific field
     if (field === 'temperature' || field === 'pressure' || field === 'altitude') {
       updateAtmosphere({ [field]: measurement });
     }
-  };
+  }, [updateAtmosphere]);
   
   // Specific handler for shot measurement changes
-  const handleShotMeasurementChange = (field: string, measurement: any) => {
+  const handleShotMeasurementChange = useCallback((field: string, measurement: any) => {
+    console.log(`🎯 CalculatorPage: handleShotMeasurementChange called - field: ${field}, measurement:`, measurement);
     // For measurement objects (with value and unit)
     // Use partial update - only update the specific field
     if (
@@ -121,7 +142,9 @@ const CalculatorPage: React.FC = () => {
     } else if (field === 'windSegments') {
       updateShot({ windSegments: measurement });
     }
-  };
+  }, [updateShot]);
+
+  console.log('✅ CalculatorPage: Component render completed');
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
