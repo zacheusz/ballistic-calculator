@@ -9,9 +9,9 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  Grid,
   styled
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import MeasurementInput from './MeasurementInput';
 import { CalculationMode, RangeCardSettings } from '../hooks/useCalculator';
 import { Unit } from '../types/ballistics';
@@ -47,12 +47,12 @@ const ModeComponent: React.FC<ModeComponentProps> = ({
     <Card sx={{ mb: 4, width: '100%' }}>
       <CardHeader title={t('calcMode')} />
       <CardContent>
-        <StyledFormControl component="fieldset" fullWidth>
+        <StyledFormControl fullWidth>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <StyledFormLabel>{t('calcCalculationMode')}</StyledFormLabel>
             </Grid>
-            <Grid item xs={12} sm={8}>
+            <Grid size={{ xs: 12, sm: 8 }}>
               <RadioGroup
                 row
                 name="displayMode"
@@ -80,10 +80,10 @@ const ModeComponent: React.FC<ModeComponentProps> = ({
           <>
             <StyledFormControl fullWidth>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <StyledFormLabel>{t('calcRangeCardStart')}</StyledFormLabel>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid size={{ xs: 12, sm: 8 }}>
                   <MeasurementInput
                     value={{ value: rangeCardSettings.start, unit: rangeCardSettings.unit }}
                     onChange={(newMeasurement) => {
@@ -97,7 +97,7 @@ const ModeComponent: React.FC<ModeComponentProps> = ({
                       { value: 'METERS', label: t('unitMeters') },
                       { value: 'FEET', label: t('unitFeet') }
                     ]}
-                    label={null}
+                    label=""
                     inputProps={{
                       min: 0,
                       step: 1
@@ -109,10 +109,10 @@ const ModeComponent: React.FC<ModeComponentProps> = ({
             </StyledFormControl>
             <StyledFormControl fullWidth>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <StyledFormLabel>{t('calcRangeCardStep')}</StyledFormLabel>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid size={{ xs: 12, sm: 8 }}>
                   <MeasurementInput
                     value={{ value: rangeCardSettings.step, unit: rangeCardSettings.unit }}
                     onChange={(newMeasurement) => {
@@ -127,7 +127,7 @@ const ModeComponent: React.FC<ModeComponentProps> = ({
                       { value: 'METERS', label: t('unitMeters') },
                       { value: 'FEET', label: t('unitFeet') }
                     ]}
-                    label={null}
+                    label=""
                     inputProps={{
                       min: 1,
                       step: 1
