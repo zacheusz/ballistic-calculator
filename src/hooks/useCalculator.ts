@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import useBallisticsStore from '../stores/useBallisticsStore';
 import apiModule from '../services/api';
 import { SolutionCardResponse, Solution } from '../types/apiTypes';
-import { BallisticsRequest, WindSegment } from '../types/ballistics';
+import { BallisticsRequest, WindSegment, Preferences } from '../types/ballistics';
 import { Unit } from '../types/ballistics';
 
 // Re-export Solution type for convenience
@@ -193,11 +193,23 @@ export const useCalculator = () => {
         console.log('- Range card start:', JSON.stringify(requestData.preferences.rangeCardStart));
         console.log('- Range card step:', JSON.stringify(requestData.preferences.rangeCardStep));
       } else {
-        // HUD mode - use base request data
-        requestData = baseRequestData;
+        // HUD mode - exclude range card settings from preferences
+        const hudPreferences: Omit<Preferences, 'rangeCardStart' | 'rangeCardStep'> = {
+          calculateSpinDrift: baseRequestData.preferences.calculateSpinDrift,
+          calculateCoriolisEffect: baseRequestData.preferences.calculateCoriolisEffect,
+          calculateAeroJump: baseRequestData.preferences.calculateAeroJump,
+          unitPreferences: baseRequestData.preferences.unitPreferences,
+          interpolateRange: baseRequestData.preferences.interpolateRange
+        };
+        
+        requestData = {
+          ...baseRequestData,
+          preferences: hudPreferences as Preferences
+        };
         
         console.log('HUD mode request:');
         console.log('- Shot range:', JSON.stringify(requestData.shot.range));
+        console.log('- Range card settings excluded from preferences');
       }
 
       // Call API with optional logging parameter
