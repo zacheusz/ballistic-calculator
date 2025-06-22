@@ -95,6 +95,15 @@ const CalculatorPage: React.FC = () => {
   const shot = currentState.shot;
   const preferences = currentState.preferences;
   
+  // Subscribe only to wind segments length to trigger re-renders when segments are added/removed
+  // This is a minimal subscription that doesn't cause re-renders on other shot changes
+  const windSegmentsLength = useBallisticsStore(state => state.shot.windSegments.length);
+  
+  // Force a fresh state read when wind segments length changes
+  const freshShot = windSegmentsLength !== shot.windSegments.length 
+    ? useBallisticsStore.getState().shot 
+    : shot;
+  
   // Extract calculation options from preferences
   const calculationOptions = preferences || {};
   
@@ -196,7 +205,7 @@ const CalculatorPage: React.FC = () => {
               {/* Right column for Shot component */}
               <Box sx={{ width: { xs: '100%', md: '50%' } }}>
                 <ShotComponent
-                  values={{ shot }}
+                  values={{ shot: freshShot }}
                   handleBlur={handleBlur}
                   handleShotChange={handleShotMeasurementChange}
                   loading={loading}

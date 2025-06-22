@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { BallisticsState } from '../types/ballistics';
 import { getDefaultConfig, toApiRequest, mergeWithDefaults } from '../utils/ballisticsUtils';
+import type { WindSegment } from '../types/ballistics';
 
 // Storage key for the ballistics store
 const STORAGE_KEY = 'ballistics-store-v3';
@@ -49,12 +50,33 @@ const useBallisticsStore = create<BallisticsState>()(
           
         updateWindSegment: (index, updates) =>
           set((state) => {
-            const windSegments = [...state.shot.windSegments];
-            if (index >= 0 && index < windSegments.length) {
-              windSegments[index] = mergeWithDefaults(windSegments[index], updates);
-              return { shot: { ...state.shot, windSegments } };
+            const newWindSegments = [...state.shot.windSegments];
+            if (index >= 0 && index < newWindSegments.length) {
+              newWindSegments[index] = mergeWithDefaults(newWindSegments[index], updates);
             }
-            return {};
+            return {
+              shot: { ...state.shot, windSegments: newWindSegments },
+            };
+          }),
+
+        addWindSegment: (segment: WindSegment) =>
+          set((state) => ({
+            shot: {
+              ...state.shot,
+              windSegments: [...state.shot.windSegments, segment],
+            },
+          })),
+
+        removeWindSegment: (index: number) =>
+          set((state) => {
+            if (index >= 0 && index < state.shot.windSegments.length) {
+              const newSegments = [...state.shot.windSegments];
+              newSegments.splice(index, 1);
+              return {
+                shot: { ...state.shot, windSegments: newSegments },
+              };
+            }
+            return state;
           }),
           
         resetToDefault: () => {

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import useBallisticsStore from '../stores/useBallisticsStore';
 import apiModule from '../services/api';
 import { SolutionCardResponse, Solution } from '../types/apiTypes';
-import { BallisticsRequest, WindSegment, Preferences } from '../types/ballistics';
+import { BallisticsRequest, Preferences } from '../types/ballistics';
 import { Unit } from '../types/ballistics';
 
 // Re-export Solution type for convenience
@@ -42,29 +42,12 @@ export interface TouchedFields {
  * while leveraging the shared ballistics store for domain data
  */
 export const useCalculator = () => {
-  // Get store actions directly WITHOUT subscribing (using getState approach)
-  const store = useBallisticsStore.getState();
-  const updateAtmosphere = store.updateAtmosphere;
-  const updateShot = store.updateShot;
-  const updateWindSegment = store.updateWindSegment;
-
-  // Helper to add a new wind segment
-  const addWindSegment = useCallback((segment: WindSegment) => {
-    // Get current wind segments and add the new one
-    const currentSegments = useBallisticsStore.getState().shot.windSegments;
-    updateShot({ windSegments: [...currentSegments, segment] });
-  }, [updateShot]);
-
-  // Helper to remove a wind segment by index
-  const removeWindSegment = useCallback((index: number) => {
-    // Get current wind segments and remove the specified one
-    const currentSegments = useBallisticsStore.getState().shot.windSegments;
-    if (index >= 0 && index < currentSegments.length) {
-      const newSegments = [...currentSegments];
-      newSegments.splice(index, 1);
-      updateShot({ windSegments: newSegments });
-    }
-  }, [updateShot]);
+  // Get store actions directly
+  const updateAtmosphere = useBallisticsStore(state => state.updateAtmosphere);
+  const updateShot = useBallisticsStore(state => state.updateShot);
+  const updateWindSegment = useBallisticsStore(state => state.updateWindSegment);
+  const addWindSegment = useBallisticsStore(state => state.addWindSegment);
+  const removeWindSegment = useBallisticsStore(state => state.removeWindSegment);
 
   // Get values without subscribing - use getState() snapshots
   const getCurrentRangeValue = useCallback(() => {
@@ -95,7 +78,7 @@ export const useCalculator = () => {
       ...prev,
       unit: shotRangeUnit as Unit
     }));
-  }, []);
+  }, [getCurrentShotRangeUnit]);
 
   // Form validation state
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -111,7 +94,7 @@ export const useCalculator = () => {
     setRangeCardSettings(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  // Validate form fields - use memoized rangeValue to stabilize dependencies
+  // Validate form fields
   const validateForm = useCallback(() => {
     const newErrors: ValidationErrors = {};
     
@@ -127,7 +110,7 @@ export const useCalculator = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, []);
+  }, [getCurrentRangeValue]);
 
   // Handle field blur
   const handleBlur = useCallback((e: React.FocusEvent<any>) => {

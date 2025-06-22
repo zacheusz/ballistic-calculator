@@ -559,6 +559,8 @@ export interface BallisticsState {
   updateShot: (updates: Partial<Shot>) => void;
   updatePreferences: (updates: Partial<Preferences>) => void;
   updateWindSegment: (index: number, updates: Partial<WindSegment>) => void;
+  addWindSegment: (segment: WindSegment) => void;
+  removeWindSegment: (index: number) => void;
   resetToDefault: () => void;
   toApiRequest: () => BallisticsRequest;
 }
