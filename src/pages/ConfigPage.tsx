@@ -112,9 +112,7 @@ const ConfigPage: React.FC = () => {
   // API key update handler
   const handleApiKeyChange = useCallback((value: string) => {
     setInputApiKey(value);
-    if (value.trim()) {
-      setApiKey(value.trim());
-    }
+    setApiKey(value.trim());
   }, [setApiKey]);
   
   // Environment change handler
