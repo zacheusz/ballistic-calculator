@@ -46,6 +46,7 @@ const BallisticsResultsGrid: React.FC<BallisticsResultsGridProps> = ({ results, 
       { field: 'spinDrift', headerName: headerWithUnit('Spin Drift', first.spinDrift, 'ScopeAdjustment'), width: 120, type: 'number' as const },
       { field: 'wind', headerName: headerWithUnit('Wind Drift', first.wind, 'ScopeAdjustment'), width: 120, type: 'number' as const },
       { field: 'aeroJump', headerName: headerWithUnit('Aero Jump', first.aeroJump, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'corioJump', headerName: headerWithUnit('Coriolis Jump', first.corioJump, 'ScopeAdjustment'), width: 120, type: 'number' as const },
     ];
   }, [results, extractUnitOrPref]);
 
@@ -73,6 +74,7 @@ const BallisticsResultsGrid: React.FC<BallisticsResultsGridProps> = ({ results, 
       spinDrift: formatNumber(extractValue(result.spinDrift)),
       wind: formatNumber(extractValue(result.wind)),
       aeroJump: formatNumber(extractValue(result.aeroJump)),
+      corioJump: formatNumber(extractValue(result.corioJump)),
     }));
   }, [results]);
 

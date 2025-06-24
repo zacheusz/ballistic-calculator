@@ -174,5 +174,6 @@
   "currentValues": "Aktualne wartości",
   "distance": "Dystans",
   "velocity": "Prędkość",
+  "coriolisJump": "Skok Coriolisa",
   "settingsAutoSaved": "Ustawienia są zapisywane automatycznie"
 }

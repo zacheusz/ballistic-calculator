@@ -39,6 +39,8 @@ export interface Solution {
   wind: ScopeAdjustmentMeasurement;
   /** Vertical deflection caused by crosswind acting on a spinning bullet */
   aeroJump: ScopeAdjustmentMeasurement;
+  /** Vertical deflection due to Earth's rotation affecting apparent gravity */
+  corioJump: ScopeAdjustmentMeasurement;
 }
 
 /**

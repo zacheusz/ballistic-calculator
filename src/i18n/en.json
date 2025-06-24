@@ -174,5 +174,7 @@
   "currentValues": "Current Values",
   "distance": "Distance",
   "velocity": "Velocity",
-  "settingsAutoSaved": "Settings are automatically saved"
+  "coriolisJump": "Coriolis Jump",
+  "settingsAutoSaved": "Settings are automatically saved",
+  "addWindSegment": "Add Wind Segment"
 }
