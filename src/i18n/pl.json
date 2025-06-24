@@ -175,5 +175,20 @@
   "distance": "Dystans",
   "velocity": "Prędkość",
   "coriolisJump": "Skok Coriolisa",
-  "settingsAutoSaved": "Ustawienia są zapisywane automatycznie"
+  "settingsAutoSaved": "Ustawienia są zapisywane automatycznie",
+  "resultsRange": "Zasięg",
+  "resultsWindageAdj": "Korekta Boczna",
+  "resultsElevation": "Elewacja",
+  "resultsTime": "Czas lotu",
+  "resultsEnergy": "Energia",
+  "resultsVelocity": "Prędkość",
+  "resultsMach": "Mach",
+  "resultsDrop": "Opad",
+  "resultsCoriolis": "Dryf Coriolisa",
+  "resultsLead": "Wyprzedzenie",
+  "resultsSpinDrift": "Dryf Obrotu",
+  "resultsWindDrift": "Dryf Wiatru",
+  "resultsAeroJump": "Skok Aerodynamiczny",
+  "resultsCoriolisJump": "Skok Coriolisa",
+  "calcError": "Błąd obliczeń"
 }

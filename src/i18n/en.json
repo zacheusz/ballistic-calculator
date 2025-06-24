@@ -176,5 +176,20 @@
   "velocity": "Velocity",
   "coriolisJump": "Coriolis Jump",
   "settingsAutoSaved": "Settings are automatically saved",
-  "addWindSegment": "Add Wind Segment"
+  "resultsRange": "Range",
+  "resultsWindageAdj": "Windage Adj",
+  "resultsElevation": "Elevation",
+  "resultsTime": "Time",
+  "resultsEnergy": "Energy",
+  "resultsVelocity": "Velocity",
+  "resultsMach": "Mach",
+  "resultsDrop": "Drop",
+  "resultsCoriolis": "Coriolis",
+  "resultsLead": "Lead",
+  "resultsSpinDrift": "Spin Drift",
+  "resultsWindDrift": "Wind Drift",
+  "resultsAeroJump": "Aero Jump",
+  "resultsCoriolisJump": "Coriolis Jump",
+  "addWindSegment": "Add Wind Segment",
+  "calcError": "Calculation Error"
 }

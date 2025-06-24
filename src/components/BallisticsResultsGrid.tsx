@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { useTranslation } from 'react-i18next';
 import { useAppConfigStore } from '../stores/useAppConfigStore';
 import { Solution } from '../types/apiTypes';
 
@@ -17,6 +18,7 @@ interface BallisticsResultsGridProps {
  */
 const BallisticsResultsGrid: React.FC<BallisticsResultsGridProps> = ({ results, unitPreferences = {} }) => {
   const { theme } = useAppConfigStore();
+  const { t } = useTranslation();
 
   // Helper to extract unit from object fields, fallback to unitPreferences
   const extractUnitOrPref = useCallback((field: any, prefKey?: string): string => {
@@ -33,22 +35,22 @@ const BallisticsResultsGrid: React.FC<BallisticsResultsGridProps> = ({ results, 
       return unit ? `${label} (${unit})` : label;
     }
     return [
-      { field: 'range', headerName: headerWithUnit('Range', first.range, 'Range'), width: 120, type: 'number' as const },
-      { field: 'horizontalAdjustment', headerName: headerWithUnit('Windage Adj', first.horizontalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' as const },
-      { field: 'verticalAdjustment', headerName: headerWithUnit('Elevation', first.verticalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' as const },
-      { field: 'time', headerName: headerWithUnit('Time', undefined, 'TimeOfFlight'), width: 100, type: 'number' as const },
-      { field: 'energy', headerName: headerWithUnit('Energy', first.energy, 'BulletEnergy'), width: 120, type: 'number' as const },
-      { field: 'velocity', headerName: headerWithUnit('Velocity', first.velocity, 'BulletVelocity'), width: 120, type: 'number' as const },
-      { field: 'mach', headerName: 'Mach', width: 100, type: 'number' as const },
-      { field: 'drop', headerName: headerWithUnit('Drop', first.drop, 'ScopeAdjustment'), width: 120, type: 'number' as const },
-      { field: 'coroDrift', headerName: headerWithUnit('Coriolis', first.coroDrift, 'ScopeAdjustment'), width: 120, type: 'number' as const },
-      { field: 'lead', headerName: headerWithUnit('Lead', first.lead, 'ScopeAdjustment'), width: 100, type: 'number' as const },
-      { field: 'spinDrift', headerName: headerWithUnit('Spin Drift', first.spinDrift, 'ScopeAdjustment'), width: 120, type: 'number' as const },
-      { field: 'wind', headerName: headerWithUnit('Wind Drift', first.wind, 'ScopeAdjustment'), width: 120, type: 'number' as const },
-      { field: 'aeroJump', headerName: headerWithUnit('Aero Jump', first.aeroJump, 'ScopeAdjustment'), width: 120, type: 'number' as const },
-      { field: 'corioJump', headerName: headerWithUnit('Coriolis Jump', first.corioJump, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'range', headerName: headerWithUnit(t('resultsRange'), first.range, 'Range'), width: 120, type: 'number' as const },
+      { field: 'horizontalAdjustment', headerName: headerWithUnit(t('resultsWindageAdj'), first.horizontalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'verticalAdjustment', headerName: headerWithUnit(t('resultsElevation'), first.verticalAdjustment, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'time', headerName: headerWithUnit(t('resultsTime'), undefined, 'TimeOfFlight'), width: 100, type: 'number' as const },
+      { field: 'energy', headerName: headerWithUnit(t('resultsEnergy'), first.energy, 'BulletEnergy'), width: 120, type: 'number' as const },
+      { field: 'velocity', headerName: headerWithUnit(t('resultsVelocity'), first.velocity, 'BulletVelocity'), width: 120, type: 'number' as const },
+      { field: 'mach', headerName: t('resultsMach'), width: 100, type: 'number' as const },
+      { field: 'drop', headerName: headerWithUnit(t('resultsDrop'), first.drop, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'coroDrift', headerName: headerWithUnit(t('resultsCoriolis'), first.coroDrift, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'lead', headerName: headerWithUnit(t('resultsLead'), first.lead, 'ScopeAdjustment'), width: 100, type: 'number' as const },
+      { field: 'spinDrift', headerName: headerWithUnit(t('resultsSpinDrift'), first.spinDrift, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'wind', headerName: headerWithUnit(t('resultsWindDrift'), first.wind, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'aeroJump', headerName: headerWithUnit(t('resultsAeroJump'), first.aeroJump, 'ScopeAdjustment'), width: 120, type: 'number' as const },
+      { field: 'corioJump', headerName: headerWithUnit(t('resultsCoriolisJump'), first.corioJump, 'ScopeAdjustment'), width: 120, type: 'number' as const },
     ];
-  }, [results, extractUnitOrPref]);
+  }, [results, extractUnitOrPref, t]);
 
   // Helper to extract .value from object fields or return primitive if number
   const extractValue = (field: any): number | undefined => {
