@@ -1,8 +1,9 @@
-import { 
+import {
   RangeMeasurement,
   ScopeAdjustmentMeasurement,
   BulletEnergyMeasurement,
-  BulletVelocityMeasurement
+  BulletVelocityMeasurement,
+  TimeOfFlightMeasurement
 } from './ballistics';
 
 /**
@@ -19,8 +20,8 @@ export interface Solution {
   horizontalAdjustment: ScopeAdjustmentMeasurement;
   /** Scope/sight adjustment to counteract drop and other vertical deviations */
   verticalAdjustment: ScopeAdjustmentMeasurement;
-  /** Time of flight in seconds from muzzle to current range */
-  time: number;
+  /** Time of flight from muzzle to current range */
+  time: TimeOfFlightMeasurement;
   /** Bullet's kinetic energy */
   energy: BulletEnergyMeasurement;
   /** Total bullet velocity */
