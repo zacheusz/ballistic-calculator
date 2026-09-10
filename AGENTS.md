@@ -62,6 +62,12 @@ Before preparing a commit:
 After a file rename or removal, update every reference: imports/exports, other
 code, tests, and documentation. Leave no dangling reference.
 
+## Backlog
+
+Known issues and deferred work are tracked in [BACKLOG.md](BACKLOG.md). Check it
+before starting related work, and update the relevant item's status (or add a
+new one) as part of the change that touches it.
+
 ## Commit message format
 
 Commit messages use Gitmoji:
