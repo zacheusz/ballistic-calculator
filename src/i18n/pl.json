@@ -43,12 +43,14 @@
   "calcAbsolutePressure": "Ciśnienie absolutne",
   "calcHumidity": "Wilgotność (%)",
   "calcDensityModel": "Model gęstości powietrza",
-  "densityModelCipm2007": "CIPM-2007 (zalecany)",
-  "densityModelPartialPressure": "Gaz doskonały (ciśnienia cząstkowe)",
+  "densityModelAshraeIdealGas": "Gaz doskonały ASHRAE (zalecany)",
+  "densityModelCipm2007": "CIPM-2007 (15–27 °C)",
+  "densityModelPartialPressure": "Prosty gaz doskonały (starszy)",
   "densityModelMcCoyIdealGas": "Gaz doskonały McCoya (historyczny)",
   "densityModelHelp": {
-    "CIPM_2007": "Domyślny model oparty na standardzie. Podany zakres równań to 600–1100 hPa i 15–27 °C.",
-    "PARTIAL_PRESSURE": "Prosty model gazu doskonałego, gdy nie chcesz ekstrapolować CIPM poza jego podany zakres.",
+    "ASHRAE_IDEAL_GAS": "Domyślny model z równaniami ciśnienia nasycenia zależnymi od fazy, udokumentowanymi od -100 do 200 °C.",
+    "CIPM_2007": "Model metrologiczny gazu niedoskonałego zalecany tylko dla 600–1100 hPa i 15–27 °C.",
+    "PARTIAL_PRESSURE": "Wcześniejsze, proste przybliżenie gazu doskonałego Magnusa-Tetensa.",
     "MCCOY_IDEAL_GAS": "Historyczne obliczenie Snipe zachowane wyłącznie do odtwarzania wcześniejszych wyników."
   },
   "calcAltitude": "Wysokość n.p.m.",

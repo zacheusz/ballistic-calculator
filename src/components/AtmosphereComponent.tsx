@@ -163,7 +163,7 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
           <StyledFormLabel>{t('calcDensityModel')}</StyledFormLabel>
           <Select
             name="atmosphere.densityModel"
-            value={values.atmosphere.densityModel ?? 'CIPM_2007'}
+            value={values.atmosphere.densityModel ?? 'ASHRAE_IDEAL_GAS'}
             onChange={(e) => {
               handleAtmosphereSimpleChange('densityModel', e.target.value);
             }}
@@ -172,12 +172,13 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
             fullWidth
             disabled={loading}
           >
+            <MenuItem value="ASHRAE_IDEAL_GAS">{t('densityModelAshraeIdealGas')}</MenuItem>
             <MenuItem value="CIPM_2007">{t('densityModelCipm2007')}</MenuItem>
             <MenuItem value="PARTIAL_PRESSURE">{t('densityModelPartialPressure')}</MenuItem>
             <MenuItem value="MCCOY_IDEAL_GAS">{t('densityModelMcCoyIdealGas')}</MenuItem>
           </Select>
           <FormHelperText>
-            {t(`densityModelHelp.${values.atmosphere.densityModel ?? 'CIPM_2007'}`)}
+            {t(`densityModelHelp.${values.atmosphere.densityModel ?? 'ASHRAE_IDEAL_GAS'}`)}
           </FormHelperText>
         </StyledFormControl>
 

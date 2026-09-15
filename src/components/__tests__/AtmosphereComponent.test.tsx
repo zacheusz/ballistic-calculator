@@ -38,7 +38,7 @@ describe('AtmosphereComponent', () => {
         pressure: { value: 29.92, unit: 'INCHES_MERCURY' },
         pressureType: 'STATION',
         humidity: 50,
-        densityModel: 'CIPM_2007',
+        densityModel: 'ASHRAE_IDEAL_GAS',
         altitude: { value: 0, unit: 'FEET' }
       }
     },
@@ -77,7 +77,7 @@ describe('AtmosphereComponent', () => {
     expect(screen.getByDisplayValue('50')).toBeInTheDocument();
 
     // Check that the standards-based density model is selected by default
-    expect(screen.getByText('densityModelCipm2007')).toBeInTheDocument();
+    expect(screen.getByText('densityModelAshraeIdealGas')).toBeInTheDocument();
     
     // Check that altitude field is rendered with correct value
     expect(screen.getByDisplayValue('0')).toBeInTheDocument();
@@ -168,16 +168,16 @@ describe('AtmosphereComponent', () => {
     render(<AtmosphereComponent {...defaultProps} />);
 
     const densityModelSelect = screen.getAllByRole('combobox').find(select =>
-      select.textContent?.includes('densityModelCipm2007')
+      select.textContent?.includes('densityModelAshraeIdealGas')
     );
     expect(densityModelSelect).toBeDefined();
 
     fireEvent.mouseDown(densityModelSelect as HTMLElement);
-    fireEvent.click(screen.getByText('densityModelPartialPressure'));
+    fireEvent.click(screen.getByText('densityModelCipm2007'));
 
     expect(defaultProps.handleAtmosphereSimpleChange).toHaveBeenCalledWith(
       'densityModel',
-      'PARTIAL_PRESSURE'
+      'CIPM_2007'
     );
   });
 

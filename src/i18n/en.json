@@ -43,12 +43,14 @@
   "calcAbsolutePressure": "Absolute Pressure",
   "calcHumidity": "Humidity (%)",
   "calcDensityModel": "Air-density model",
-  "densityModelCipm2007": "CIPM-2007 (recommended)",
-  "densityModelPartialPressure": "Ideal gas (partial pressures)",
+  "densityModelAshraeIdealGas": "ASHRAE ideal gas (recommended)",
+  "densityModelCipm2007": "CIPM-2007 (15–27 °C)",
+  "densityModelPartialPressure": "Simple ideal gas (legacy)",
   "densityModelMcCoyIdealGas": "McCoy ideal gas (historical)",
   "densityModelHelp": {
-    "CIPM_2007": "Standards-based default. Its fitted equations state a range of 600–1100 hPa and 15–27 °C.",
-    "PARTIAL_PRESSURE": "Simple ideal-gas fallback when you prefer not to extrapolate CIPM beyond its fitted range.",
+    "ASHRAE_IDEAL_GAS": "Default phase-aware model, with saturation-pressure equations documented from -100 to 200 °C.",
+    "CIPM_2007": "Non-ideal metrology model recommended only from 600–1100 hPa and 15–27 °C.",
+    "PARTIAL_PRESSURE": "Earlier simple Magnus-Tetens ideal-gas approximation.",
     "MCCOY_IDEAL_GAS": "Historical Snipe calculation retained only for reproducing earlier results."
   },
   "calcAltitude": "Altitude",

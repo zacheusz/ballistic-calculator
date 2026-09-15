@@ -12,11 +12,11 @@ describe('useBallisticsStore atmosphere density model', () => {
     });
   });
 
-  it('uses and serializes the explicit CIPM-2007 default', () => {
+  it('uses and serializes the explicit ASHRAE ideal-gas default', () => {
     const state = useBallisticsStore.getState();
 
-    expect(state.atmosphere.densityModel).toBe('CIPM_2007');
-    expect(state.toApiRequest().atmosphere.densityModel).toBe('CIPM_2007');
+    expect(state.atmosphere.densityModel).toBe('ASHRAE_IDEAL_GAS');
+    expect(state.toApiRequest().atmosphere.densityModel).toBe('ASHRAE_IDEAL_GAS');
   });
 
   it('serializes a selected density model without changing other atmosphere fields', () => {
@@ -41,7 +41,7 @@ describe('useBallisticsStore atmosphere density model', () => {
     });
 
     expect(useBallisticsStore.getState().toApiRequest().zeroAtmosphere?.densityModel)
-      .toBe('CIPM_2007');
+      .toBe('ASHRAE_IDEAL_GAS');
   });
 
   it('persists an explicit density-model selection', () => {
@@ -53,7 +53,7 @@ describe('useBallisticsStore atmosphere density model', () => {
     expect(stored.state.atmosphere.densityModel).toBe('MCCOY_IDEAL_GAS');
   });
 
-  it('hydrates a pre-density-model atmosphere with the CIPM-2007 default', async () => {
+  it('hydrates a pre-density-model atmosphere with the ASHRAE ideal-gas default', async () => {
     const legacyAtmosphere = { ...getDefaultConfig().atmosphere };
     delete legacyAtmosphere.densityModel;
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -68,7 +68,7 @@ describe('useBallisticsStore atmosphere density model', () => {
       await useBallisticsStore.persist.rehydrate();
     });
 
-    expect(useBallisticsStore.getState().atmosphere.densityModel).toBe('CIPM_2007');
-    expect(useBallisticsStore.getState().zeroAtmosphere?.densityModel).toBe('CIPM_2007');
+    expect(useBallisticsStore.getState().atmosphere.densityModel).toBe('ASHRAE_IDEAL_GAS');
+    expect(useBallisticsStore.getState().zeroAtmosphere?.densityModel).toBe('ASHRAE_IDEAL_GAS');
   });
 });

@@ -327,7 +327,11 @@ export interface Ammo {
  * Atmospheric conditions specification for ballistic calculations
  * @remarks Matches the Atmosphere schema in the OpenAPI spec
  */
-export type DensityModel = 'CIPM_2007' | 'PARTIAL_PRESSURE' | 'MCCOY_IDEAL_GAS';
+export type DensityModel =
+  | 'ASHRAE_IDEAL_GAS'
+  | 'CIPM_2007'
+  | 'PARTIAL_PRESSURE'
+  | 'MCCOY_IDEAL_GAS';
 
 export interface Atmosphere {
   /** Ambient temperature */
@@ -338,7 +342,7 @@ export interface Atmosphere {
   pressureType: 'STATION' | 'ABSOLUTE';
   /** Relative humidity (0-100%) */
   humidity: number;
-  /** Equation used to calculate station density; the API defaults to CIPM_2007 when omitted */
+  /** Equation used to calculate station density; the API defaults to ASHRAE_IDEAL_GAS when omitted */
   densityModel?: DensityModel;
   /** Altitude above sea level */
   altitude: AltitudeMeasurement;

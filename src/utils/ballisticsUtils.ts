@@ -49,7 +49,7 @@ export const defaultAtmosphere: Atmosphere = {
   humidity: 50.0,
   // Keep the API default explicit so saved calculations remain reproducible if
   // the server default ever changes.
-  densityModel: 'CIPM_2007',
+  densityModel: 'ASHRAE_IDEAL_GAS',
   altitude: createMeasurement(0.0, 'FEET'),
 };
 
@@ -99,11 +99,11 @@ const deepClone = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-// Although the API also defaults an omitted value to CIPM-2007, writing the
+// Although the API also defaults an omitted value to ASHRAE ideal gas, writing the
 // choice into every request makes saved and replayed calculations unambiguous.
 const withExplicitDensityModel = (atmosphere: Atmosphere): Atmosphere => ({
   ...deepClone(atmosphere),
-  densityModel: atmosphere.densityModel ?? 'CIPM_2007',
+  densityModel: atmosphere.densityModel ?? 'ASHRAE_IDEAL_GAS',
 });
 
 // Function to load default configuration
