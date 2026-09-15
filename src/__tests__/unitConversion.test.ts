@@ -53,6 +53,21 @@ describe('Unit Conversion Utilities', () => {
       it('should convert miles per hour to kilometers per hour correctly', () => {
         expect(convertUnit(60, 'MILES_PER_HOUR', 'KILOMETERS_PER_HOUR')).toBeCloseTo(96.56, 2);
       });
+
+      it('converts velocity-per-temperature units using interval scaling', () => {
+        const metricValue = convertUnit(
+          1.5,
+          'FEET_PER_SECOND_PER_FAHRENHEIT',
+          'METERS_PER_SECOND_PER_CELSIUS'
+        );
+
+        expect(metricValue).toBeCloseTo(0.82296, 12);
+        expect(convertUnit(
+          metricValue,
+          'METERS_PER_SECOND_PER_CELSIUS',
+          'FEET_PER_SECOND_PER_FAHRENHEIT'
+        )).toBeCloseTo(1.5, 12);
+      });
     });
 
     describe('Pressure conversions', () => {

@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { BallisticsState } from '../types/ballistics';
-import { getDefaultConfig, toApiRequest, mergeWithDefaults } from '../utils/ballisticsUtils';
+import {
+  getDefaultConfig,
+  toApiRequest,
+  mergeWithDefaults,
+  migrateAmmoTemperatureCoefficient,
+} from '../utils/ballisticsUtils';
 import type { WindSegment } from '../types/ballistics';
 
 // Storage key for the ballistics store
@@ -138,7 +143,10 @@ const useBallisticsStore = create<BallisticsState>()(
           ),
           ammo: mergeWithDefaults(
             defaultConfig.ammo,
-            stateToMerge.ammo || {}
+            migrateAmmoTemperatureCoefficient(
+              stateToMerge.ammo || {},
+              stateToMerge.shot?.powderTemp ?? defaultConfig.shot.powderTemp
+            )
           ),
           atmosphere: mergeWithDefaults(
             defaultConfig.atmosphere,

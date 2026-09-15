@@ -12,6 +12,8 @@ export type Unit =
   | 'KILOMETERS_PER_HOUR'
   | 'METERS_PER_SECOND'
   | 'FEET_PER_SECOND'
+  | 'FEET_PER_SECOND_PER_FAHRENHEIT'
+  | 'METERS_PER_SECOND_PER_CELSIUS'
   | 'DEGREES'
   | 'CLOCK'
   | 'MILS'
@@ -187,6 +189,15 @@ export type TargetSpeedMeasurement = Measurement;
  */
 export type BulletVelocityMeasurement = Measurement;
 
+export type VelocityPerTemperatureUnit =
+  | 'FEET_PER_SECOND_PER_FAHRENHEIT'
+  | 'METERS_PER_SECOND_PER_CELSIUS';
+
+/** Muzzle-velocity change per powder-temperature interval. */
+export interface VelocityPerTemperatureMeasurement extends Measurement {
+  unit: VelocityPerTemperatureUnit;
+}
+
 /**
  * Wind direction measurement interface
  * @remarks Matches the WindDirectionMeasurement schema in the OpenAPI spec
@@ -308,8 +319,10 @@ export interface Ammo {
   length: GunParametersMeasurement;
   /** Bullet velocity at muzzle (must be nonzero) */
   muzzleVelocity: BulletVelocityMeasurement;
-  /** Muzzle velocity variation in degrees */
-  muzzleVelVarDeg: number;
+  /** Muzzle-velocity change per powder-temperature interval */
+  muzzleVelocityTemperatureCoefficient: VelocityPerTemperatureMeasurement;
+  /** Powder temperature at which muzzleVelocity was measured */
+  zeroPowderTemp?: TemperatureMeasurement;
   /** Zero range of the ammo */
   zeroRange: RangeMeasurement;
   /** Ballistic coefficients for the bullet (required for G1 and G7, not required for CDM) */

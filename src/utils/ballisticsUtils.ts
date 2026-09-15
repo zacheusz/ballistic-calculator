@@ -2,7 +2,10 @@ import { BallisticsRequest, FirearmProfile, Ammo, Atmosphere, Shot, Preferences,
 import defaultConfig from '@/config/default.json';
 
 // Helper function to create a measurement object
-export const createMeasurement = (value: number, unit: Unit): Measurement => ({
+export const createMeasurement = <U extends Unit>(
+  value: number,
+  unit: U
+): Measurement & { unit: U } => ({
   value,
   unit,
 });
@@ -38,7 +41,11 @@ export const defaultAmmo: Ammo = {
   mass: createMeasurement(185.0, 'GRAINS'),
   length: createMeasurement(1.30, 'INCHES'),
   muzzleVelocity: createMeasurement(2510, 'FEET_PER_SECOND'),
-  muzzleVelVarDeg: 0.0,
+  muzzleVelocityTemperatureCoefficient: createMeasurement(
+    0.0,
+    'FEET_PER_SECOND_PER_FAHRENHEIT'
+  ),
+  zeroPowderTemp: createMeasurement(70.0, 'FAHRENHEIT'),
   zeroRange: createMeasurement(100, 'YARDS'),
 };
 
@@ -106,6 +113,40 @@ const withExplicitDensityModel = (atmosphere: Atmosphere): Atmosphere => ({
   densityModel: atmosphere.densityModel ?? 'ASHRAE_IDEAL_GAS',
 });
 
+type LegacyAmmo = Partial<Ammo> & { muzzleVelVarDeg?: unknown };
+
+/**
+ * Converts persisted pre-migration ammunition data to the current API contract.
+ * The removed bare number was always interpreted as fps/°F.
+ */
+export const migrateAmmoTemperatureCoefficient = (
+  ammo: LegacyAmmo,
+  legacyReferenceTemperature?: Ammo['zeroPowderTemp']
+): Partial<Ammo> => {
+  const { muzzleVelVarDeg, ...currentAmmo } = ammo;
+  if (currentAmmo.muzzleVelocityTemperatureCoefficient) {
+    return currentAmmo;
+  }
+
+  const legacyValue = typeof muzzleVelVarDeg === 'number'
+    && Number.isFinite(muzzleVelVarDeg)
+    && muzzleVelVarDeg >= 0
+    ? muzzleVelVarDeg
+    : 0.0;
+
+  return {
+    ...currentAmmo,
+    muzzleVelocityTemperatureCoefficient: createMeasurement(
+      legacyValue,
+      'FEET_PER_SECOND_PER_FAHRENHEIT'
+    ),
+    // Legacy UI profiles had no reference-temperature control. Using the
+    // persisted shot temperature preserves their current solved velocity while
+    // establishing an explicit baseline for future edits.
+    zeroPowderTemp: currentAmmo.zeroPowderTemp ?? legacyReferenceTemperature,
+  };
+};
+
 // Function to load default configuration
 export const getDefaultConfig = (): BallisticsRequest => {
   // Use values from default.json as the primary source
@@ -117,7 +158,9 @@ export const getDefaultConfig = (): BallisticsRequest => {
     }),
     ammo: deepClone({
       ...defaultAmmo,
-      ...((defaultConfig.ammo || {}) as Partial<Ammo>)
+      ...migrateAmmoTemperatureCoefficient(
+        (defaultConfig.ammo || {}) as LegacyAmmo
+      )
     }),
     atmosphere: deepClone({
       ...defaultAtmosphere,
@@ -173,7 +216,7 @@ export const toApiRequest = (state: {
 }): BallisticsRequest => {
   const request: BallisticsRequest = {
     firearmProfile: deepClone(state.firearmProfile),
-    ammo: deepClone(state.ammo),
+    ammo: deepClone(migrateAmmoTemperatureCoefficient(state.ammo) as Ammo),
     atmosphere: withExplicitDensityModel(state.atmosphere),
     shot: deepClone(state.shot),
     preferences: deepClone(state.preferences),

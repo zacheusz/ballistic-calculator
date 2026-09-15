@@ -28,7 +28,11 @@
     "mass": { "value": 185.0, "unit": "GRAINS" },
     "length": { "value": 1.30, "unit": "INCHES" },
     "muzzleVelocity": { "value": 2510, "unit": "FEET_PER_SECOND" },
-    "muzzleVelVarDeg": 0.0,
+    "muzzleVelocityTemperatureCoefficient": {
+      "value": 0.0,
+      "unit": "FEET_PER_SECOND_PER_FAHRENHEIT"
+    },
+    "zeroPowderTemp": { "value": 70.0, "unit": "FAHRENHEIT" },
     "zeroRange": { "value": 100, "unit": "YARDS" },
     "ballisticCoefficients": []
   },

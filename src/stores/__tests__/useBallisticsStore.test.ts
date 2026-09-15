@@ -71,4 +71,56 @@ describe('useBallisticsStore atmosphere density model', () => {
     expect(useBallisticsStore.getState().atmosphere.densityModel).toBe('ASHRAE_IDEAL_GAS');
     expect(useBallisticsStore.getState().zeroAtmosphere?.densityModel).toBe('ASHRAE_IDEAL_GAS');
   });
+
+  it('migrates a persisted bare powder-temperature coefficient from fps/°F', async () => {
+    const {
+      muzzleVelocityTemperatureCoefficient: _currentCoefficient,
+      zeroPowderTemp: _currentReferenceTemperature,
+      ...legacyAmmo
+    } = getDefaultConfig().ammo;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      state: {
+        ammo: {
+          ...legacyAmmo,
+          muzzleVelVarDeg: 1.5,
+        },
+        shot: {
+          ...getDefaultConfig().shot,
+          powderTemp: { value: 12, unit: 'CELSIUS' },
+        },
+      },
+      version: 0,
+    }));
+
+    await act(async () => {
+      await useBallisticsStore.persist.rehydrate();
+    });
+
+    const state = useBallisticsStore.getState();
+    expect(state.ammo.muzzleVelocityTemperatureCoefficient).toEqual({
+      value: 1.5,
+      unit: 'FEET_PER_SECOND_PER_FAHRENHEIT',
+    });
+    expect(state.ammo.zeroPowderTemp).toEqual({ value: 12, unit: 'CELSIUS' });
+    expect(state.toApiRequest().ammo).not.toHaveProperty('muzzleVelVarDeg');
+  });
+
+  it('serializes a metric powder-temperature coefficient without changing its unit', () => {
+    act(() => {
+      useBallisticsStore.getState().updateAmmo({
+        muzzleVelocityTemperatureCoefficient: {
+          value: 0.82296,
+          unit: 'METERS_PER_SECOND_PER_CELSIUS',
+        },
+        zeroPowderTemp: { value: 20, unit: 'CELSIUS' },
+      });
+    });
+
+    const ammo = useBallisticsStore.getState().toApiRequest().ammo;
+    expect(ammo.muzzleVelocityTemperatureCoefficient).toEqual({
+      value: 0.82296,
+      unit: 'METERS_PER_SECOND_PER_CELSIUS',
+    });
+    expect(ammo.zeroPowderTemp).toEqual({ value: 20, unit: 'CELSIUS' });
+  });
 });
