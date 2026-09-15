@@ -37,6 +37,7 @@
     "pressure": { "value": 30.0, "unit": "INCHES_MERCURY" },
     "pressureType": "STATION",
     "humidity": 50.0,
+    "densityModel": "CIPM_2007",
     "altitude": { "value": 0.0, "unit": "FEET" }
   },
   "shot": {

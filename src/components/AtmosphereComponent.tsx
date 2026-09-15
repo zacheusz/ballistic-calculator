@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardContent,
   FormControl,
+  FormHelperText,
   FormLabel,
   Select,
   MenuItem,
@@ -156,6 +157,28 @@ const AtmosphereComponent: React.FC<AtmosphereComponentProps> = ({
             size="small"
             fullWidth
           />
+        </StyledFormControl>
+
+        <StyledFormControl fullWidth>
+          <StyledFormLabel>{t('calcDensityModel')}</StyledFormLabel>
+          <Select
+            name="atmosphere.densityModel"
+            value={values.atmosphere.densityModel ?? 'CIPM_2007'}
+            onChange={(e) => {
+              handleAtmosphereSimpleChange('densityModel', e.target.value);
+            }}
+            onBlur={handleBlur}
+            size="small"
+            fullWidth
+            disabled={loading}
+          >
+            <MenuItem value="CIPM_2007">{t('densityModelCipm2007')}</MenuItem>
+            <MenuItem value="PARTIAL_PRESSURE">{t('densityModelPartialPressure')}</MenuItem>
+            <MenuItem value="MCCOY_IDEAL_GAS">{t('densityModelMcCoyIdealGas')}</MenuItem>
+          </Select>
+          <FormHelperText>
+            {t(`densityModelHelp.${values.atmosphere.densityModel ?? 'CIPM_2007'}`)}
+          </FormHelperText>
         </StyledFormControl>
 
         <StyledFormControl fullWidth>

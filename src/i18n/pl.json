@@ -42,6 +42,15 @@
   "calcStationPressure": "Ciśnienie stacji",
   "calcAbsolutePressure": "Ciśnienie absolutne",
   "calcHumidity": "Wilgotność (%)",
+  "calcDensityModel": "Model gęstości powietrza",
+  "densityModelCipm2007": "CIPM-2007 (zalecany)",
+  "densityModelPartialPressure": "Gaz doskonały (ciśnienia cząstkowe)",
+  "densityModelMcCoyIdealGas": "Gaz doskonały McCoya (historyczny)",
+  "densityModelHelp": {
+    "CIPM_2007": "Domyślny model oparty na standardzie. Podany zakres równań to 600–1100 hPa i 15–27 °C.",
+    "PARTIAL_PRESSURE": "Prosty model gazu doskonałego, gdy nie chcesz ekstrapolować CIPM poza jego podany zakres.",
+    "MCCOY_IDEAL_GAS": "Historyczne obliczenie Snipe zachowane wyłącznie do odtwarzania wcześniejszych wyników."
+  },
   "calcAltitude": "Wysokość n.p.m.",
   "unitFeet": "Stopy",
   "unitMeters": "Metry",

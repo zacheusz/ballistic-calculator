@@ -47,6 +47,9 @@ export const defaultAtmosphere: Atmosphere = {
   pressure: createMeasurement(30.0, 'INCHES_MERCURY'),
   pressureType: 'STATION',
   humidity: 50.0,
+  // Keep the API default explicit so saved calculations remain reproducible if
+  // the server default ever changes.
+  densityModel: 'CIPM_2007',
   altitude: createMeasurement(0.0, 'FEET'),
 };
 
@@ -95,6 +98,13 @@ export const defaultPreferences: Preferences = {
 const deepClone = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj));
 };
+
+// Although the API also defaults an omitted value to CIPM-2007, writing the
+// choice into every request makes saved and replayed calculations unambiguous.
+const withExplicitDensityModel = (atmosphere: Atmosphere): Atmosphere => ({
+  ...deepClone(atmosphere),
+  densityModel: atmosphere.densityModel ?? 'CIPM_2007',
+});
 
 // Function to load default configuration
 export const getDefaultConfig = (): BallisticsRequest => {
@@ -164,13 +174,13 @@ export const toApiRequest = (state: {
   const request: BallisticsRequest = {
     firearmProfile: deepClone(state.firearmProfile),
     ammo: deepClone(state.ammo),
-    atmosphere: deepClone(state.atmosphere),
+    atmosphere: withExplicitDensityModel(state.atmosphere),
     shot: deepClone(state.shot),
     preferences: deepClone(state.preferences),
   };
 
   if (state.zeroAtmosphere) {
-    request.zeroAtmosphere = deepClone(state.zeroAtmosphere);
+    request.zeroAtmosphere = withExplicitDensityModel(state.zeroAtmosphere);
   }
 
   return request;

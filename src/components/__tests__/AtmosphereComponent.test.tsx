@@ -38,6 +38,7 @@ describe('AtmosphereComponent', () => {
         pressure: { value: 29.92, unit: 'INCHES_MERCURY' },
         pressureType: 'STATION',
         humidity: 50,
+        densityModel: 'CIPM_2007',
         altitude: { value: 0, unit: 'FEET' }
       }
     },
@@ -74,6 +75,9 @@ describe('AtmosphereComponent', () => {
     
     // Check that humidity field is rendered with correct value
     expect(screen.getByDisplayValue('50')).toBeInTheDocument();
+
+    // Check that the standards-based density model is selected by default
+    expect(screen.getByText('densityModelCipm2007')).toBeInTheDocument();
     
     // Check that altitude field is rendered with correct value
     expect(screen.getByDisplayValue('0')).toBeInTheDocument();
@@ -158,6 +162,23 @@ describe('AtmosphereComponent', () => {
     // Check that handleChange and handleAtmosphereSimpleChange were called with the correct values
     expect(defaultProps.handleChange).toHaveBeenCalled();
     expect(defaultProps.handleAtmosphereSimpleChange).toHaveBeenCalledWith('humidity', 60);
+  });
+
+  test('calls handleAtmosphereSimpleChange when density model is changed', () => {
+    render(<AtmosphereComponent {...defaultProps} />);
+
+    const densityModelSelect = screen.getAllByRole('combobox').find(select =>
+      select.textContent?.includes('densityModelCipm2007')
+    );
+    expect(densityModelSelect).toBeDefined();
+
+    fireEvent.mouseDown(densityModelSelect as HTMLElement);
+    fireEvent.click(screen.getByText('densityModelPartialPressure'));
+
+    expect(defaultProps.handleAtmosphereSimpleChange).toHaveBeenCalledWith(
+      'densityModel',
+      'PARTIAL_PRESSURE'
+    );
   });
 
   test('calls handleAtmosphereChange when altitude value is changed', async () => {

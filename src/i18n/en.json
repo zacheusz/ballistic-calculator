@@ -42,6 +42,15 @@
   "calcStationPressure": "Station Pressure",
   "calcAbsolutePressure": "Absolute Pressure",
   "calcHumidity": "Humidity (%)",
+  "calcDensityModel": "Air-density model",
+  "densityModelCipm2007": "CIPM-2007 (recommended)",
+  "densityModelPartialPressure": "Ideal gas (partial pressures)",
+  "densityModelMcCoyIdealGas": "McCoy ideal gas (historical)",
+  "densityModelHelp": {
+    "CIPM_2007": "Standards-based default. Its fitted equations state a range of 600–1100 hPa and 15–27 °C.",
+    "PARTIAL_PRESSURE": "Simple ideal-gas fallback when you prefer not to extrapolate CIPM beyond its fitted range.",
+    "MCCOY_IDEAL_GAS": "Historical Snipe calculation retained only for reproducing earlier results."
+  },
   "calcAltitude": "Altitude",
   "unitFeet": "Feet",
   "unitMeters": "Meters",
