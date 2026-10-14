@@ -32,3 +32,20 @@ Apply in the deployment config (`deployment/` + the deploy workflows) for all
 environments (dev/stage/prod), then verify by loading `/calculator` directly.
 
 **Discovered:** 2026-09-10, during live dev verification of the deployed UI.
+
+## 2. Dependency security review — **OPEN**
+
+GitHub reports open dependency alerts. Triage them against the current lockfile,
+distinguish shipped runtime dependencies from development/build tooling, and
+update compatible dependency groups with tests, lint, build, and browser checks.
+The form-data 4.0.6 update resolves that targeted advisory; it does not establish
+that the rest of the dependency tree is free of known vulnerabilities. Avoid a
+blanket forced audit update that combines unrelated breaking changes.
+
+## 3. Deployment runtime refresh — **OPEN**
+
+The dev workflow reports deprecated Node runtimes for its GitHub Actions.
+Refresh checkout, setup-node, setup-python, and configure-aws-credentials, and
+review the separately configured Node 20 application build runtime. Validate
+dependency installation, all tests, lint, the build, and a dev deployment before
+promoting workflow changes to stage or production.
