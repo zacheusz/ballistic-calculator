@@ -89,9 +89,11 @@ const CalculatorPage: React.FC = () => {
   // Simplified logging to avoid TypeScript issues
   console.log('📊 CalculatorPage: Component render - checking what triggers re-renders');
   
-  // Get current state values only when needed for rendering (not subscribing to changes)
+  // Atmosphere fields are controlled inputs, so subscribe to keep their displayed
+  // values in sync with store updates. The remaining values retain the existing
+  // snapshot behavior.
+  const atmosphere = useBallisticsStore(state => state.atmosphere);
   const currentState = useBallisticsStore.getState();
-  const atmosphere = currentState.atmosphere;
   const shot = currentState.shot;
   const preferences = currentState.preferences;
   

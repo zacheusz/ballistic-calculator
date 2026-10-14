@@ -181,12 +181,12 @@ const ConfigPage: React.FC = () => {
       arr[parseInt(index)][childField] = value;
       
       setLocalAmmo(updatedAmmo);
-      updateAmmo({ ammo: updatedAmmo });
+      updateAmmo(updatedAmmo);
     } else {
       // Regular field update
       const updatedAmmo = { ...localAmmo, [field]: value };
       setLocalAmmo(updatedAmmo);
-      updateAmmo({ ammo: updatedAmmo });
+      updateAmmo(updatedAmmo);
     }
   }, [localAmmo, updateAmmo]);
   
@@ -194,7 +194,7 @@ const ConfigPage: React.FC = () => {
   const handleAmmoMeasurementChange = useCallback((field: string, measurement: Measurement) => {
     const updatedAmmo = { ...localAmmo, [field]: measurement };
     setLocalAmmo(updatedAmmo);
-    updateAmmo({ ammo: updatedAmmo });
+    updateAmmo(updatedAmmo);
   }, [localAmmo, updateAmmo]);
   
   // Calculation options changes handler
@@ -267,8 +267,8 @@ const ConfigPage: React.FC = () => {
           {activeTab === 'ammo' && (
             <AmmunitionTab
               ammunition={localAmmo}
-              onFieldChange={handleAmmoChange}
-              onMeasurementChange={handleAmmoMeasurementChange}
+              onAmmoChange={handleAmmoChange}
+              onAmmoMeasurementChange={handleAmmoMeasurementChange}
               t={t}
             />
           )}

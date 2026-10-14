@@ -173,6 +173,47 @@ const AmmunitionTab: React.FC<AmmunitionTabProps> = ({
 
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle1" gutterBottom>
+              {t('muzzleVelocityTemperatureCoefficient')}
+            </Typography>
+            <MeasurementInput
+              value={ammunition.muzzleVelocityTemperatureCoefficient || {
+                value: 0,
+                unit: 'FEET_PER_SECOND_PER_FAHRENHEIT'
+              }}
+              onChange={(newMeasurement) => onAmmoMeasurementChange(
+                'muzzleVelocityTemperatureCoefficient',
+                newMeasurement
+              )}
+              unitOptions={[
+                { value: 'FEET_PER_SECOND_PER_FAHRENHEIT', label: 'fps/°F' },
+                { value: 'METERS_PER_SECOND_PER_CELSIUS', label: 'm/s/°C' }
+              ]}
+              label=""
+              inputProps={{ min: 0, step: "0.01" }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              {t('muzzleVelocityTemperatureCoefficientHelp')}
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              {t('zeroPowderTemperature')}
+            </Typography>
+            <MeasurementInput
+              value={ammunition.zeroPowderTemp || { value: 70, unit: 'FAHRENHEIT' }}
+              onChange={(newMeasurement) => onAmmoMeasurementChange('zeroPowderTemp', newMeasurement)}
+              unitOptions={[
+                { value: 'FAHRENHEIT', label: '°F' },
+                { value: 'CELSIUS', label: '°C' }
+              ]}
+              label=""
+              inputProps={{ step: "0.1" }}
+            />
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
               {t('zeroRange')}
             </Typography>
             <MeasurementInput

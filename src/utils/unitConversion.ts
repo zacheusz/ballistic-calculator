@@ -25,6 +25,11 @@ export const CONVERSION_FACTORS = {
   METERS_PER_SECOND: 3.28084,
   MILES_PER_HOUR: 1.466666666667,
   KILOMETERS_PER_HOUR: 0.911344415281,
+
+  // Velocity per temperature interval - Base unit: fps/°F.
+  // Temperature offsets do not apply; 1 °C interval equals 1.8 °F intervals.
+  FEET_PER_SECOND_PER_FAHRENHEIT: 1.0,
+  METERS_PER_SECOND_PER_CELSIUS: (1 / 0.3048) / 1.8,
   
   // Pressure units - Base unit: INCHES_MERCURY
   INHG: 1.0,
