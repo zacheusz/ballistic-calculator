@@ -54,33 +54,37 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
   // Local state for the input value to prevent focus loss
   const [localValue, setLocalValue] = useState(value.value.toString());
   const [localUnit, setLocalUnit] = useState(value.unit);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelPendingUpdate = useCallback(() => {
+    if (debounceTimerRef.current !== null) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }, []);
 
   // Update local state when prop value changes (from external source)
   useEffect(() => {
+    // The new value supersedes any edit queued against the previous value/unit.
+    cancelPendingUpdate();
     setLocalValue(value.value.toString());
     setLocalUnit(value.unit);
-  }, [value.value, value.unit]);
+  }, [value.value, value.unit, cancelPendingUpdate]);
 
   // Debounced update to parent component
   const debouncedUpdate = useCallback((newValue: number, newUnit: Unit) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+    cancelPendingUpdate();
     
     debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
       onChange({ value: newValue, unit: newUnit });
     }, 300); // 300ms debounce delay
-  }, [onChange]);
+  }, [onChange, cancelPendingUpdate]);
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
+    return cancelPendingUpdate;
+  }, [cancelPendingUpdate]);
 
   // Check if the unit is valid for the current options
   const mapUnit = (unit: Unit): Unit => {
@@ -119,6 +123,8 @@ const MeasurementInput: React.FC<MeasurementInputProps> = ({
 
   // Handle unit change with conversion
   const handleUnitChange = (event: React.ChangeEvent<HTMLInputElement> | { target: { value: unknown } }) => {
+    // Unit changes publish immediately; an older timer must not restore the old unit.
+    cancelPendingUpdate();
     const newUnit = event.target.value as Unit;
     const oldUnit = currentUnit;
     

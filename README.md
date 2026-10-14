@@ -20,6 +20,21 @@ See the [deployment documentation](./deployment/README.md) for information on ho
 
 ---
 
+## Shared measurement input behavior
+
+`MeasurementInput` displays numeric edits immediately and notifies its parent
+after a 300 ms debounce. Selecting a unit converts the current displayed value
+and notifies the parent immediately, cancelling any older pending edit. Changes
+to the value or unit supplied by the parent also cancel pending edits; an
+equivalent value object does not. Unmounting cancels the timer without publishing.
+
+The component's tests use fake timers to cover edit ordering, unit changes,
+external value replacement, and unmounting. Run them with:
+
+```sh
+npm test -- --runInBand src/components/__tests__/MeasurementInput.test.tsx
+```
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
