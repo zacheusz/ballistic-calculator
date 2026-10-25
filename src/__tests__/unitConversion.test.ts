@@ -5,9 +5,24 @@ import {
   formatMeasurement,
   formatMeasurementObject
 } from '../utils/unitConversion';
+import { isValidTimeOfFlightUnit } from '../types/ballistics';
 
 describe('Unit Conversion Utilities', () => {
   describe('convertUnit', () => {
+    it('converts generic time physically while restricting time of flight to seconds and milliseconds', () => {
+      expect(convertUnit(1, 'MINUTES', 'SECONDS')).toBe(60);
+      expect(convertUnit(1, 'HOURS', 'SECONDS')).toBe(3600);
+      expect(convertUnit(7200, 'SECONDS', 'MINUTES')).toBe(120);
+      expect(convertUnit(7200, 'SECONDS', 'HOURS')).toBe(2);
+      expect(convertUnit(1.5, 'SECONDS', 'MILLISECONDS')).toBe(1500);
+      expect(convertUnit(1.5, 'SECONDS', 'MINUTES')).toBeCloseTo(0.025, 12);
+      expect(isValidTimeOfFlightUnit('SECONDS')).toBe(true);
+      expect(isValidTimeOfFlightUnit('MILLISECONDS')).toBe(true);
+      expect(isValidTimeOfFlightUnit('MINUTES')).toBe(false);
+      expect(isValidTimeOfFlightUnit('HOURS')).toBe(false);
+      expect(isValidTimeOfFlightUnit('METERS')).toBe(false);
+    });
+
     it('should return the same value when from and to units are the same', () => {
       expect(convertUnit(10, 'METERS', 'METERS')).toBe(10);
       expect(convertUnit(25.5, 'FEET', 'FEET')).toBe(25.5);

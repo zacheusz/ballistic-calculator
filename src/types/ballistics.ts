@@ -1,5 +1,6 @@
 /**
- * All possible measurement units supported by the API
+ * Measurement units used by conversion helpers and API types.
+ * Individual API fields accept only their documented subset.
  */
 export type Unit =
   | 'YARDS'
@@ -30,7 +31,9 @@ export type Unit =
   | 'FOOT_POUNDS'
   | 'JOULES'
   | 'SECONDS'
-  | 'MILLISECONDS';
+  | 'MILLISECONDS'
+  | 'MINUTES'
+  | 'HOURS';
 
 /**
  * Unit types as defined in the API spec
@@ -108,7 +111,7 @@ export type BulletEnergyUnit = Unit;
  * Time of flight unit types as defined in the API spec
  * @remarks Valid values: 'SECONDS', 'MILLISECONDS'
  */
-export type TimeOfFlightUnit = Unit;
+export type TimeOfFlightUnit = 'SECONDS' | 'MILLISECONDS';
 
 /**
  * Generic measurement interface with value and unit
@@ -251,9 +254,11 @@ export type BulletEnergyMeasurement = Measurement;
 /**
  * Time of flight measurement interface
  * @remarks Matches the TimeOfFlightMeasurement schema in the OpenAPI spec
- * @remarks Should use TimeOfFlightUnit ('SECONDS', 'MILLISECONDS')
+ * @remarks Uses TimeOfFlightUnit ('SECONDS', 'MILLISECONDS')
  */
-export type TimeOfFlightMeasurement = Measurement;
+export interface TimeOfFlightMeasurement extends Measurement {
+  unit: TimeOfFlightUnit;
+}
 
 /**
  * Firearm configuration with sight and barrel properties
@@ -563,7 +568,7 @@ export function isValidBulletEnergyUnit(unit: Unit): boolean {
  * @param unit The unit to validate
  * @returns True if the unit is a valid time of flight unit
  */
-export function isValidTimeOfFlightUnit(unit: Unit): boolean {
+export function isValidTimeOfFlightUnit(unit: Unit): unit is TimeOfFlightUnit {
   return unit === 'SECONDS' || unit === 'MILLISECONDS';
 }
 

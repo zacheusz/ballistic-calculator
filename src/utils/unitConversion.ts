@@ -53,8 +53,8 @@ export const CONVERSION_FACTORS = {
   // Time units - Base unit: SECONDS
   SECONDS: 1.0,
   MILLISECONDS: 0.001,
-  MINUTES: 0.016666666667,
-  HOURS: 0.000277777778
+  MINUTES: 60,
+  HOURS: 3600
 } as const;
 
 /**

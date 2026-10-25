@@ -5,6 +5,13 @@ Open items for the ballistic-calculator UI. Status markers: **OPEN**, **DONE**,
 
 ---
 
+## Time-unit contract alignment — **DONE**
+
+Time-of-flight types and validation accept only seconds and milliseconds,
+matching the API contract. Generic time conversion uses 60 seconds per minute
+and 3600 seconds per hour without exposing these units as ToF choices.
+Regressions cover the physical conversions and rejection of unsupported ToF units.
+
 ## 1. Deep links to SPA routes 404 on the deployed site — **OPEN**
 
 **Symptom:** opening or refreshing any client-side route directly (e.g.
