@@ -5,6 +5,13 @@ Open items for the ballistic-calculator UI. Status markers: **OPEN**, **DONE**,
 
 ---
 
+## Structured solver errors — **DONE**
+
+The API client retains optional structured failure data and includes input paths,
+pass, termination, reached/requested yards and stopped seconds in the calculator
+error alert. Message-only errors remain supported. Individual form-field
+highlighting and translated diagnostic labels remain future improvements.
+
 ## Time-unit contract alignment — **DONE**
 
 Time-of-flight types and validation accept only seconds and milliseconds,

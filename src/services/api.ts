@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import configService from './configService';
 import { UnitPreferences, BallisticsRequest } from '../types/ballistics';
-import { SolutionCardResponse, ErrorResponse, SystemInfoResponse } from '../types/apiTypes';
+import { SolutionCardResponse, ErrorResponse, SystemInfoResponse, BallisticsApiError } from '../types/apiTypes';
 
 // Define interfaces for the class properties
 interface BallisticsApiConfig {
@@ -182,7 +182,7 @@ class BallisticsApi implements BallisticsApiConfig {
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ErrorResponse>;
         if (axiosError.response?.data) {
-          throw new Error(axiosError.response.data.error || 'API Error');
+          throw new BallisticsApiError(axiosError.response.data);
         }
       }
       throw error;
@@ -202,7 +202,7 @@ class BallisticsApi implements BallisticsApiConfig {
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ErrorResponse>;
         if (axiosError.response?.data) {
-          throw new Error(axiosError.response.data.error || 'API Error');
+          throw new BallisticsApiError(axiosError.response.data);
         }
       }
       throw error;
